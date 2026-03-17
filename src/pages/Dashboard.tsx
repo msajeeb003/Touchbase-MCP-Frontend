@@ -42,7 +42,6 @@ export default function Dashboard() {
   const dispatch = useAppDispatch();
   const user = useAppSelector(useCurrentUser);
   const activeItem = navItems.find((item) => item.to === location.pathname);
-  console.log(user);
   const handleLogout = () => {
     dispatch(logout());
     navigate("/");
@@ -84,7 +83,7 @@ export default function Dashboard() {
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-xs font-medium text-slate-900">User Email</p>
+              <p className="text-xs font-medium text-slate-900">Email</p>
               <p className="text-[11px] text-slate-500">{user?.email}</p>
             </div>
           </div>

@@ -38,7 +38,7 @@ export default function Signup() {
   })
 
   const onSignupSubmit = async (values: SignupFormValues) => {
-    const loadingToastId = showLoading('Creating your account...')
+    // const loadingToastId = showLoading('Creating your account...')
 
     try {
       const response = await register({
@@ -57,14 +57,12 @@ export default function Signup() {
 
         showSuccess(response.message || 'Registration successful')
         signupForm.reset()
-        navigate('/')
+        navigate('/dashboard')
       } else {
         showError(response.message || 'Registration failed. Please try again.')
       }
     }catch(error: unknown){
       showError((error as { data?: { message?: string } })?.data?.message || 'Registration failed. Please try again.')
-    }finally {
-      dismissToast(loadingToastId)
     }
     
   }
