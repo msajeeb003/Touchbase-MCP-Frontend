@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,10 +16,17 @@ import {
 } from '@/components/ui/form'
 import { Eye, EyeOff, Lock, Mail, Send } from 'lucide-react'
 import { signupFormSchema, type SignupFormValues } from '@/schema/auth/signup.schema'
+import { useRegisterMutation } from '@/store/features/auth/authApi'
+import { setCredentials } from '@/store/features/auth/authSlice'
+import { useAppDispatch } from '@/store/hooks'
+import { dismissToast, showError, showLoading, showSuccess } from '@/utils/toast'
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const [register, { isLoading }] = useRegisterMutation()
 
   const signupForm = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
@@ -30,10 +37,36 @@ export default function Signup() {
     },
   })
 
-  const onSignupSubmit = (values: SignupFormValues) => {
-    console.log('Email:', values.email)
-    console.log('Password:', values.password)
-    console.log('Confirm password:', values.confirmPassword)
+  const onSignupSubmit = async (values: SignupFormValues) => {
+    const loadingToastId = showLoading('Creating your account...')
+
+    try {
+      const response = await register({
+        email: values.email,
+        password: values.password,
+      }).unwrap()
+      console.log(response);
+
+      if (response.success) {
+        dispatch(
+          setCredentials({
+            token: response.data.accessToken,
+            user: response.data.user,
+          }),
+        )
+
+        showSuccess(response.message || 'Registration successful')
+        signupForm.reset()
+        navigate('/')
+      } else {
+        showError(response.message || 'Registration failed. Please try again.')
+      }
+    }catch(error: unknown){
+      showError((error as { data?: { message?: string } })?.data?.message || 'Registration failed. Please try again.')
+    }finally {
+      dismissToast(loadingToastId)
+    }
+    
   }
 
   return (
@@ -125,7 +158,7 @@ export default function Signup() {
                             placeholder='••••••••'
                             className='h-12 border-slate-300 px-10'
                             {...field}
-                            
+
                           />
                         </FormControl>
                         <button
@@ -146,8 +179,12 @@ export default function Signup() {
                   )}
                 />
 
-                <Button type='submit' className='mt-2 h-12 w-full bg-indigo-600 text-base hover:bg-indigo-700'>
-                  Create account
+                <Button
+                  type='submit'
+                  disabled={isLoading}
+                  className='mt-2 h-12 w-full bg-indigo-600 text-base hover:bg-indigo-700 disabled:opacity-70'
+                >
+                  {isLoading ? 'Creating account...' : 'Create account'}
                 </Button>
 
                 <div className='my-6 h-px w-full bg-slate-200' />
