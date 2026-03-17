@@ -15,12 +15,12 @@ export interface SetCredentialsPayload {
   user: AuthUser;
 }
 
-export interface RegisterRequestBody {
+export interface AuthRequestBody {
   email: string;
   password: string;
 }
 
-export interface RegisterResponse {
+export interface AuthSuccessResponse {
   success: boolean;
   statusCode: number;
   message: string;
@@ -29,3 +29,9 @@ export interface RegisterResponse {
     user: AuthUser;
   };
 }
+
+export type RegisterRequestBody = AuthRequestBody;
+export type LoginRequestBody = AuthRequestBody;
+
+export type RegisterResponse = AuthSuccessResponse;
+export type LoginResponse = AuthSuccessResponse;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -15,9 +15,16 @@ import {
 } from '@/components/ui/form'
 import { Eye, EyeOff, Lock, Mail, Send } from 'lucide-react'
 import { loginFormSchema, type LoginFormValues } from '@/schema/auth/login.schema'
+import { useLoginMutation } from '@/store/features/auth/authApi'
+import { setCredentials } from '@/store/features/auth/authSlice'
+import { useAppDispatch } from '@/store/hooks'
+import { dismissToast, showError, showLoading, showSuccess } from '@/utils/toast'
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const [login, { isLoading }] = useLoginMutation()
 
   const signInForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -27,9 +34,32 @@ export default function SignIn() {
     },
   })
 
-  const onSignInSubmit = (values: LoginFormValues) => {
-    console.log('Login email:', values.email)
-    console.log('Login password:', values.password)
+  const onSignInSubmit = async (values: LoginFormValues) => {
+    // const loadingToastId = showLoading('Signing you in...')
+
+    try {
+      const response = await login({
+        email: values.email,
+        password: values.password,
+      }).unwrap()
+
+      if (response.success) {
+        dispatch(
+          setCredentials({
+            token: response.data.accessToken,
+            user: response.data.user,
+          }),
+        )
+
+        showSuccess(response.message || 'Login successful')
+        signInForm.reset()
+        navigate('/dashboard')
+      } else {
+        showError(response.message || 'Login failed. Please try again.')
+      }
+    } catch (error: unknown) {
+      showError((error as { data?: { message?: string } })?.data?.message || 'Login failed. Please try again.')
+    } 
   }
 
   return (
@@ -104,8 +134,12 @@ export default function SignIn() {
                   )}
                 />
 
-                <Button type='submit' className='mt-2 h-12 w-full bg-indigo-600 text-base hover:bg-indigo-700'>
-                  Sign in
+                <Button
+                  type='submit'
+                  disabled={isLoading}
+                  className='mt-2 h-12 w-full bg-indigo-600 text-base hover:bg-indigo-700 disabled:opacity-70'
+                >
+                  {isLoading ? 'Signing in...' : 'Sign in'}
                 </Button>
 
                 <div className='my-6 h-px w-full bg-slate-200' />
