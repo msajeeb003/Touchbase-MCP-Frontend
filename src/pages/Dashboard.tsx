@@ -98,7 +98,7 @@ export default function Dashboard() {
         </SidebarFooter>
       </Sidebar>
 
-      <SidebarInset>
+      <SidebarInset className="min-w-0">
         <header className="flex h-14 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
@@ -106,10 +106,8 @@ export default function Dashboard() {
             {activeItem?.title || "Dashboard"}
           </h1>
         </header>
-        <main className="p-6">
-          <h1 className="mb-4 text-2xl font-semibold text-slate-900">
-            {activeItem?.title || "Dashboard"}
-          </h1>
+        <main className="min-w-0 overflow-x-hidden p-6">
+          
           <Outlet />
         </main>
       </SidebarInset>

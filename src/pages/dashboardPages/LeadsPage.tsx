@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Plus, Search, Upload, Users2 } from "lucide-react";
+import { ArrowRight, Building2, Mail, Phone, Plus, Search, Upload, Users2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,12 +76,20 @@ export default function LeadsPage() {
   const startItem = total === 0 ? 0 : (page - 1) * limit + 1;
   const endItem = Math.min(page * limit, total);
   const leads = data?.data.items ?? [];
+  const visiblePageNumbers = useMemo(() => {
+    const maxVisiblePages = 5;
+    const start = Math.max(1, page - Math.floor(maxVisiblePages / 2));
+    const end = Math.min(totalPages, start + maxVisiblePages - 1);
+    const adjustedStart = Math.max(1, end - maxVisiblePages + 1);
+
+    return Array.from({ length: end - adjustedStart + 1 }, (_, index) => adjustedStart + index);
+  }, [page, totalPages]);
 
   return (
-    <div className="space-y-4">
+    <div className="w-full min-w-0 space-y-4 overflow-x-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm text-slate-500">Follow Up Dashboard</p>
+          {/* <p className="text-sm text-slate-500">Follow Up Dashboard</p> */}
           <h2 className="flex items-center gap-2 text-3xl font-semibold text-slate-900">
             <Users2 className="h-7 w-7 text-indigo-600" />
             Leads
@@ -99,7 +107,7 @@ export default function LeadsPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-white p-4 shadow-sm">
+      <div className="w-full min-w-0 rounded-xl border bg-white p-4 shadow-sm">
         <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-12">
           <div className="relative md:col-span-8">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -174,53 +182,64 @@ export default function LeadsPage() {
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>FollowUp Stage</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leads.map((lead) => (
-                  <TableRow key={lead.id}>
-                    <TableCell className="font-medium">{lead.name}</TableCell>
-                    <TableCell>{lead.email}</TableCell>
-                    <TableCell>{lead.company}</TableCell>
-                    <TableCell>{lead.location}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStageBadgeClass(lead.followUpStage)}>
-                        {lead.followUpStage}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusBadgeClass(lead.status)}>
-                        {lead.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="gap-1 text-indigo-600 hover:text-indigo-700">
-                        View
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            <div className="w-full max-w-full overflow-x-auto">
+              <Table className="min-w-[920px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Address</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>FollowUp Stage</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {leads.map((lead) => (
+                    <TableRow key={lead.id}>
+                      <TableCell className="">
+                        <div className="flex flex-col gap-y-0.5">
+                          <h3 className="font-medium">{lead.name}</h3>
+                         <span className="flex items-center gap-x-1 text-sm"><Building2 className="h-3 w-3" /> {lead.company}</span>
+                        </div>  
+
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-y-0.5">
+                          <span className="flex items-center gap-x-1 text-sm"><Mail className="h-3 w-3" /> {lead.email}</span>
+                          <span className="flex items-center gap-x-1 text-sm"><Phone className="h-3 w-3" /> {lead.phone}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{lead.location}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStageBadgeClass(lead.followUpStage)}>
+                          {lead.followUpStage}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusBadgeClass(lead.status)}>
+                          {lead.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" className="gap-1 text-indigo-600 hover:text-indigo-700">
+                          View
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
             <div className="mt-4 flex flex-col items-center justify-between gap-3 border-t pt-3 text-sm text-slate-600 md:flex-row">
               <p>
                 Showing {startItem}-{endItem} of {total}
               </p>
 
-              <Pagination className="mx-0 w-auto justify-end">
-                <PaginationContent>
+              <Pagination className="mx-0 w-auto max-w-full justify-end overflow-x-auto">
+                <PaginationContent className="shrink-0">
                   <PaginationItem>
                     <PaginationPrevious
                       href="#"
@@ -231,7 +250,7 @@ export default function LeadsPage() {
                     />
                   </PaginationItem>
 
-                  {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+                  {visiblePageNumbers.map((pageNumber) => (
                     <PaginationItem key={pageNumber}>
                       <PaginationLink
                         href="#"
