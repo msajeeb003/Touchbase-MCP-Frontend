@@ -12,6 +12,7 @@ import TranscriptsPage from "./pages/dashboardPages/TranscriptsPage";
 import TemplatesPage from "./pages/dashboardPages/TemplatesPage";
 import CreateTemplatePage from "./pages/dashboardPages/CreateTemplatePage";
 import EditTemplatePage from "./pages/dashboardPages/EditTemplatePage";
+import SettingsPage from "./pages/dashboardPages/SettingsPage";
 import RequireAuth from "./routes/RequireAuth";
 import SignIn from "./pages/auth/SignIn";
 import Signup from "./pages/auth/Signup";
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="templates" element={<TemplatesPage />} />
               <Route path="templates/new" element={<CreateTemplatePage />} />
               <Route path="templates/:id/edit" element={<EditTemplatePage />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Route>
           <Route path="/index" element={<Index />} />

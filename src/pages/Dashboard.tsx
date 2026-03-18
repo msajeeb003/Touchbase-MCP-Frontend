@@ -7,6 +7,7 @@ import {
   Users2,
   Bot,
   Home,
+  Settings,
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -42,6 +43,7 @@ const navItems = [
   { title: "Sequences", to: "/dashboard/sequences", icon: Layers3 },
   { title: "Transcripts", to: "/dashboard/transcripts", icon: FileText },
   { title: "Templates", to: "/dashboard/templates", icon: Shapes },
+  { title: "Settings", to: "/dashboard/settings", icon: Settings },
 ];
 
 const breadcrumbLabelMap: Record<string, string> = {
@@ -50,6 +52,7 @@ const breadcrumbLabelMap: Record<string, string> = {
   sequences: "Sequences",
   transcripts: "Transcripts",
   templates: "Templates",
+  settings: "Settings",
   new: "New Template",
   edit: "Edit Template",
 };
