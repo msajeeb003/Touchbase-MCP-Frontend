@@ -8,9 +8,17 @@ import {
   Bot,
   Home,
 } from "lucide-react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import {
   Sidebar,
   SidebarContent,
@@ -36,12 +44,46 @@ const navItems = [
   { title: "Templates", to: "/dashboard/templates", icon: Shapes },
 ];
 
+const breadcrumbLabelMap: Record<string, string> = {
+  dashboard: "Dashboard",
+  leads: "Leads",
+  sequences: "Sequences",
+  transcripts: "Transcripts",
+  templates: "Templates",
+  new: "New Template",
+  edit: "Edit Template",
+};
+
 export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector(useCurrentUser);
   const activeItem = navItems.find((item) => item.to === location.pathname);
+  const pathSegments = location.pathname.split("/").filter(Boolean);
+  const breadcrumbItems = pathSegments.reduce<Array<{ href: string; label: string }>>(
+    (items, segment, index) => {
+      const isUuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        segment,
+      );
+
+      if (isUuidLike) {
+        return items;
+      }
+
+      const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
+      const label =
+        breadcrumbLabelMap[segment] ??
+        segment
+          .split("-")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ");
+
+      items.push({ href, label });
+      return items;
+    },
+    [],
+  );
   const handleLogout = () => {
     dispatch(logout());
     navigate("/");
@@ -102,9 +144,24 @@ export default function Dashboard() {
         <header className="flex h-14 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
-          <h1 className="text-sm font-medium text-slate-700">
-            {activeItem?.title || "Dashboard"}
-          </h1>
+          <Breadcrumb>
+            <BreadcrumbList>
+              {breadcrumbItems.map((item, index) => (
+                <div key={item.href} className="inline-flex items-center gap-1.5">
+                  <BreadcrumbItem>
+                    {index === breadcrumbItems.length - 1 ? (
+                      <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink asChild>
+                        <Link to={item.href}>{item.label}</Link>
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                  {index < breadcrumbItems.length - 1 ? <BreadcrumbSeparator /> : null}
+                </div>
+              ))}
+            </BreadcrumbList>
+          </Breadcrumb>
         </header>
         <main className="min-w-0 overflow-x-hidden p-6">
           

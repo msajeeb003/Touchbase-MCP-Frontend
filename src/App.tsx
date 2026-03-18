@@ -10,6 +10,8 @@ import LeadsPage from "./pages/dashboardPages/LeadsPage";
 import SequencesPage from "./pages/dashboardPages/SequencesPage";
 import TranscriptsPage from "./pages/dashboardPages/TranscriptsPage";
 import TemplatesPage from "./pages/dashboardPages/TemplatesPage";
+import CreateTemplatePage from "./pages/dashboardPages/CreateTemplatePage";
+import EditTemplatePage from "./pages/dashboardPages/EditTemplatePage";
 import RequireAuth from "./routes/RequireAuth";
 import SignIn from "./pages/auth/SignIn";
 import Signup from "./pages/auth/Signup";
@@ -34,6 +36,8 @@ const App = () => (
               <Route path="sequences" element={<SequencesPage />} />
               <Route path="transcripts" element={<TranscriptsPage />} />
               <Route path="templates" element={<TemplatesPage />} />
+              <Route path="templates/new" element={<CreateTemplatePage />} />
+              <Route path="templates/:id/edit" element={<EditTemplatePage />} />
             </Route>
           </Route>
           <Route path="/index" element={<Index />} />
