@@ -54,3 +54,26 @@ export interface CreateLeadResponse {
   message: string;
   data: LeadItem;
 }
+
+export interface GetSingleLeadResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: LeadItem;
+}
+
+export interface UpdateLeadRequestBody {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  location: string;
+  followUpStage: string;
+}
+
+export interface UpdateLeadResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: LeadItem;
+}

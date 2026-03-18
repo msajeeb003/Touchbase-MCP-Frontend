@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Building2, Mail, Phone, Plus, Search, Upload, Users2 } from "lucide-react";
+import {
+  Building2,
+  Mail,
+  Pencil,
+  Phone,
+  Plus,
+  Search,
+  Trash2,
+  Upload,
+  Users2,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +37,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import AddLeadDialog from "@/components/leads/AddLeadDialog";
+import UpdateLeadDialog from "@/components/leads/UpdateLeadDialog";
 import { useGetLeadsQuery } from "@/store/features/leads/leadsApi";
+import { showError } from "@/utils/toast";
 
 const getStatusBadgeClass = (status: string) => {
   const value = status.toLowerCase();
@@ -231,7 +243,8 @@ export default function LeadsPage() {
                     <TableHead>Location</TableHead>
                     <TableHead>FollowUp Stage</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead className="text-center">Update</TableHead>
+                    <TableHead className="text-center">Delete</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -263,10 +276,26 @@ export default function LeadsPage() {
                           {lead.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="gap-1 text-indigo-600 hover:text-indigo-700">
-                          View
-                          <ArrowRight className="h-4 w-4" />
+                      <TableCell className="text-center">
+                        <UpdateLeadDialog
+                          leadId={lead.id}
+                          trigger={
+                            <Button variant="ghost" size="icon" className="text-indigo-600 hover:text-indigo-700">
+                              <Pencil className="h-4 w-4" />
+                              <span className="sr-only">Update lead</span>
+                            </Button>
+                          }
+                        />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-rose-600 hover:text-rose-700"
+                          onClick={() => showError("Delete endpoint is not implemented yet.")}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete lead</span>
                         </Button>
                       </TableCell>
                     </TableRow>

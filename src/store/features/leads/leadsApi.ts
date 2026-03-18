@@ -2,8 +2,11 @@ import { baseApi } from "@/store/api/baseApi";
 import type {
   CreateLeadRequestBody,
   CreateLeadResponse,
+  GetSingleLeadResponse,
   GetLeadsQueryParams,
   GetLeadsResponse,
+  UpdateLeadRequestBody,
+  UpdateLeadResponse,
 } from "@/types/leads";
 
 const sanitizeQueryParams = (params: GetLeadsQueryParams) =>
@@ -21,6 +24,13 @@ export const leadsApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Leads"],
     }),
+    getSingleLead: builder.query<GetSingleLeadResponse, string>({
+      query: (id) => ({
+        url: `/leads/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Leads"],
+    }),
     createLead: builder.mutation<CreateLeadResponse, CreateLeadRequestBody>({
       query: (body) => ({
         url: "/leads",
@@ -29,8 +39,24 @@ export const leadsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Leads"],
     }),
+    updateLead: builder.mutation<
+      UpdateLeadResponse,
+      { id: string; body: UpdateLeadRequestBody }
+    >({
+      query: ({ id, body }) => ({
+        url: `/leads/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Leads"],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetLeadsQuery, useCreateLeadMutation } = leadsApi;
+export const {
+  useGetLeadsQuery,
+  useGetSingleLeadQuery,
+  useCreateLeadMutation,
+  useUpdateLeadMutation,
+} = leadsApi;
