@@ -77,3 +77,10 @@ export interface UpdateLeadResponse {
   message: string;
   data: LeadItem;
 }
+
+export interface DeleteLeadResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: null;
+}

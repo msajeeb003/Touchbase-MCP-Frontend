@@ -2,6 +2,7 @@ import { baseApi } from "@/store/api/baseApi";
 import type {
   CreateLeadRequestBody,
   CreateLeadResponse,
+  DeleteLeadResponse,
   GetSingleLeadResponse,
   GetLeadsQueryParams,
   GetLeadsResponse,
@@ -50,6 +51,13 @@ export const leadsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Leads"],
     }),
+    deleteLead: builder.mutation<DeleteLeadResponse, string>({
+      query: (id) => ({
+        url: `/leads/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Leads"],
+    }),
   }),
   overrideExisting: false,
 });
@@ -59,4 +67,5 @@ export const {
   useGetSingleLeadQuery,
   useCreateLeadMutation,
   useUpdateLeadMutation,
+  useDeleteLeadMutation,
 } = leadsApi;

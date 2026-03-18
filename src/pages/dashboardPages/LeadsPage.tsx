@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Building2,
+  Loader2,
   Mail,
   Pencil,
   Phone,
@@ -38,8 +39,19 @@ import {
 } from "@/components/ui/table";
 import AddLeadDialog from "@/components/leads/AddLeadDialog";
 import UpdateLeadDialog from "@/components/leads/UpdateLeadDialog";
-import { useGetLeadsQuery } from "@/store/features/leads/leadsApi";
-import { showError } from "@/utils/toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useDeleteLeadMutation, useGetLeadsQuery } from "@/store/features/leads/leadsApi";
+import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 const getStatusBadgeClass = (status: string) => {
   const value = status.toLowerCase();
@@ -68,6 +80,8 @@ export default function LeadsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<string>("All");
   const [stage, setStage] = useState<string>("All");
+  const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null);
+  const [deleteLead] = useDeleteLeadMutation();
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -132,6 +146,24 @@ export default function LeadsPage() {
 
     return Array.from({ length: end - adjustedStart + 1 }, (_, index) => adjustedStart + index);
   }, [page, totalPages]);
+
+  const handleDeleteLead = async (leadId: string) => {
+    const loadingToastId = showLoading("Deleting lead...");
+    setDeletingLeadId(leadId);
+
+    try {
+      const response = await deleteLead(leadId).unwrap();
+      showSuccess(response.message || "Lead deleted successfully");
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to delete lead. Please try again.";
+      showError(errorMessage);
+    } finally {
+      dismissToast(loadingToastId);
+      setDeletingLeadId(null);
+    }
+  };
 
   return (
     <div className="w-full min-w-0 space-y-4 overflow-x-hidden">
@@ -288,15 +320,41 @@ export default function LeadsPage() {
                         />
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-rose-600 hover:text-rose-700"
-                          onClick={() => showError("Delete endpoint is not implemented yet.")}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete lead</span>
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-rose-600 hover:text-rose-700"
+                              disabled={deletingLeadId === lead.id}
+                            >
+                              {deletingLeadId === lead.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                              <span className="sr-only">Delete lead</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete lead?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete{" "}
+                                <span className="font-medium text-foreground">{lead.name}</span>.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-rose-600 text-white hover:bg-rose-700"
+                                onClick={() => handleDeleteLead(lead.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </TableCell>
                     </TableRow>
                   ))}
