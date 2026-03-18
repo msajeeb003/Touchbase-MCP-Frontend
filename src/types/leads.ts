@@ -38,3 +38,19 @@ export interface GetLeadsQueryParams {
   search?: string;
   followUpStage?: string;
 }
+
+export interface CreateLeadRequestBody {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  location: string;
+  followUpStage: string;
+}
+
+export interface CreateLeadResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: LeadItem;
+}

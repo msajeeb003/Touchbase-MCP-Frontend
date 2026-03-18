@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Building2, Mail, Phone, Plus, Search, Upload, Users2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,10 +26,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import AddLeadDialog from "@/components/leads/AddLeadDialog";
 import { useGetLeadsQuery } from "@/store/features/leads/leadsApi";
-
-const statusOptions = ["All", "Active", "Processing", "Replied", "Booked", "Won", "Lost"] as const;
-const stageOptions = ["All", "NoShow", "After Sale", "PRD", "HotLead", "Cancel"] as const;
 
 const getStatusBadgeClass = (status: string) => {
   const value = status.toLowerCase();
@@ -55,27 +53,65 @@ export default function LeadsPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<string>("All");
   const [stage, setStage] = useState<string>("All");
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 450);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [search]);
 
   const queryParams = useMemo(
     () => ({
       page,
       limit,
       status: status === "All" ? undefined : status,
-      search: search.trim() ? search.trim() : undefined,
+      search: debouncedSearch || undefined,
       followUpStage: stage === "All" ? undefined : stage,
     }),
-    [page, limit, status, search, stage],
+    [page, limit, status, debouncedSearch, stage],
   );
 
   const { data, isLoading, isError } = useGetLeadsQuery(queryParams);
+  const { data: filterSourceData } = useGetLeadsQuery({
+    page: 1,
+    limit: 200,
+  });
 
   const total = data?.data.pagination.total ?? 0;
   const totalPages = data?.data.pagination.totalPages ?? 1;
   const startItem = total === 0 ? 0 : (page - 1) * limit + 1;
   const endItem = Math.min(page * limit, total);
   const leads = data?.data.items ?? [];
+  const filterSourceItems = useMemo(
+    () => filterSourceData?.data.items ?? [],
+    [filterSourceData?.data.items],
+  );
+  const statusOptions = useMemo(() => {
+    const uniqueStatuses = Array.from(
+      new Set(filterSourceItems.map((item) => item.status).filter(Boolean)),
+    );
+    const options = ["All", ...uniqueStatuses];
+    if (status !== "All" && !options.includes(status)) {
+      options.push(status);
+    }
+    return options;
+  }, [filterSourceItems, status]);
+  const stageOptions = useMemo(() => {
+    const uniqueStages = Array.from(
+      new Set(filterSourceItems.map((item) => item.followUpStage).filter(Boolean)),
+    );
+    const options = ["All", ...uniqueStages];
+    if (stage !== "All" && !options.includes(stage)) {
+      options.push(stage);
+    }
+    return options;
+  }, [filterSourceItems, stage]);
+  
   const visiblePageNumbers = useMemo(() => {
     const maxVisiblePages = 5;
     const start = Math.max(1, page - Math.floor(maxVisiblePages / 2));
@@ -100,10 +136,14 @@ export default function LeadsPage() {
             <Upload className="h-4 w-4" />
             Import CSV
           </Button>
-          <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
-            <Plus className="h-4 w-4" />
-            Add Lead
-          </Button>
+          <AddLeadDialog
+            trigger={
+              <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+                <Plus className="h-4 w-4" />
+                Add Lead
+              </Button>
+            }
+          />
         </div>
       </div>
 
@@ -136,7 +176,7 @@ export default function LeadsPage() {
               <SelectContent>
                 {statusOptions.map((option) => (
                   <SelectItem key={option} value={option}>
-                    Status: {option}
+                    {option}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -157,7 +197,7 @@ export default function LeadsPage() {
               <SelectContent>
                 {stageOptions.map((option) => (
                   <SelectItem key={option} value={option}>
-                    Stage: {option}
+                    {option}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -200,8 +240,10 @@ export default function LeadsPage() {
                       <TableCell className="">
                         <div className="flex flex-col gap-y-0.5">
                           <h3 className="font-medium">{lead.name}</h3>
-                         <span className="flex items-center gap-x-1 text-sm"><Building2 className="h-3 w-3" /> {lead.company}</span>
-                        </div>  
+                          {lead.company && (
+                            <span className="flex items-center gap-x-1 text-sm"><Building2 className="h-3 w-3" /> {lead.company}</span>
+                          )}
+                        </div>
 
                       </TableCell>
                       <TableCell>

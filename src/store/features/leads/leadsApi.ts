@@ -1,5 +1,10 @@
 import { baseApi } from "@/store/api/baseApi";
-import type { GetLeadsQueryParams, GetLeadsResponse } from "@/types/leads";
+import type {
+  CreateLeadRequestBody,
+  CreateLeadResponse,
+  GetLeadsQueryParams,
+  GetLeadsResponse,
+} from "@/types/leads";
 
 const sanitizeQueryParams = (params: GetLeadsQueryParams) =>
   Object.fromEntries(
@@ -16,8 +21,16 @@ export const leadsApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Leads"],
     }),
+    createLead: builder.mutation<CreateLeadResponse, CreateLeadRequestBody>({
+      query: (body) => ({
+        url: "/leads",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Leads"],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetLeadsQuery } = leadsApi;
+export const { useGetLeadsQuery, useCreateLeadMutation } = leadsApi;
