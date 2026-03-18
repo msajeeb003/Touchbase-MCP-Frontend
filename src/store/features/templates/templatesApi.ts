@@ -2,6 +2,7 @@ import { baseApi } from "@/store/api/baseApi";
 import type {
   CreatePromptTemplateRequestBody,
   CreatePromptTemplateResponse,
+  DeletePromptTemplateResponse,
   GetPromptTemplateByIdResponse,
   GetPromptTemplatesResponse,
   UpdatePromptTemplateRequestBody,
@@ -46,6 +47,13 @@ export const templatesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Templates"],
     }),
+    deletePromptTemplate: builder.mutation<DeletePromptTemplateResponse, string>({
+      query: (id) => ({
+        url: `/prompt-templates/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Templates"],
+    }),
   }),
   overrideExisting: false,
 });
@@ -56,4 +64,5 @@ export const {
   useLazyGetPromptTemplateByIdQuery,
   useCreatePromptTemplateMutation,
   useUpdatePromptTemplateMutation,
+  useDeletePromptTemplateMutation,
 } = templatesApi;

@@ -46,3 +46,10 @@ export interface UpdatePromptTemplateResponse {
   message: string;
   data: PromptTemplateItem;
 }
+
+export interface DeletePromptTemplateResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: null;
+}

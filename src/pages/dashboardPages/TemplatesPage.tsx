@@ -1,9 +1,25 @@
-import { FileText, Plus } from "lucide-react";
+import { FileText, Loader2, Plus } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useGetPromptTemplatesQuery } from "@/store/features/templates/templatesApi";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  useDeletePromptTemplateMutation,
+  useGetPromptTemplatesQuery,
+} from "@/store/features/templates/templatesApi";
 import ViewTemplateDialog from "@/components/templates/ViewTemplateDialog";
+import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 const getStageBadgeClass = (stage: string) => {
   const value = stage.toLowerCase();
@@ -27,8 +43,28 @@ const getSummary = (promptText: string) => {
 
 export default function TemplatesPage() {
   const navigate = useNavigate();
+  const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null);
+  const [deletePromptTemplate] = useDeletePromptTemplateMutation();
   const { data, isLoading, isError } = useGetPromptTemplatesQuery();
   const templates = data?.data ?? [];
+
+  const handleDeleteTemplate = async (templateId: string) => {
+    const loadingToastId = showLoading("Deleting template...");
+    setDeletingTemplateId(templateId);
+
+    try {
+      const response = await deletePromptTemplate(templateId).unwrap();
+      showSuccess(response.message || "Prompt template deleted successfully");
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to delete prompt template. Please try again.";
+      showError(errorMessage);
+    } finally {
+      dismissToast(loadingToastId);
+      setDeletingTemplateId(null);
+    }
+  };
 
   if (isLoading) {
     return <div className="rounded-lg border border-dashed p-8 text-sm text-slate-500">Loading templates...</div>;
@@ -108,9 +144,42 @@ export default function TemplatesPage() {
                   >
                     Edit
                   </button>
-                  <button className="text-rose-500 hover:text-rose-600" type="button">
-                    Delete
-                  </button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="text-rose-500 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-70"
+                        type="button"
+                        disabled={deletingTemplateId === template.id}
+                      >
+                        {deletingTemplateId === template.id ? "Deleting..." : "Delete"}
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete template?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete{" "}
+                          <span className="font-medium text-foreground">{template.name}</span>.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-rose-600 text-white hover:bg-rose-700"
+                          onClick={() => handleDeleteTemplate(template.id)}
+                        >
+                          {deletingTemplateId === template.id ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Deleting
+                            </>
+                          ) : (
+                            "Delete"
+                          )}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </div>
