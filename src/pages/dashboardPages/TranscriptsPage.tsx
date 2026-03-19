@@ -40,16 +40,13 @@ export default function TranscriptsPage() {
 
   if (isError) {
     return (
-      // <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-sm text-red-600">
-      //   Invalid Fathom API key. Please check your Settings.
-      // </div>
       <div className="rounded-xl border border-dashed border-red-200 bg-red-50 p-8 text-sm  text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
           <FileText className="h-5 w-5 text-indigo-600" />
         </div>
-        <h3 className="text-2xl font-semibold text-slate-900">No meetings found.</h3>
+        <h3 className="text-2xl font-semibold text-red-900">Invalid Fathom API key.</h3>
         <p className="mx-auto mt-2 max-w-xl text-sm text-red-500">
-          Connect your settings and sync with Fathom to view transcript-ready meetings here.
+          Invalid Fathom API key. Please check your Settings.
         </p>
       </div>
     );
@@ -109,21 +106,21 @@ export default function TranscriptsPage() {
                 </p>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-4">
+              <div className="mt-4 flex flex-row items-center gap-2 border-t pt-4">
                 <ViewTranscriptDialog
                   recordingId={meeting.recording_id}
                   meetingTitle={meeting.meeting_title || meeting.title}
                   trigger={
-                    <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                      View Transcript <Eye className="ml-1 h-3.5 w-3.5" />
+                    <Button size="sm" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                      Transcript <Eye className="ml-1 h-3.5 w-3.5" />
                     </Button>
                   }
                 />
 
                 {meeting.share_url ? (
-                  <Button asChild size="sm" variant="outline" >
+                  <Button asChild size="sm" variant="outline" className="w-full" >
                     <a href={meeting.share_url} target="_blank" rel="noreferrer">
-                      Open Share URL
+                      Open 
                       <ExternalLink className="ml-1 h-3.5 w-3.5" />
                     </a>
                   </Button>
