@@ -13,13 +13,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   settingsFormSchema,
   type SettingsFormValues,
 } from "@/schema/settings/updateSettings.schema";
@@ -31,13 +24,6 @@ import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast
 import type { UpdateSettingsRequestBody } from "@/types/settings";
 
 const sectionCardClass = "rounded-xl border bg-white shadow-sm";
-const AI_PROVIDERS = ["openai", "gemini"] as const;
-const AI_MODEL_BY_PROVIDER = {
-  openai: "gpt-4o-mini",
-  gemini: "gemini-2.0-flash",
-} as const;
-
-type AiProvider = (typeof AI_PROVIDERS)[number];
 
 const toInitialValues = (data?: {
   aiProvider: string | null;
@@ -52,49 +38,50 @@ const toInitialValues = (data?: {
   textmagicUsername: string | null;
   textmagicApiKey: string | null;
 }): SettingsFormValues => {
-  const normalizedProvider =
-    typeof data?.aiProvider === "string" ? data.aiProvider.trim().toLowerCase() : "";
-  const aiProvider = AI_PROVIDERS.includes(normalizedProvider as AiProvider)
-    ? (normalizedProvider as AiProvider)
-    : undefined;
-
-  const aiModelFromApi = typeof data?.aiModel === "string" ? data.aiModel.trim() : "";
-  const aiModel =
-    aiProvider && aiModelFromApi === AI_MODEL_BY_PROVIDER[aiProvider]
-      ? aiModelFromApi
-      : aiProvider
-        ? AI_MODEL_BY_PROVIDER[aiProvider]
-        : undefined;
-
   return {
-  aiProvider,
-  aiApiKey: data?.aiApiKey ?? "",
-  aiModel,
-  fathomApiKey: data?.fathomApiKey ?? "",
-  smtpHost: data?.smtpHost ?? "",
-  smtpPort: data?.smtpPort ?? undefined,
-  smtpUsername: data?.smtpUsername ?? "",
-  smtpPassword: data?.smtpPassword ?? "",
-  smtpFromName: data?.smtpFromName ?? "",
-  textmagicUsername: data?.textmagicUsername ?? "",
-  textmagicApiKey: data?.textmagicApiKey ?? "",
+    aiProvider: data?.aiProvider ?? "",
+    aiApiKey: data?.aiApiKey ?? "",
+    aiModel: data?.aiModel ?? "",
+    fathomApiKey: data?.fathomApiKey ?? "",
+    smtpHost: data?.smtpHost ?? "",
+    smtpPort: data?.smtpPort ?? undefined,
+    smtpUsername: data?.smtpUsername ?? "",
+    smtpPassword: data?.smtpPassword ?? "",
+    smtpFromName: data?.smtpFromName ?? "",
+    textmagicUsername: data?.textmagicUsername ?? "",
+    textmagicApiKey: data?.textmagicApiKey ?? "",
   };
 };
 
-const sanitizeUpdatePayload = (values: SettingsFormValues): UpdateSettingsRequestBody => {
-  return {
-    aiProvider: values.aiProvider ?? "",
-    aiApiKey: values.aiApiKey ?? "",
-    aiModel: values.aiModel ?? "",
-    fathomApiKey: values.fathomApiKey ?? "",
-    smtpHost: values.smtpHost ?? "",
-    smtpPort: typeof values.smtpPort === "number" ? values.smtpPort : undefined,
-    smtpUsername: values.smtpUsername ?? "",
-    smtpPassword: values.smtpPassword ?? "",
-    smtpFromName: values.smtpFromName ?? "",
-    textmagicUsername: values.textmagicUsername ?? "",
-    textmagicApiKey: values.textmagicApiKey ?? "",
-  };
+const sanitizeUpdatePayload = (
+  values: SettingsFormValues,
+  dirtyFields: Partial<Record<keyof SettingsFormValues, boolean>>,
+): UpdateSettingsRequestBody => {
+  const payload: UpdateSettingsRequestBody = {};
+
+  (Object.keys(dirtyFields) as Array<keyof SettingsFormValues>).forEach((key) => {
+    if (!dirtyFields[key]) return;
+
+    const value = values[key];
+
+    if (key === "smtpPort") {
+      if (typeof value === "number") {
+        payload.smtpPort = value;
+      } else {
+        payload.smtpPort = null;
+      }
+      return;
+    }
+
+    if (typeof value === "string") {
+      payload[key] = value === "" ? null : value;
+      return;
+    }
+
+    payload[key] = null;
+  });
+
+  return payload;
 };
 
 export default function SettingsPage() {
@@ -105,7 +92,6 @@ export default function SettingsPage() {
     resolver: zodResolver(settingsFormSchema),
     defaultValues: toInitialValues(),
   });
-  const selectedProvider = form.watch("aiProvider");
 
   useEffect(() => {
     if (data?.data) {
@@ -113,23 +99,17 @@ export default function SettingsPage() {
     }
   }, [data, form]);
 
-  useEffect(() => {
-    if (!selectedProvider) return;
-
-    const expectedModel = AI_MODEL_BY_PROVIDER[selectedProvider];
-    const currentModel = form.getValues("aiModel");
-
-    if (currentModel !== expectedModel) {
-      form.setValue("aiModel", expectedModel, { shouldDirty: true, shouldValidate: true });
-    }
-  }, [selectedProvider, form]);
-
-  const handleTestConnection = (label: string) => {
-    showSuccess(`${label} test feature coming soon.`);
-  };
-
   const handleSave = async (values: SettingsFormValues) => {
-    const payload = sanitizeUpdatePayload(values);
+    const payload = sanitizeUpdatePayload(
+      values,
+      form.formState.dirtyFields as Partial<Record<keyof SettingsFormValues, boolean>>,
+    );
+    console.log({payload});
+    if (Object.keys(payload).length === 0) {
+      showSuccess("No changes to save");
+      return;
+    }
+
     const loadingToastId = showLoading("Saving settings...");
 
     try {
@@ -173,9 +153,9 @@ export default function SettingsPage() {
                   <p className="text-xs text-slate-500">Configure your AI assistant settings and models.</p>
                 </div>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => handleTestConnection("AI")}>
+              {/* <Button type="button" variant="outline" size="sm" onClick={() => handleTestConnection("AI")}>
                 Test Connection
-              </Button>
+              </Button> */}
             </div>
             <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
               <FormField
@@ -184,20 +164,9 @@ export default function SettingsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>AI Provider</FormLabel>
-                    <Select
-                      value={field.value || undefined}
-                      onValueChange={(value) => field.onChange(value as AiProvider)}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select provider" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="openai">openai</SelectItem>
-                        <SelectItem value="gemini">gemini</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input placeholder="e.g. openai or gemini" {...field} value={field.value ?? ""} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -209,24 +178,9 @@ export default function SettingsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>AI Model</FormLabel>
-                    <Select
-                      value={field.value || undefined}
-                      onValueChange={field.onChange}
-                      disabled={!selectedProvider}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select provider first" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {selectedProvider ? (
-                          <SelectItem value={AI_MODEL_BY_PROVIDER[selectedProvider]}>
-                            {AI_MODEL_BY_PROVIDER[selectedProvider]}
-                          </SelectItem>
-                        ) : null}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input placeholder="e.g. gpt-4o-mini / gemini-2.0-flash" {...field} value={field.value ?? ""} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -259,7 +213,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 size="sm"
@@ -267,7 +221,7 @@ export default function SettingsPage() {
                 onClick={() => handleTestConnection("Fathom")}
               >
                 Test Connection
-              </Button>
+              </Button> */}
             </div>
             <div className="p-4">
               <FormField
@@ -295,7 +249,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-slate-500">Configure SMTP settings for outgoing email follow-ups.</p>
                 </div>
               </div>
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 size="sm"
@@ -303,7 +257,7 @@ export default function SettingsPage() {
                 onClick={() => handleTestConnection("SMTP")}
               >
                 Test Connection
-              </Button>
+              </Button> */}
             </div>
             <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
               <FormField
@@ -379,7 +333,7 @@ export default function SettingsPage() {
                   <FormItem className="md:col-span-2">
                     <FormLabel>SMTP From Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Artech" {...field} value={field.value ?? ""} />
+                      <Input placeholder="name" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -397,7 +351,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-slate-500">Configure SMS messaging service for text follow-ups.</p>
                 </div>
               </div>
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 size="sm"
@@ -405,7 +359,7 @@ export default function SettingsPage() {
                 onClick={() => handleTestConnection("TextMagic")}
               >
                 Test Connection
-              </Button>
+              </Button> */}
             </div>
             <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
               <FormField
@@ -415,7 +369,7 @@ export default function SettingsPage() {
                   <FormItem>
                     <FormLabel>TextMagic Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="oauthartechdigitalem" {...field} value={field.value ?? ""} />
+                      <Input placeholder="username" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

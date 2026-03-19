@@ -24,17 +24,17 @@ export interface GetSettingsResponse {
 }
 
 export interface UpdateSettingsRequestBody {
-  aiProvider?: string;
-  aiApiKey?: string;
-  aiModel?: string;
-  fathomApiKey?: string;
-  smtpHost?: string;
-  smtpPort?: number;
-  smtpUsername?: string;
-  smtpPassword?: string;
-  smtpFromName?: string;
-  textmagicUsername?: string;
-  textmagicApiKey?: string;
+  aiProvider?: string | null;
+  aiApiKey?: string | null;
+  aiModel?: string | null;
+  fathomApiKey?: string | null;
+  smtpHost?: string | null;
+  smtpPort?: number | null;
+  smtpUsername?: string | null;
+  smtpPassword?: string | null;
+  smtpFromName?: string | null;
+  textmagicUsername?: string | null;
+  textmagicApiKey?: string | null;
 }
 
 export interface UpdateSettingsResponse {

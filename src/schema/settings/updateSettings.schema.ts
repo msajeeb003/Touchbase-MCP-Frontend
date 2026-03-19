@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const optionalText = z.string().optional();
-const optionalAiProvider = z.union([z.literal(""), z.enum(["openai", "gemini"])]).optional();
-const optionalAiModel = z.union([z.literal(""), z.enum(["gpt-4o-mini", "gemini-2.0-flash"])]).optional();
+const optionalAiProvider = z.string().optional();
+const optionalAiModel = z.string().optional();
 
 const optionalPort = z.preprocess((value) => {
   if (value === "" || value === null || typeof value === "undefined") {
@@ -18,36 +18,22 @@ const optionalPort = z.preprocess((value) => {
 }, z.number().int().min(1, "SMTP port must be between 1 and 65535").max(65535, "SMTP port must be between 1 and 65535").optional());
 
 export const updateSettingsSchema = z.object({
-  body: z
-    .object({
-      aiProvider: optionalAiProvider,
-      aiApiKey: optionalText,
-      aiModel: optionalAiModel,
+  body: z.object({
+    aiProvider: optionalAiProvider,
+    aiApiKey: optionalText,
+    aiModel: optionalAiModel,
 
-      fathomApiKey: optionalText,
+    fathomApiKey: optionalText,
 
-      smtpHost: optionalText,
-      smtpPort: optionalPort,
-      smtpUsername: optionalText,
-      smtpPassword: optionalText,
-      smtpFromName: optionalText,
+    smtpHost: optionalText,
+    smtpPort: optionalPort,
+    smtpUsername: optionalText,
+    smtpPassword: optionalText,
+    smtpFromName: optionalText,
 
-      textmagicUsername: optionalText,
-      textmagicApiKey: optionalText,
-    })
-    .refine(
-      (data) =>
-        !data.aiProvider ||
-        data.aiProvider === "" ||
-        !data.aiModel ||
-        data.aiModel === "" ||
-        (data.aiProvider === "openai" && data.aiModel === "gpt-4o-mini") ||
-        (data.aiProvider === "gemini" && data.aiModel === "gemini-2.0-flash"),
-      {
-        path: ["aiModel"],
-        message: "Selected AI model does not match AI provider",
-      },
-    ),
+    textmagicUsername: optionalText,
+    textmagicApiKey: optionalText,
+  }),
 });
 
 export const settingsFormSchema = updateSettingsSchema.shape.body;
