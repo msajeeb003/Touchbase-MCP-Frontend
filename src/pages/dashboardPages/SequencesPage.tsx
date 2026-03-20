@@ -117,7 +117,7 @@ export default function SequencesPage() {
     <div className="w-full min-w-0 space-y-4 overflow-x-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm text-slate-500">Follow Up Dashboard</p>
+          {/* <p className="text-sm text-slate-500">Follow Up Dashboard</p> */}
           <h2 className="flex items-center gap-2 text-3xl font-semibold text-slate-900">
             <RefreshCw className="h-6 w-6 text-indigo-500" />
             Sequences
