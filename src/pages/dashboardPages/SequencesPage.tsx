@@ -1,8 +1,20 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Loader2, Plus, RefreshCw } from "lucide-react";
+import { Loader2, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AddSequenceDialog from "@/components/sequences/AddSequenceDialog";
+import UpdateSequenceDialog from "@/components/sequences/UpdateSequenceDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -18,8 +30,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useGetSequencesQuery } from "@/store/features/sequences/sequencesApi";
+import {
+  useDeleteSequenceMutation,
+  useGetSequencesQuery,
+} from "@/store/features/sequences/sequencesApi";
 import type { SequenceStatus } from "@/types/sequences";
+import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 const VALID_STATUSES: SequenceStatus[] = ["draft", "active", "paused", "completed", "cancelled"];
 
@@ -37,7 +53,9 @@ const getStatusLabel = (status: SequenceStatus) => status.charAt(0).toUpperCase(
 export default function SequencesPage() {
   const [stageFilter, setStageFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [deletingSequenceId, setDeletingSequenceId] = useState<string | null>(null);
   const { data, isLoading, isError } = useGetSequencesQuery();
+  const [deleteSequence] = useDeleteSequenceMutation();
   const sequences = useMemo(() => data?.data ?? [], [data?.data]);
 
   const stageOptions = useMemo(() => {
@@ -57,6 +75,24 @@ export default function SequencesPage() {
       }),
     [sequences, stageFilter, statusFilter],
   );
+
+  const handleDeleteSequence = async (sequenceId: string) => {
+    const loadingToastId = showLoading("Deleting sequence...");
+    setDeletingSequenceId(sequenceId);
+
+    try {
+      const response = await deleteSequence(sequenceId).unwrap();
+      showSuccess(response.message || "Sequence deleted successfully");
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to delete sequence. Please try again.";
+      showError(errorMessage);
+    } finally {
+      dismissToast(loadingToastId);
+      setDeletingSequenceId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -146,7 +182,8 @@ export default function SequencesPage() {
                   <TableHead>Steps</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Template</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="text-center">Edit</TableHead>
+                  <TableHead className="text-center">Delete</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -165,14 +202,53 @@ export default function SequencesPage() {
                     <TableCell className="text-slate-600">
                       {sequence.promptTemplate?.followUpStage || sequence.promptTemplate?.name || "N/A"}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                      >
-                        View
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
+                    <TableCell className="text-center">
+                      <UpdateSequenceDialog
+                        sequenceId={sequence.id}
+                        trigger={
+                          <Button variant="ghost" size="icon" className="text-indigo-600 hover:text-indigo-700">
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Update sequence</span>
+                          </Button>
+                        }
+                      />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-rose-600 hover:text-rose-700"
+                            disabled={deletingSequenceId === sequence.id}
+                          >
+                            {deletingSequenceId === sequence.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                            <span className="sr-only">Delete sequence</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete sequence?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete{" "}
+                              <span className="font-medium text-foreground">{sequence.name}</span>.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-rose-600 text-white hover:bg-rose-700"
+                              onClick={() => handleDeleteSequence(sequence.id)}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))}
