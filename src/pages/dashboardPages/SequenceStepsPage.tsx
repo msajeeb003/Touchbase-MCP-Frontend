@@ -1,14 +1,9 @@
 import { useState } from "react";
 import {
   CalendarDays,
-  Clock3,
   Loader2,
-  Mail,
-  MessageSquare,
   Plus,
-  Send,
   Sparkles,
-  StickyNote,
   Trash2,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
@@ -27,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import AddStepDialog from "@/components/sequences/AddStepDialog";
+import SequenceStepEditor from "@/components/sequences/SequenceStepEditor";
 import {
   useDeleteSequenceStepMutation,
   useGenerateSequenceStepContentMutation,
@@ -262,62 +258,8 @@ export default function SequenceStepsPage() {
                       </AlertDialog>
                     </div>
 
-                    <div className="space-y-4 lg:col-span-2">
-                      <div className="flex items-start gap-3">
-                        <StickyNote className="mt-0.5 h-4 w-4 text-slate-400" />
-                        <div className="space-y-1">
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Subject
-                          </p>
-                          <p className="text-sm text-slate-700">{step.subject || "No subject"}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-3">
-                        {step.stepType === "EMAIL" ? (
-                          <Mail className="mt-0.5 h-4 w-4 text-slate-400" />
-                        ) : (
-                          <MessageSquare className="mt-0.5 h-4 w-4 text-slate-400" />
-                        )}
-                        <div className="space-y-1">
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Content
-                          </p>
-                          <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-                            {step.content || "No content generated yet."}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <CalendarDays className="mt-0.5 h-4 w-4 text-slate-400" />
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                          Scheduled At
-                        </p>
-                        <p className="text-sm text-slate-700">{formatDateTime(step.scheduledAt)}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <Send className="mt-0.5 h-4 w-4 text-slate-400" />
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                          Sent At
-                        </p>
-                        <p className="text-sm text-slate-700">{formatDateTime(step.sentAt)}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 lg:col-span-2">
-                      <Clock3 className="mt-0.5 h-4 w-4 text-slate-400" />
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                          Send Log
-                        </p>
-                        <p className="text-sm text-slate-700">{step.sendLog || "No send log available."}</p>
-                      </div>
+                    <div className="lg:col-span-2">
+                      <SequenceStepEditor sequenceId={id ?? ""} step={step} />
                     </div>
                   </div>
                 </AccordionContent>

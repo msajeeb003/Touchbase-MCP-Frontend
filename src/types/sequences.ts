@@ -131,3 +131,16 @@ export interface GenerateSequenceStepContentResponse {
   message: string;
   data: SequenceStepItem;
 }
+
+export interface UpdateSequenceStepRequestBody {
+  subject?: string | null;
+  content?: string | null;
+  scheduledAt?: string;
+}
+
+export interface UpdateSequenceStepResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: SequenceStepItem;
+}

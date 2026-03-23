@@ -10,6 +10,8 @@ import type {
   GetSequencesResponse,
   GetSequenceStepsResponse,
   GetSingleSequenceResponse,
+  UpdateSequenceStepRequestBody,
+  UpdateSequenceStepResponse,
   UpdateSequenceRequestBody,
   UpdateSequenceResponse,
 } from "@/types/sequences";
@@ -68,6 +70,17 @@ export const sequencesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Sequences"],
     }),
+    updateSequenceStep: builder.mutation<
+      UpdateSequenceStepResponse,
+      { sequenceId: string; stepId: string; body: UpdateSequenceStepRequestBody }
+    >({
+      query: ({ sequenceId, stepId, body }) => ({
+        url: `/sequences/${sequenceId}/steps/${stepId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Sequences"],
+    }),
     createSequence: builder.mutation<CreateSequenceResponse, CreateSequenceRequestBody>({
       query: (body) => ({
         url: "/sequences",
@@ -105,6 +118,7 @@ export const {
   useCreateSequenceStepMutation,
   useDeleteSequenceStepMutation,
   useGenerateSequenceStepContentMutation,
+  useUpdateSequenceStepMutation,
   useCreateSequenceMutation,
   useUpdateSequenceMutation,
   useDeleteSequenceMutation,
