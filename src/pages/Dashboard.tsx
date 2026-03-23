@@ -53,6 +53,7 @@ const breadcrumbLabelMap: Record<string, string> = {
   transcripts: "Transcripts",
   templates: "Templates",
   settings: "Settings",
+  steps: "Steps",
   new: "New Template",
   edit: "Edit Template",
 };

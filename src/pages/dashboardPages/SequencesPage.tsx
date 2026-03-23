@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Loader2, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ChevronRight, Loader2, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AddSequenceDialog from "@/components/sequences/AddSequenceDialog";
@@ -124,6 +125,7 @@ export default function SequencesPage() {
           </h2>
         </div>
         <AddSequenceDialog
+        
           trigger={
             <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
               <Plus className="h-4 w-4" />
@@ -174,7 +176,7 @@ export default function SequencesPage() {
           </div>
         ) : (
           <div className="w-full max-w-full overflow-x-auto">
-            <Table className="min-w-[920px]">
+            <Table className="min-w-[1080px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -182,6 +184,7 @@ export default function SequencesPage() {
                   <TableHead>Steps</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Template</TableHead>
+                  <TableHead className="text-center">Step Details</TableHead>
                   <TableHead className="text-center">Edit</TableHead>
                   <TableHead className="text-center">Delete</TableHead>
                 </TableRow>
@@ -201,6 +204,14 @@ export default function SequencesPage() {
                     </TableCell>
                     <TableCell className="text-slate-600">
                       {sequence.promptTemplate?.followUpStage || sequence.promptTemplate?.name || "N/A"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button asChild variant="ghost" className="gap-1 text-indigo-600 hover:text-indigo-700">
+                        <Link to={`/dashboard/sequences/${sequence.id}/steps`}>
+                          View
+                          <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      </Button>
                     </TableCell>
                     <TableCell className="text-center">
                       <UpdateSequenceDialog

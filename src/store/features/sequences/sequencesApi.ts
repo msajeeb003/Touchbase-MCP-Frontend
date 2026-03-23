@@ -4,6 +4,7 @@ import type {
   CreateSequenceResponse,
   DeleteSequenceResponse,
   GetSequencesResponse,
+  GetSequenceStepsResponse,
   GetSingleSequenceResponse,
   UpdateSequenceRequestBody,
   UpdateSequenceResponse,
@@ -21,6 +22,13 @@ export const sequencesApi = baseApi.injectEndpoints({
     getSingleSequence: builder.query<GetSingleSequenceResponse, string>({
       query: (id) => ({
         url: `/sequences/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Sequences"],
+    }),
+    getSequenceSteps: builder.query<GetSequenceStepsResponse, string>({
+      query: (sequenceId) => ({
+        url: `/sequences/${sequenceId}/steps`,
         method: "GET",
       }),
       providesTags: ["Sequences"],
@@ -58,6 +66,7 @@ export const sequencesApi = baseApi.injectEndpoints({
 export const {
   useGetSequencesQuery,
   useGetSingleSequenceQuery,
+  useGetSequenceStepsQuery,
   useCreateSequenceMutation,
   useUpdateSequenceMutation,
   useDeleteSequenceMutation,

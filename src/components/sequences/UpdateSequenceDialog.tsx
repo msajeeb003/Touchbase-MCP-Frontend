@@ -104,7 +104,7 @@ export default function UpdateSequenceDialog({ sequenceId, trigger }: UpdateSequ
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog  open={open} onOpenChange={setOpen} >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-w-2xl p-0">
         <DialogHeader className="border-b px-6 py-5 text-left">
@@ -184,6 +184,7 @@ export default function UpdateSequenceDialog({ sequenceId, trigger }: UpdateSequ
                         min={1}
                         placeholder="5"
                         value={field.value}
+                        disabled
                         onChange={(event) => field.onChange(Number(event.target.value))}
                       />
                     </FormControl>

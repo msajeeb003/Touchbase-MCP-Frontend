@@ -33,8 +33,18 @@ export interface SequenceItem {
 }
 
 export interface SequenceStepItem {
-  id?: string;
-  [key: string]: unknown;
+  id: string;
+  sequenceId: string;
+  stepOrder: number;
+  stepType: "EMAIL" | "SMS";
+  subject: string | null;
+  content: string | null;
+  status: string;
+  scheduledAt: string;
+  sentAt: string | null;
+  sendLog: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GetSequencesResponse {
@@ -86,4 +96,11 @@ export interface DeleteSequenceResponse {
   statusCode: number;
   message: string;
   data: null;
+}
+
+export interface GetSequenceStepsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: SequenceStepItem[];
 }

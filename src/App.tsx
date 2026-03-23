@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardPage from "./pages/dashboardPages/DashboardPage";
 import LeadsPage from "./pages/dashboardPages/LeadsPage";
 import SequencesPage from "./pages/dashboardPages/SequencesPage";
+import SequenceStepsPage from "./pages/dashboardPages/SequenceStepsPage";
 import TranscriptsPage from "./pages/dashboardPages/TranscriptsPage";
 import TemplatesPage from "./pages/dashboardPages/TemplatesPage";
 import CreateTemplatePage from "./pages/dashboardPages/CreateTemplatePage";
@@ -35,6 +36,7 @@ const App = () => (
               <Route index element={<DashboardPage />} />
               <Route path="leads" element={<LeadsPage />} />
               <Route path="sequences" element={<SequencesPage />} />
+              <Route path="sequences/:id/steps" element={<SequenceStepsPage />} />
               <Route path="transcripts" element={<TranscriptsPage />} />
               <Route path="templates" element={<TemplatesPage />} />
               <Route path="templates/new" element={<CreateTemplatePage />} />
