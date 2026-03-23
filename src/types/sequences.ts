@@ -104,3 +104,30 @@ export interface GetSequenceStepsResponse {
   message: string;
   data: SequenceStepItem[];
 }
+
+export interface CreateSequenceStepRequestBody {
+  stepOrder: number;
+  stepType: "EMAIL" | "SMS";
+  scheduledAt: string;
+}
+
+export interface CreateSequenceStepResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: SequenceStepItem;
+}
+
+export interface DeleteSequenceStepResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: null;
+}
+
+export interface GenerateSequenceStepContentResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: SequenceStepItem;
+}

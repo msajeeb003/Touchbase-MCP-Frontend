@@ -1,11 +1,39 @@
-import { CalendarDays, Clock3, Loader2, Mail, MessageSquare, Send, StickyNote } from "lucide-react";
+import { useState } from "react";
+import {
+  CalendarDays,
+  Clock3,
+  Loader2,
+  Mail,
+  MessageSquare,
+  Plus,
+  Send,
+  Sparkles,
+  StickyNote,
+  Trash2,
+} from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import AddStepDialog from "@/components/sequences/AddStepDialog";
+import {
+  useDeleteSequenceStepMutation,
+  useGenerateSequenceStepContentMutation,
   useGetSequenceStepsQuery,
   useGetSingleSequenceQuery,
 } from "@/store/features/sequences/sequencesApi";
+import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 const formatDateTime = (value: string | null | undefined) => {
   if (!value) return "N/A";
@@ -23,6 +51,8 @@ const getStepStatusBadgeClass = (status: string) => {
 
 export default function SequenceStepsPage() {
   const { id } = useParams<{ id: string }>();
+  const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
+  const [generatingStepId, setGeneratingStepId] = useState<string | null>(null);
   const {
     data: sequenceData,
     isLoading: isSequenceLoading,
@@ -37,9 +67,53 @@ export default function SequenceStepsPage() {
   } = useGetSequenceStepsQuery(id ?? "", {
     skip: !id,
   });
+  const [deleteSequenceStep] = useDeleteSequenceStepMutation();
+  const [generateSequenceStepContent] = useGenerateSequenceStepContentMutation();
 
   const sequence = sequenceData?.data;
   const steps = stepsData?.data ?? [];
+  const nextStepOrder = steps.length + 1;
+  const hasCompletedAllSteps = Boolean(sequence && steps.length >= sequence.totalSteps);
+
+  const handleDeleteStep = async (stepId: string) => {
+    if (!id) return;
+
+    const loadingToastId = showLoading("Deleting step...");
+    setDeletingStepId(stepId);
+
+    try {
+      const response = await deleteSequenceStep({ sequenceId: id, stepId }).unwrap();
+      showSuccess(response.message || "Step deleted successfully");
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to delete step. Please try again.";
+      showError(errorMessage);
+    } finally {
+      dismissToast(loadingToastId);
+      setDeletingStepId(null);
+    }
+  };
+
+  const handleGenerateContent = async (stepId: string) => {
+    if (!id) return;
+
+    const loadingToastId = showLoading("Generating content...");
+    setGeneratingStepId(stepId);
+
+    try {
+      const response = await generateSequenceStepContent({ sequenceId: id, stepId }).unwrap();
+      showSuccess(response.message || "Content generated successfully");
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to generate content. Please try again.";
+      showError(errorMessage);
+    } finally {
+      dismissToast(loadingToastId);
+      setGeneratingStepId(null);
+    }
+  };
 
   if (isSequenceLoading || isStepsLoading) {
     return (
@@ -73,9 +147,25 @@ export default function SequenceStepsPage() {
               {sequence?.promptTemplate?.name || "N/A"}
             </p>
           </div>
-          <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
-            {steps.length} step{steps.length === 1 ? "" : "s"}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
+              {steps.length}/{sequence?.totalSteps} step{steps.length === 1 ? "" : "s"}
+            </Badge>
+            <AddStepDialog
+              sequenceId={id ?? ""}
+              nextStepOrder={nextStepOrder}
+              disabled={hasCompletedAllSteps}
+              trigger={
+                <Button
+                  className="gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={hasCompletedAllSteps}
+                >
+                  <Plus className="h-4 w-4" />
+                  {hasCompletedAllSteps ? "All Steps Added" : "Create Step"}
+                </Button>
+              }
+            />
+          </div>
         </div>
       </div>
 
@@ -120,6 +210,58 @@ export default function SequenceStepsPage() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="grid grid-cols-1 gap-4 rounded-xl bg-slate-50/70 p-4 lg:grid-cols-2">
+                    <div className="flex flex-wrap items-center justify-end gap-2 lg:col-span-2">
+                      <Button
+                        type="button"
+                        onClick={() => handleGenerateContent(step.id)}
+                        disabled={generatingStepId === step.id}
+                        className="group relative overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-md"
+                      >
+                        <span className="absolute inset-0 bg-[linear-gradient(110deg,transparent,rgba(255,255,255,0.28),transparent)] opacity-0 transition-opacity duration-500 group-hover:animate-[shine_1.2s_ease-in-out] group-hover:opacity-100" />
+                        {generatingStepId === step.id ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
+                        )}
+                        Generate Content
+                      </Button>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-rose-600 hover:text-rose-700"
+                            disabled={deletingStepId === step.id}
+                          >
+                            {deletingStepId === step.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                            <span className="sr-only">Delete step</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete step?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will remove step {step.stepOrder} and reorder the remaining steps.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-rose-600 text-white hover:bg-rose-700"
+                              onClick={() => handleDeleteStep(step.id)}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+
                     <div className="space-y-4 lg:col-span-2">
                       <div className="flex items-start gap-3">
                         <StickyNote className="mt-0.5 h-4 w-4 text-slate-400" />

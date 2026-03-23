@@ -1,8 +1,12 @@
 import { baseApi } from "@/store/api/baseApi";
 import type {
+  CreateSequenceStepRequestBody,
+  CreateSequenceStepResponse,
   CreateSequenceRequestBody,
   CreateSequenceResponse,
+  DeleteSequenceStepResponse,
   DeleteSequenceResponse,
+  GenerateSequenceStepContentResponse,
   GetSequencesResponse,
   GetSequenceStepsResponse,
   GetSingleSequenceResponse,
@@ -32,6 +36,37 @@ export const sequencesApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["Sequences"],
+    }),
+    createSequenceStep: builder.mutation<
+      CreateSequenceStepResponse,
+      { sequenceId: string; body: CreateSequenceStepRequestBody }
+    >({
+      query: ({ sequenceId, body }) => ({
+        url: `/sequences/${sequenceId}/steps`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Sequences"],
+    }),
+    deleteSequenceStep: builder.mutation<
+      DeleteSequenceStepResponse,
+      { sequenceId: string; stepId: string }
+    >({
+      query: ({ sequenceId, stepId }) => ({
+        url: `/sequences/${sequenceId}/steps/${stepId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Sequences"],
+    }),
+    generateSequenceStepContent: builder.mutation<
+      GenerateSequenceStepContentResponse,
+      { sequenceId: string; stepId: string }
+    >({
+      query: ({ sequenceId, stepId }) => ({
+        url: `/sequences/${sequenceId}/steps/${stepId}/generate`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Sequences"],
     }),
     createSequence: builder.mutation<CreateSequenceResponse, CreateSequenceRequestBody>({
       query: (body) => ({
@@ -67,6 +102,9 @@ export const {
   useGetSequencesQuery,
   useGetSingleSequenceQuery,
   useGetSequenceStepsQuery,
+  useCreateSequenceStepMutation,
+  useDeleteSequenceStepMutation,
+  useGenerateSequenceStepContentMutation,
   useCreateSequenceMutation,
   useUpdateSequenceMutation,
   useDeleteSequenceMutation,
