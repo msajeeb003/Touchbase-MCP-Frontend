@@ -34,6 +34,7 @@ import {
 import {
   useDeleteSequenceMutation,
   useGetSequencesQuery,
+  useUpdateSequenceMutation,
 } from "@/store/features/sequences/sequencesApi";
 import type { SequenceStatus } from "@/types/sequences";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
@@ -55,8 +56,10 @@ export default function SequencesPage() {
   const [stageFilter, setStageFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [deletingSequenceId, setDeletingSequenceId] = useState<string | null>(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
   const { data, isLoading, isError } = useGetSequencesQuery();
   const [deleteSequence] = useDeleteSequenceMutation();
+  const [updateSequence] = useUpdateSequenceMutation();
   const sequences = useMemo(() => data?.data ?? [], [data?.data]);
 
   const stageOptions = useMemo(() => {
@@ -92,6 +95,38 @@ export default function SequencesPage() {
     } finally {
       dismissToast(loadingToastId);
       setDeletingSequenceId(null);
+    }
+  };
+
+  const handleStatusUpdate = async (sequenceId: string, status: SequenceStatus) => {
+    const sequence = sequences.find((item) => item.id === sequenceId);
+    if (!sequence || sequence.status === status || sequence.status === "completed" || status === "completed") {
+      return;
+    }
+
+    const loadingToastId = showLoading("Updating sequence status...");
+    setUpdatingStatusId(sequenceId);
+
+    try {
+      const response = await updateSequence({
+        id: sequenceId,
+        body: {
+          leadId: sequence.leadId,
+          name: sequence.name,
+          totalSteps: sequence.totalSteps,
+          promptTemplateId: sequence.promptTemplateId,
+          status,
+        },
+      }).unwrap();
+      showSuccess(response.message || "Sequence updated successfully");
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to update sequence status. Please try again.";
+      showError(errorMessage);
+    } finally {
+      dismissToast(loadingToastId);
+      setUpdatingStatusId(null);
     }
   };
 
@@ -198,9 +233,28 @@ export default function SequencesPage() {
                       {sequence._count?.steps ?? 0}/{sequence.totalSteps}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={getStatusBadgeClass(sequence.status)}>
-                        {getStatusLabel(sequence.status)}
-                      </Badge>
+                      <Select
+                        value={sequence.status}
+                        onValueChange={(value) =>
+                          handleStatusUpdate(sequence.id, value as SequenceStatus)
+                        }
+                        disabled={updatingStatusId === sequence.id || sequence.status === "completed"}
+                      >
+                        <SelectTrigger className={`h-9 w-[150px] ${getStatusBadgeClass(sequence.status)}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {VALID_STATUSES.map((status) => (
+                            <SelectItem
+                              key={status}
+                              value={status}
+                              disabled={status === "completed"}
+                            >
+                              {getStatusLabel(status)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell className="text-slate-600">
                       {sequence.promptTemplate?.followUpStage || sequence.promptTemplate?.name || "N/A"}

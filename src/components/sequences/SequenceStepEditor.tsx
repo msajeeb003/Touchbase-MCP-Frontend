@@ -195,7 +195,7 @@ export default function SequenceStepEditor({ sequenceId, step }: SequenceStepEdi
                 Updating...
               </>
             ) : (
-              "Update Step"
+              "Update Content"
             )}
           </Button>
         </div>

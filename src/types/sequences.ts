@@ -82,6 +82,7 @@ export interface UpdateSequenceRequestBody {
   name: string;
   totalSteps: number;
   promptTemplateId: string;
+  status?: SequenceStatus;
 }
 
 export interface UpdateSequenceResponse {
