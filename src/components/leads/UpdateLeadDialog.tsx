@@ -27,6 +27,7 @@ import {
   useGetSingleLeadQuery,
   useUpdateLeadMutation,
 } from "@/store/features/leads/leadsApi";
+import type { UpdateLeadRequestBody } from "@/types/leads";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 interface UpdateLeadDialogProps {
@@ -68,11 +69,19 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
 
   const onSubmit = async (values: CreateLeadFormValues) => {
     const loadingToastId = showLoading("Updating lead...");
+    const payload: UpdateLeadRequestBody = {
+      name: values.name,
+      email: values.email,
+      phone: values.phone,
+      company: values.company ?? "",
+      location: values.location,
+      followUpStage: values.followUpStage,
+    };
 
     try {
       const response = await updateLead({
         id: leadId,
-        body: values,
+        body: payload,
       }).unwrap();
 
       showSuccess(response.message || "Lead updated successfully");
