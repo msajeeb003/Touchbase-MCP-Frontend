@@ -1,5 +1,7 @@
 import { Loader2, TrendingUp } from "lucide-react";
+import DeliveryStatsChart from "@/components/dashboard/DeliveryStatsChart";
 import LeadsByStageDonutChart from "@/components/dashboard/LeadsByStageDonutChart";
+import LeadsOverTimeAreaChart from "@/components/dashboard/LeadsOverTimeAreaChart";
 import DashboardSummarySection from "@/components/dashboard/DashboardSummarySection";
 import SequencesByStatusDonutChart from "@/components/dashboard/SequencesByStatusDonutChart";
 import SentTrendLineChart from "@/components/dashboard/SentTrendLineChart";
@@ -49,7 +51,11 @@ export default function DashboardPage() {
         <LeadsByStageDonutChart data={dashboardData.leadsByStage} />
         <SequencesByStatusDonutChart data={dashboardData.sequencesByStatus} />
       </div>
-      <SentTrendLineChart data={dashboardData.sentTrend} />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <SentTrendLineChart data={dashboardData.sentTrend} />
+        <DeliveryStatsChart data={dashboardData.deliveryStats} />
+      </div>
+      <LeadsOverTimeAreaChart data={dashboardData.leadsOverTime} />
     </div>
   );
 }
