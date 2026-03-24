@@ -1,5 +1,12 @@
 import { baseApi } from "@/store/api/baseApi";
-import type { GetFathomMeetingsResponse, GetMeetingTranscriptResponse } from "@/types/transcripts";
+import type {
+  DeleteLeadTranscriptResponse,
+  GetFathomMeetingsResponse,
+  GetLeadTranscriptsResponse,
+  GetMeetingTranscriptResponse,
+  ImportLeadTranscriptFromFathomRequestBody,
+  ImportLeadTranscriptFromFathomResponse,
+} from "@/types/transcripts";
 
 export const transcriptsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -17,8 +24,42 @@ export const transcriptsApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Transcripts"],
     }),
+    getLeadTranscripts: builder.query<GetLeadTranscriptsResponse, string>({
+      query: (leadId) => ({
+        url: `/leads/${leadId}/transcripts`,
+        method: "GET",
+      }),
+      providesTags: ["Transcripts"],
+    }),
+    importLeadTranscriptFromFathom: builder.mutation<
+      ImportLeadTranscriptFromFathomResponse,
+      { leadId: string; body: ImportLeadTranscriptFromFathomRequestBody }
+    >({
+      query: ({ leadId, body }) => ({
+        url: `/leads/${leadId}/transcripts/from-fathom`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Transcripts"],
+    }),
+    deleteLeadTranscript: builder.mutation<
+      DeleteLeadTranscriptResponse,
+      { leadId: string; transcriptId: string }
+    >({
+      query: ({ leadId, transcriptId }) => ({
+        url: `/leads/${leadId}/transcripts/${transcriptId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Transcripts"],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetFathomMeetingsQuery, useLazyGetMeetingTranscriptQuery } = transcriptsApi;
+export const {
+  useGetFathomMeetingsQuery,
+  useGetLeadTranscriptsQuery,
+  useLazyGetMeetingTranscriptQuery,
+  useDeleteLeadTranscriptMutation,
+  useImportLeadTranscriptFromFathomMutation,
+} = transcriptsApi;

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Building2,
+  FileText,
   Loader2,
   Mail,
   Pencil,
@@ -11,6 +12,7 @@ import {
   Upload,
   Users2,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -267,7 +269,7 @@ export default function LeadsPage() {
         ) : (
           <>
             <div className="w-full max-w-full overflow-x-auto">
-              <Table className="min-w-[920px]">
+              <Table className="min-w-[1080px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
@@ -275,6 +277,7 @@ export default function LeadsPage() {
                     <TableHead>Location</TableHead>
                     <TableHead>FollowUp Stage</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead className="text-center">Add Transcript</TableHead>
                     <TableHead className="text-center">Update</TableHead>
                     <TableHead className="text-center">Delete</TableHead>
                   </TableRow>
@@ -307,6 +310,14 @@ export default function LeadsPage() {
                         <Badge variant="outline" className={getStatusBadgeClass(lead.status)}>
                           {lead.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button asChild variant="ghost" size="sm" className="gap-2 text-indigo-600 hover:text-indigo-700">
+                          <Link to={`/dashboard/leads/${lead.id}/transcripts`}>
+                            <FileText className="h-4 w-4" />
+                            Add
+                          </Link>
+                        </Button>
                       </TableCell>
                       <TableCell className="text-center">
                         <UpdateLeadDialog

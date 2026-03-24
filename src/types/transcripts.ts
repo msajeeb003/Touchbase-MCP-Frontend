@@ -66,3 +66,43 @@ export interface GetMeetingTranscriptResponse {
   message: string;
   data: GetMeetingTranscriptData;
 }
+
+export interface LeadTranscriptItem {
+  id: string;
+  userId?: string;
+  leadId?: string;
+  source: string;
+  fathomRecordingId: number;
+  meetingTitle: string;
+  meetingDate: string;
+  transcript: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ImportLeadTranscriptFromFathomRequestBody {
+  recordingId: number;
+  meetingTitle: string;
+  meetingDate: string;
+}
+
+export interface ImportLeadTranscriptFromFathomResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: LeadTranscriptItem;
+}
+
+export interface GetLeadTranscriptsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: LeadTranscriptItem[];
+}
+
+export interface DeleteLeadTranscriptResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: null;
+}
