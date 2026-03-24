@@ -5,6 +5,7 @@ import LeadsOverTimeAreaChart from "@/components/dashboard/LeadsOverTimeAreaChar
 import DashboardSummarySection from "@/components/dashboard/DashboardSummarySection";
 import SequencesByStatusDonutChart from "@/components/dashboard/SequencesByStatusDonutChart";
 import SentTrendLineChart from "@/components/dashboard/SentTrendLineChart";
+import UpcomingStepsSection from "@/components/dashboard/UpcomingStepsSection";
 import { useGetDashboardQuery } from "@/store/features/dashboard/dashboardApi";
 
 export default function DashboardPage() {
@@ -56,6 +57,7 @@ export default function DashboardPage() {
         <DeliveryStatsChart data={dashboardData.deliveryStats} />
       </div>
       <LeadsOverTimeAreaChart data={dashboardData.leadsOverTime} />
+      <UpcomingStepsSection data={dashboardData.upcomingSteps} />
     </div>
   );
 }
