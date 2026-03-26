@@ -6,6 +6,7 @@ import type {
   GetSingleLeadResponse,
   GetLeadsQueryParams,
   GetLeadsResponse,
+  ImportLeadsCsvResponse,
   UpdateLeadRequestBody,
   UpdateLeadResponse,
 } from "@/types/leads";
@@ -58,6 +59,14 @@ export const leadsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Leads"],
     }),
+    importLeadsCsv: builder.mutation<ImportLeadsCsvResponse, FormData>({
+      query: (body) => ({
+        url: "/leads/import-csv",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Leads"],
+    }),
   }),
   overrideExisting: false,
 });
@@ -68,4 +77,5 @@ export const {
   useCreateLeadMutation,
   useUpdateLeadMutation,
   useDeleteLeadMutation,
+  useImportLeadsCsvMutation,
 } = leadsApi;

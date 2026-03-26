@@ -84,3 +84,23 @@ export interface DeleteLeadResponse {
   message: string;
   data: null;
 }
+
+export interface LeadImportErrorItem {
+  row: number;
+  email: string;
+  reason: string;
+}
+
+export interface ImportLeadsCsvData {
+  total: number;
+  success: number;
+  failed: number;
+  errors: LeadImportErrorItem[];
+}
+
+export interface ImportLeadsCsvResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: ImportLeadsCsvData;
+}

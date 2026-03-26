@@ -40,6 +40,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import AddLeadDialog from "@/components/leads/AddLeadDialog";
+import ImportLeadsDialog from "@/components/leads/ImportLeadsDialog";
 import UpdateLeadDialog from "@/components/leads/UpdateLeadDialog";
 import {
   AlertDialog,
@@ -178,10 +179,14 @@ export default function LeadsPage() {
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="gap-2">
-            <Upload className="h-4 w-4" />
-            Import CSV
-          </Button>
+          <ImportLeadsDialog
+            trigger={
+              <Button variant="outline" className="gap-2">
+                <Upload className="h-4 w-4" />
+                Import CSV
+              </Button>
+            }
+          />
           <AddLeadDialog
             trigger={
               <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
