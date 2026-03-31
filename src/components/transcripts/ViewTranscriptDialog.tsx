@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { MessageSquareText } from "lucide-react";
+import { Copy, MessageSquareText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -43,9 +44,42 @@ export default function ViewTranscriptDialog({
 }: ViewTranscriptDialogProps) {
   const [open, setOpen] = useState(false);
   const [fetchTranscript, { data, isFetching, isError }] = useLazyGetMeetingTranscriptQuery();
+  const [isCopied, setIsCopied] = useState(false);
 
-  const lines = data?.data.transcript ?? [];
+  const lines = useMemo(() => data?.data.transcript ?? [], [data]);
   const summary = useMemo(() => `${lines.length} messages`, [lines.length]);
+
+  const transcriptText = useMemo(() => {
+    return lines
+      .map((item) => {
+        const speakerName = item.speaker.display_name || "Unknown Speaker";
+        return `${speakerName} (${item.timestamp}): ${item.text}`;
+      })
+      .join("\n");
+  }, [lines]);
+
+  const copyToClipboard = async (text: string) => {
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback for environments where `navigator.clipboard` is not available/allowed.
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "true");
+      textarea.style.position = "fixed";
+      textarea.style.top = "-1000px";
+      textarea.style.left = "-1000px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+
+    setIsCopied(true);
+    window.setTimeout(() => setIsCopied(false), 1500);
+  };
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
@@ -59,8 +93,23 @@ export default function ViewTranscriptDialog({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="w-[calc(100vw-1.5rem)] max-w-4xl p-0 sm:w-full">
         <DialogHeader className="border-b px-4 py-4 sm:px-6">
-          <DialogTitle className="text-left">{meetingTitle}</DialogTitle>
-          <p className="text-xs text-slate-500">{summary}</p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <DialogTitle className="text-left">{meetingTitle}</DialogTitle>
+              <p className="text-xs text-slate-500">{summary}</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void copyToClipboard(transcriptText)}
+              disabled={lines.length === 0}
+              className="mr-8"
+            >
+              <Copy className="h-4 w-4" />
+              {isCopied ? "Copied" : "Copy"}
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="max-h-[72vh] overflow-y-auto px-4 py-4 sm:px-6">
