@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -63,6 +64,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
       company: "",
       location: "",
       followUpStage: "",
+      notes: "",
     },
   });
 
@@ -76,21 +78,24 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
     const loadingToastId = showLoading("Creating lead...");
     const dial =
       countryCodes.find((c) => c.country === selectedCountryIso)?.code ?? "+880";
-    const normalizedPhone = normalizePhoneInput(values.phone);
+    const normalizedPhone = normalizePhoneInput(values.phone ?? "");
     const phoneWithCountryCode = normalizedPhone.startsWith("+")
       ? normalizedPhone
       : `${dial}${normalizedPhone}`;
-      
-      console.log({phoneWithCountryCode});
+    const email = values.email?.trim();
+    const company = values.company?.trim();
+    const location = values.location?.trim();
+    const notes = values.notes?.trim();
 
     try {
       const response = await createLead({
         name: values.name,
-        email: values.email,
-        phone: phoneWithCountryCode,
-        company: values.company,
-        location: values.location,
         followUpStage: values.followUpStage,
+        ...(email ? { email } : {}),
+        ...(normalizedPhone ? { phone: phoneWithCountryCode } : {}),
+        ...(company ? { company } : {}),
+        ...(location ? { location } : {}),
+        ...(notes ? { notes } : {}),
       }).unwrap();
 
       showSuccess(response.message || "Lead created successfully");
@@ -110,7 +115,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-2xl p-0">
+      <DialogContent className="my-4 w-[calc(100vw-2rem)] max-h-[calc(90vh-2rem)] max-w-2xl overflow-y-auto p-0">
         <DialogHeader className="border-b px-6 py-5 text-left">
           <DialogTitle className="text-3xl font-semibold text-slate-800">Add New Lead</DialogTitle>
         </DialogHeader>
@@ -221,6 +226,23 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
                   <FormLabel>Follow-up Stage </FormLabel>
                   <FormControl>
                     <Input placeholder="Follow Up Stage e.g No Show, After Sale, PRD, Hot Lead, Cancel" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Additional notes (optional)"
+                      className="min-h-[96px]"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

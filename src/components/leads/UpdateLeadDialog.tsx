@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -54,6 +55,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
       company: "",
       location: "",
       followUpStage: "",
+      notes: "",
     },
   });
 
@@ -61,24 +63,32 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
     if (singleLeadData?.data) {
       form.reset({
         name: singleLeadData.data.name,
-        email: singleLeadData.data.email,
-        phone: singleLeadData.data.phone,
-        company: singleLeadData.data.company,
-        location: singleLeadData.data.location,
+        email: singleLeadData.data.email ?? "",
+        phone: singleLeadData.data.phone ?? "",
+        company: singleLeadData.data.company ?? "",
+        location: singleLeadData.data.location ?? "",
         followUpStage: singleLeadData.data.followUpStage,
+        notes: singleLeadData.data.notes ?? "",
       });
     }
   }, [singleLeadData, form]);
 
   const onSubmit = async (values: CreateLeadFormValues) => {
     const loadingToastId = showLoading("Updating lead...");
+    const email = values.email?.trim();
+    const phone = normalizePhoneInput(values.phone ?? "");
+    const company = values.company?.trim();
+    const location = values.location?.trim();
+    const notes = values.notes?.trim();
+
     const payload: UpdateLeadRequestBody = {
       name: values.name,
-      email: values.email,
-      phone: normalizePhoneInput(values.phone),
-      company: values.company ?? "",
-      location: values.location,
       followUpStage: values.followUpStage,
+      ...(email ? { email } : {}),
+      ...(phone ? { phone } : {}),
+      ...(company ? { company } : {}),
+      ...(location ? { location } : {}),
+      ...(notes ? { notes } : {}),
     };
 
     try {
@@ -102,7 +112,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-2xl p-0">
+      <DialogContent className="my-4 w-[calc(100vw-2rem)] max-h-[calc(90vh-2rem)] max-w-2xl overflow-y-auto p-0">
         <DialogHeader className="border-b px-6 py-5 text-left">
           <DialogTitle className="text-3xl font-semibold text-slate-800">Update Lead</DialogTitle>
         </DialogHeader>
@@ -192,6 +202,23 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                     <FormControl>
                       <Input
                         placeholder="Follow Up Stage e.g No Show, After Sale, PRD, Hot Lead, Cancel"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Additional notes (optional)"
+                        className="min-h-[96px]"
                         {...field}
                       />
                     </FormControl>

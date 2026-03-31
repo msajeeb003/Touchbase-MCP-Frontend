@@ -2,12 +2,13 @@ export interface LeadItem {
   id: string;
   userId: string;
   name: string;
-  email: string;
-  phone: string;
-  company: string;
-  location: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  location?: string;
   status: string;
   followUpStage: string;
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -41,11 +42,12 @@ export interface GetLeadsQueryParams {
 
 export interface CreateLeadRequestBody {
   name: string;
-  email: string;
-  phone: string;
-  company: string;
-  location: string;
   followUpStage: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  location?: string;
+  notes?: string;
 }
 
 export interface CreateLeadResponse {
@@ -64,11 +66,12 @@ export interface GetSingleLeadResponse {
 
 export interface UpdateLeadRequestBody {
   name: string;
-  email: string;
-  phone: string;
-  company: string;
-  location: string;
   followUpStage: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  location?: string;
+  notes?: string;
 }
 
 export interface UpdateLeadResponse {

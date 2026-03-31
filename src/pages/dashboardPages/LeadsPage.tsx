@@ -39,6 +39,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import AddLeadDialog from "@/components/leads/AddLeadDialog";
 import ImportLeadsDialog from "@/components/leads/ImportLeadsDialog";
 import UpdateLeadDialog from "@/components/leads/UpdateLeadDialog";
@@ -74,6 +80,11 @@ const getStageBadgeClass = (stage: string) => {
   if (value.includes("prd")) return "bg-violet-100 text-violet-700 border-violet-200";
   if (value.includes("hot")) return "bg-emerald-100 text-emerald-700 border-emerald-200";
   return "bg-slate-100 text-slate-700 border-slate-200";
+};
+
+const getShortNotes = (notes: string, maxLength = 15) => {
+  if (notes.length <= maxLength) return notes;
+  return `${notes.slice(0, maxLength)}...`;
 };
 
 export default function LeadsPage() {
@@ -280,6 +291,7 @@ export default function LeadsPage() {
                     <TableHead>Name</TableHead>
                     <TableHead>Address</TableHead>
                     <TableHead>Location</TableHead>
+                    <TableHead>Notes</TableHead>
                     <TableHead>FollowUp Stage</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-center">Add Transcript</TableHead>
@@ -293,19 +305,35 @@ export default function LeadsPage() {
                       <TableCell className="">
                         <div className="flex flex-col gap-y-0.5">
                           <h3 className="font-medium">{lead.name}</h3>
-                          {lead.company && (
-                            <span className="flex items-center gap-x-1 text-sm"><Building2 className="h-3 w-3" /> {lead.company}</span>
-                          )}
+                            <span className="flex items-center gap-x-1 text-sm"><Building2 className="h-3 w-3" /> {lead.company || "---"}</span>
                         </div>
 
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-y-0.5">
-                          <span className="flex items-center gap-x-1 text-sm"><Mail className="h-3 w-3" /> {lead.email}</span>
-                          <span className="flex items-center gap-x-1 text-sm"><Phone className="h-3 w-3" /> {lead.phone}</span>
+                          <span className="flex items-center gap-x-1 text-sm"><Mail className="h-3 w-3" /> {lead.email || "---"}</span>
+                          <span className="flex items-center gap-x-1 text-sm"><Phone className="h-3 w-3" /> {lead.phone || "---"}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{lead.location}</TableCell>
+                      <TableCell>{lead.location || "---"}</TableCell>
+                      <TableCell className="max-w-[220px]">
+                        {lead.notes ? (
+                          <TooltipProvider delayDuration={150}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <p className="cursor-help truncate text-sm text-slate-700">
+                                  {getShortNotes(lead.notes)}
+                                </p>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs whitespace-pre-wrap break-words">
+                                {lead.notes}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          "---"
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getStageBadgeClass(lead.followUpStage)}>
                           {lead.followUpStage}
