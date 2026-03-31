@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import {
   useUpdateLeadMutation,
 } from "@/store/features/leads/leadsApi";
 import type { UpdateLeadRequestBody } from "@/types/leads";
+import { normalizePhoneInput } from "@/utils/phone";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 interface UpdateLeadDialogProps {
@@ -42,8 +43,10 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
     skip: !open,
   });
 
+  const updateLeadSchema = useMemo(() => createLeadFormSchema(() => 8), []);
+
   const form = useForm<CreateLeadFormValues>({
-    resolver: zodResolver(createLeadFormSchema),
+    resolver: zodResolver(updateLeadSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -72,7 +75,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
     const payload: UpdateLeadRequestBody = {
       name: values.name,
       email: values.email,
-      phone: values.phone,
+      phone: normalizePhoneInput(values.phone),
       company: values.company ?? "",
       location: values.location,
       followUpStage: values.followUpStage,

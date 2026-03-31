@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Form,
   FormControl,
   FormField,
@@ -24,18 +31,31 @@ import {
   type CreateLeadFormValues,
 } from "@/schema/leads/createLead.schema";
 import { useCreateLeadMutation } from "@/store/features/leads/leadsApi";
+import { countryCodes, getMinLengthForCountryIso } from "@/utils/countryCode";
+import { normalizePhoneInput } from "@/utils/phone";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 interface AddLeadDialogProps {
   trigger: ReactNode;
 }
 
+const DEFAULT_COUNTRY_ISO = "US";
+
 export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
   const [open, setOpen] = useState(false);
+  const [selectedCountryIso, setSelectedCountryIso] = useState(DEFAULT_COUNTRY_ISO);
   const [createLead, { isLoading }] = useCreateLeadMutation();
 
+  const minNationalDigitsRef = useRef(() => getMinLengthForCountryIso(DEFAULT_COUNTRY_ISO));
+  minNationalDigitsRef.current = () => getMinLengthForCountryIso(selectedCountryIso);
+
+  const leadFormSchema = useMemo(
+    () => createLeadFormSchema(() => minNationalDigitsRef.current()),
+    []
+  );
+
   const form = useForm<CreateLeadFormValues>({
-    resolver: zodResolver(createLeadFormSchema),
+    resolver: zodResolver(leadFormSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -46,14 +66,28 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
     },
   });
 
+  useEffect(() => {
+    if (form.getValues("phone").trim()) {
+      void form.trigger("phone");
+    }
+  }, [selectedCountryIso, form]);
+
   const onSubmit = async (values: CreateLeadFormValues) => {
     const loadingToastId = showLoading("Creating lead...");
+    const dial =
+      countryCodes.find((c) => c.country === selectedCountryIso)?.code ?? "+880";
+    const normalizedPhone = normalizePhoneInput(values.phone);
+    const phoneWithCountryCode = normalizedPhone.startsWith("+")
+      ? normalizedPhone
+      : `${dial}${normalizedPhone}`;
+      
+      console.log({phoneWithCountryCode});
 
     try {
       const response = await createLead({
         name: values.name,
         email: values.email,
-        phone: values.phone,
+        phone: phoneWithCountryCode,
         company: values.company,
         location: values.location,
         followUpStage: values.followUpStage,
@@ -61,6 +95,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
 
       showSuccess(response.message || "Lead created successfully");
       form.reset();
+      setSelectedCountryIso(DEFAULT_COUNTRY_ISO);
       setOpen(false);
     } catch (error: unknown) {
       const errorMessage =
@@ -120,7 +155,29 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
                 <FormItem>
                   <FormLabel>Phone Number </FormLabel>
                   <FormControl>
-                    <Input placeholder="1234567890" {...field} />
+                    <div className="flex gap-2">
+                      <Select
+                        value={selectedCountryIso}
+                        onValueChange={setSelectedCountryIso}
+                      >
+                        <SelectTrigger className="w-[150px] shrink-0">
+                          <SelectValue placeholder="Code" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-80">
+                          {countryCodes.map((item) => (
+                            <SelectItem key={item.country} value={item.country}>
+                              {item.country} ({item.code})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        placeholder="1234567890"
+                        inputMode="tel"
+                        className="flex-1"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

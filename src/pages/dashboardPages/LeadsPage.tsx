@@ -78,7 +78,7 @@ const getStageBadgeClass = (stage: string) => {
 
 export default function LeadsPage() {
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(20);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<string>("All");
