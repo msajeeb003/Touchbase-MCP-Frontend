@@ -242,7 +242,7 @@ export default function SequencesPage() {
                   <TableHead>Status</TableHead>
                   <TableHead>Template</TableHead>
                   <TableHead className="text-center">Step Details</TableHead>
-                  <TableHead className="text-center">Generate</TableHead>
+                  <TableHead className="text-center">Generate Steps</TableHead>
                   <TableHead className="text-center">Edit</TableHead>
                   <TableHead className="text-center">Delete</TableHead>
                 </TableRow>

@@ -4,6 +4,7 @@ import type {
   CreateSequenceStepResponse,
   CreateSequenceRequestBody,
   CreateSequenceResponse,
+  DeleteAllSequenceStepsResponse,
   DeleteSequenceStepResponse,
   DeleteSequenceResponse,
   GenerateSequenceStepContentResponse,
@@ -62,6 +63,13 @@ export const sequencesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Sequences"],
     }),
+    deleteAllSequenceSteps: builder.mutation<DeleteAllSequenceStepsResponse, string>({
+      query: (sequenceId) => ({
+        url: `/sequences/${sequenceId}/steps/delete-all`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Sequences"],
+    }),
     generateSequenceStepContent: builder.mutation<
       GenerateSequenceStepContentResponse,
       { sequenceId: string; stepId: string }
@@ -86,7 +94,7 @@ export const sequencesApi = baseApi.injectEndpoints({
         method: "POST",
         body: {},
       }),
-      invalidatesTags: ["Sequences",],
+      invalidatesTags: ["Sequences"],
     }),
     updateSequenceStep: builder.mutation<
       UpdateSequenceStepResponse,
@@ -134,6 +142,7 @@ export const {
   useGetSingleSequenceQuery,
   useGetSequenceStepsQuery,
   useCreateSequenceStepMutation,
+  useDeleteAllSequenceStepsMutation,
   useDeleteSequenceStepMutation,
   useGenerateSequenceStepContentMutation,
   useGenerateSequenceStepsMutation,

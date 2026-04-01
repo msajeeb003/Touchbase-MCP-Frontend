@@ -18,6 +18,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import AddStepDialog from "@/components/sequences/AddStepDialog";
 import SequenceStepEditor from "@/components/sequences/SequenceStepEditor";
 import {
+  useDeleteAllSequenceStepsMutation,
   useDeleteSequenceStepMutation,
   useGenerateSequenceStepContentMutation,
   useGetSequenceStepsQuery,
@@ -45,6 +46,7 @@ export default function SequenceStepsPage() {
   const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
   const [generatingStepId, setGeneratingStepId] = useState<string | null>(null);
   const [isRegeneratingAll, setIsRegeneratingAll] = useState(false);
+  const [isDeletingAllSteps, setIsDeletingAllSteps] = useState(false);
   const {
     data: sequenceData,
     isLoading: isSequenceLoading,
@@ -62,6 +64,7 @@ export default function SequenceStepsPage() {
   const [deleteSequenceStep] = useDeleteSequenceStepMutation();
   const [generateSequenceStepContent] = useGenerateSequenceStepContentMutation();
   const [regenerateAllStepContent] = useRegenerateAllStepContentMutation();
+  const [deleteAllSequenceSteps] = useDeleteAllSequenceStepsMutation();
 
   const sequence = sequenceData?.data;
   const steps = stepsData?.data ?? [];
@@ -70,6 +73,7 @@ export default function SequenceStepsPage() {
   const canRegenerateAllContent = Boolean(
     sequence && sequence.totalSteps > 0 && steps.length === sequence.totalSteps,
   );
+  const canDeleteAllSteps = steps.length > 0;
 
   const handleDeleteStep = async (stepId: string) => {
     if (!id) return;
@@ -131,6 +135,26 @@ export default function SequenceStepsPage() {
     }
   };
 
+  const handleDeleteAllSteps = async () => {
+    if (!id || !canDeleteAllSteps) return;
+
+    const loadingToastId = showLoading("Deleting all steps...");
+    setIsDeletingAllSteps(true);
+
+    try {
+      const response = await deleteAllSequenceSteps(id).unwrap();
+      showSuccess(response.message || `Deleted ${response.data.deletedCount} step(s)`);
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to delete steps. Please try again.";
+      showError(errorMessage);
+    } finally {
+      dismissToast(loadingToastId);
+      setIsDeletingAllSteps(false);
+    }
+  };
+
   if (isSequenceLoading || isStepsLoading) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-sm text-slate-500">
@@ -164,9 +188,42 @@ export default function SequenceStepsPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
-              {steps.length}/{sequence?.totalSteps} step{steps.length === 1 ? "" : "s"}
-            </Badge>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2 border-rose-200 text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={!canDeleteAllSteps || isDeletingAllSteps}
+                >
+                  {isDeletingAllSteps ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Trash2 className="h-4 w-4" aria-hidden />
+                  )}
+                  Delete all steps
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete all steps?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This removes every step in this sequence ({steps.length} total). You can create
+                    steps again afterward. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-rose-600 text-white hover:bg-rose-700"
+                    onClick={() => void handleDeleteAllSteps()}
+                  >
+                    Delete all
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button
               type="button"
               variant="outline"
@@ -197,6 +254,9 @@ export default function SequenceStepsPage() {
                 >
                   <Plus className="h-4 w-4" />
                   {hasCompletedAllSteps ? "All Steps Added" : "Create Step"}
+                  <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
+                    {steps.length}/{sequence?.totalSteps} step{steps.length === 1 ? "" : "s"}
+                  </Badge>
                 </Button>
               }
             />

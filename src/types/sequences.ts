@@ -126,6 +126,15 @@ export interface DeleteSequenceStepResponse {
   data: null;
 }
 
+export interface DeleteAllSequenceStepsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    deletedCount: number;
+  };
+}
+
 export interface GenerateSequenceStepContentResponse {
   success: boolean;
   statusCode: number;
