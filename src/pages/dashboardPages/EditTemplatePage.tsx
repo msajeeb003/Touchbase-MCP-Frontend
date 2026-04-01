@@ -21,35 +21,8 @@ import {
   useGetPromptTemplateByIdQuery,
   useUpdatePromptTemplateMutation,
 } from "@/store/features/templates/templatesApi";
+import PromptTemplateReference from "@/components/templates/PromptTemplateReference";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
-
-const promptVariables = ["{{FirstName}}", "{{CalendlyLink}}", "{{SenderName}}", "{{BusinessName}}"];
-const promptExampleText = `You are a Virtual Assistant for {{BusinessName}}.
-
-Below is a transcript of a sales/discovery call.
-
-Goals:
-- Identify the client's project goals and pain points.
-- Encourage booking a PRD session.
-- Mention PRD covers scope, architecture, timeline, and budget.
-
-Output:
-1) Write a short project summary.
-2) Generate one follow-up message in EMAIL or SMS format.
-3) Use {{FirstName}} and include CTA: https://calendly.com/artech-digital/30min-call
-
-EMAIL FORMAT:
-- Include Subject line
-- Greeting + short body + sign-off
-- Use {{SenderName}} at the end
-
-SMS FORMAT:
-- Keep it concise (2-4 sentences)
-- No subject line
-- Friendly and direct CTA
-
-Best regards,
-{{SenderName}}`;
 
 export default function EditTemplatePage() {
   const { id } = useParams<{ id: string }>();
@@ -101,15 +74,6 @@ export default function EditTemplatePage() {
       showError(errorMessage);
     } finally {
       dismissToast(loadingToastId);
-    }
-  };
-
-  const handleCopyVariable = async (variable: string) => {
-    try {
-      await navigator.clipboard.writeText(variable);
-      showSuccess(`Copied ${variable}`);
-    } catch {
-      showError("Failed to copy variable");
     }
   };
 
@@ -170,22 +134,6 @@ export default function EditTemplatePage() {
                 </FormItem>
               )}
             />
-            <div className="rounded-lg border bg-slate-50 px-4 py-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="mr-2 text-sm font-medium text-slate-600">Variables:</p>
-                {promptVariables.map((variable) => (
-                  <button
-                    key={variable}
-                    type="button"
-                    onClick={() => handleCopyVariable(variable)}
-                    title={`Copy ${variable}`}
-                    className="rounded-md border bg-white px-3 py-1 text-sm text-slate-600 shadow-sm"
-                  >
-                    {variable}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <div className="flex items-center justify-end gap-3 border-t pt-4">
               <Button
@@ -203,12 +151,7 @@ export default function EditTemplatePage() {
         </Form>
       </div>
 
-      <div className="rounded-lg border bg-indigo-50/30 px-4 py-3">
-        <p className="mb-2 text-sm font-medium text-slate-700">Prompt Example (for idea)</p>
-        <pre className="whitespace-pre-wrap text-xs leading-relaxed text-slate-600">
-          {promptExampleText}
-        </pre>
-      </div>
+      <PromptTemplateReference />
     </div>
   );
 }
