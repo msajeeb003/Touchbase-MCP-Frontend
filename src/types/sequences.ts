@@ -133,6 +133,27 @@ export interface GenerateSequenceStepContentResponse {
   data: SequenceStepItem;
 }
 
+export interface SequenceGenerationStepResult {
+  stepOrder: number;
+  status: string;
+}
+
+/** Shape returned by POST /sequences/:id/generate-steps (lead may omit optional list fields). */
+export interface GenerateSequenceStepsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    sequence: Omit<SequenceItem, "lead" | "_count"> & {
+      lead: Pick<SequenceLeadInfo, "name" | "email" | "followUpStage"> &
+        Partial<Pick<SequenceLeadInfo, "company">>;
+      promptTemplate: SequencePromptTemplateInfo;
+      steps: SequenceStepItem[];
+    };
+    generationResults: SequenceGenerationStepResult[];
+  };
+}
+
 export interface UpdateSequenceStepRequestBody {
   subject?: string | null;
   content?: string | null;

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Loader2, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ChevronRight, Loader2, Pencil, Plus, RefreshCw, Trash2, Wand2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AddSequenceDialog from "@/components/sequences/AddSequenceDialog";
@@ -33,10 +33,12 @@ import {
 } from "@/components/ui/table";
 import {
   useDeleteSequenceMutation,
+  useGenerateSequenceStepsMutation,
   useGetSequencesQuery,
   useUpdateSequenceMutation,
 } from "@/store/features/sequences/sequencesApi";
 import type { SequenceStatus } from "@/types/sequences";
+import { cn } from "@/lib/utils";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 const VALID_STATUSES: SequenceStatus[] = ["draft", "active", "paused", "completed", "cancelled"];
@@ -57,9 +59,11 @@ export default function SequencesPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [deletingSequenceId, setDeletingSequenceId] = useState<string | null>(null);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+  const [generatingStepsId, setGeneratingStepsId] = useState<string | null>(null);
   const { data, isLoading, isError } = useGetSequencesQuery();
   const [deleteSequence] = useDeleteSequenceMutation();
   const [updateSequence] = useUpdateSequenceMutation();
+  const [generateSequenceSteps] = useGenerateSequenceStepsMutation();
   const sequences = useMemo(() => data?.data ?? [], [data?.data]);
 
   const stageOptions = useMemo(() => {
@@ -127,6 +131,24 @@ export default function SequencesPage() {
     } finally {
       dismissToast(loadingToastId);
       setUpdatingStatusId(null);
+    }
+  };
+
+  const handleGenerateSteps = async (sequenceId: string) => {
+    const loadingToastId = showLoading("Generating steps...");
+    setGeneratingStepsId(sequenceId);
+
+    try {
+      const response = await generateSequenceSteps(sequenceId).unwrap();
+      showSuccess(response.message || "Steps generated successfully");
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to generate steps. Please try again.";
+      showError(errorMessage);
+    } finally {
+      dismissToast(loadingToastId);
+      setGeneratingStepsId(null);
     }
   };
 
@@ -211,7 +233,7 @@ export default function SequencesPage() {
           </div>
         ) : (
           <div className="w-full max-w-full overflow-x-auto">
-            <Table className="min-w-[1080px]">
+            <Table className="min-w-[1180px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -220,6 +242,7 @@ export default function SequencesPage() {
                   <TableHead>Status</TableHead>
                   <TableHead>Template</TableHead>
                   <TableHead className="text-center">Step Details</TableHead>
+                  <TableHead className="text-center">Generate</TableHead>
                   <TableHead className="text-center">Edit</TableHead>
                   <TableHead className="text-center">Delete</TableHead>
                 </TableRow>
@@ -266,6 +289,24 @@ export default function SequencesPage() {
                           <ChevronRight className="h-4 w-4" />
                         </Link>
                       </Button>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <button
+                        type="button"
+                        title="Generate all step content"
+                        disabled={generatingStepsId === sequence.id}
+                        onClick={() => void handleGenerateSteps(sequence.id)}
+                        className={cn(
+                          "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 via-fuchsia-500 to-amber-400 text-white shadow-md shadow-violet-500/35 ring-2 ring-violet-200/80 transition-transform hover:scale-105 hover:from-violet-600 hover:via-fuchsia-600 hover:to-amber-500 hover:shadow-lg hover:shadow-fuchsia-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60 disabled:hover:scale-100",
+                        )}
+                      >
+                        {generatingStepsId === sequence.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                        ) : (
+                          <Wand2 className="h-4 w-4 drop-shadow-sm" strokeWidth={2.25} aria-hidden />
+                        )}
+                        <span className="sr-only">Generate steps with AI</span>
+                      </button>
                     </TableCell>
                     <TableCell className="text-center">
                       <UpdateSequenceDialog
