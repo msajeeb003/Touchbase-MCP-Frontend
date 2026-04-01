@@ -154,6 +154,22 @@ export interface GenerateSequenceStepsResponse {
   };
 }
 
+export interface RegenerateAllStepContentResult {
+  stepOrder: number;
+  status: string;
+}
+
+/** POST /sequences/:id/steps/regenerate-all — refreshes AI content on existing steps only. */
+export interface RegenerateAllStepContentResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    steps: SequenceStepItem[];
+    results: RegenerateAllStepContentResult[];
+  };
+}
+
 export interface UpdateSequenceStepRequestBody {
   subject?: string | null;
   content?: string | null;

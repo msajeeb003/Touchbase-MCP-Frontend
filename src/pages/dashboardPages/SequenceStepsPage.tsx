@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  CalendarDays,
-  Loader2,
-  Plus,
-  Sparkles,
-  Trash2,
-} from "lucide-react";
+import { Loader2, Plus, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +22,7 @@ import {
   useGenerateSequenceStepContentMutation,
   useGetSequenceStepsQuery,
   useGetSingleSequenceQuery,
+  useRegenerateAllStepContentMutation,
 } from "@/store/features/sequences/sequencesApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
@@ -49,6 +44,7 @@ export default function SequenceStepsPage() {
   const { id } = useParams<{ id: string }>();
   const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
   const [generatingStepId, setGeneratingStepId] = useState<string | null>(null);
+  const [isRegeneratingAll, setIsRegeneratingAll] = useState(false);
   const {
     data: sequenceData,
     isLoading: isSequenceLoading,
@@ -65,11 +61,15 @@ export default function SequenceStepsPage() {
   });
   const [deleteSequenceStep] = useDeleteSequenceStepMutation();
   const [generateSequenceStepContent] = useGenerateSequenceStepContentMutation();
+  const [regenerateAllStepContent] = useRegenerateAllStepContentMutation();
 
   const sequence = sequenceData?.data;
   const steps = stepsData?.data ?? [];
   const nextStepOrder = steps.length + 1;
   const hasCompletedAllSteps = Boolean(sequence && steps.length >= sequence.totalSteps);
+  const canRegenerateAllContent = Boolean(
+    sequence && sequence.totalSteps > 0 && steps.length === sequence.totalSteps,
+  );
 
   const handleDeleteStep = async (stepId: string) => {
     if (!id) return;
@@ -111,6 +111,26 @@ export default function SequenceStepsPage() {
     }
   };
 
+  const handleRegenerateAllContent = async () => {
+    if (!id || !canRegenerateAllContent) return;
+
+    const loadingToastId = showLoading("Regenerating all step content...");
+    setIsRegeneratingAll(true);
+
+    try {
+      const response = await regenerateAllStepContent(id).unwrap();
+      showSuccess(response.message || "Bulk step content regeneration finished");
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to regenerate step content. Please try again.";
+      showError(errorMessage);
+    } finally {
+      dismissToast(loadingToastId);
+      setIsRegeneratingAll(false);
+    }
+  };
+
   if (isSequenceLoading || isStepsLoading) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-sm text-slate-500">
@@ -147,6 +167,25 @@ export default function SequenceStepsPage() {
             <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
               {steps.length}/{sequence?.totalSteps} step{steps.length === 1 ? "" : "s"}
             </Badge>
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 border-violet-200 bg-gradient-to-r from-violet-50 to-fuchsia-50 text-violet-900 hover:from-violet-100 hover:to-fuchsia-100 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!canRegenerateAllContent || isRegeneratingAll}
+              title={
+                canRegenerateAllContent
+                  ? "Regenerate AI content for every step"
+                  : "Available once all steps exist for this sequence"
+              }
+              onClick={() => void handleRegenerateAllContent()}
+            >
+              {isRegeneratingAll ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <RefreshCw className="h-4 w-4 text-violet-600" aria-hidden />
+              )}
+              Regenerate all content
+            </Button>
             <AddStepDialog
               sequenceId={id ?? ""}
               nextStepOrder={nextStepOrder}
@@ -211,7 +250,7 @@ export default function SequenceStepsPage() {
                         type="button"
                         onClick={() => handleGenerateContent(step.id)}
                         disabled={generatingStepId === step.id}
-                        className="group relative overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-md"
+                        className="invisible group relative overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-md"
                       >
                         <span className="absolute inset-0 bg-[linear-gradient(110deg,transparent,rgba(255,255,255,0.28),transparent)] opacity-0 transition-opacity duration-500 group-hover:animate-[shine_1.2s_ease-in-out] group-hover:opacity-100" />
                         {generatingStepId === step.id ? (

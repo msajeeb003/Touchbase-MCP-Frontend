@@ -8,6 +8,7 @@ import type {
   DeleteSequenceResponse,
   GenerateSequenceStepContentResponse,
   GenerateSequenceStepsResponse,
+  RegenerateAllStepContentResponse,
   GetSequencesResponse,
   GetSequenceStepsResponse,
   GetSingleSequenceResponse,
@@ -79,6 +80,14 @@ export const sequencesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Sequences"],
     }),
+    regenerateAllStepContent: builder.mutation<RegenerateAllStepContentResponse, string>({
+      query: (sequenceId) => ({
+        url: `/sequences/${sequenceId}/steps/regenerate-all`,
+        method: "POST",
+        body: {},
+      }),
+      invalidatesTags: ["Sequences",],
+    }),
     updateSequenceStep: builder.mutation<
       UpdateSequenceStepResponse,
       { sequenceId: string; stepId: string; body: UpdateSequenceStepRequestBody }
@@ -128,6 +137,7 @@ export const {
   useDeleteSequenceStepMutation,
   useGenerateSequenceStepContentMutation,
   useGenerateSequenceStepsMutation,
+  useRegenerateAllStepContentMutation,
   useUpdateSequenceStepMutation,
   useCreateSequenceMutation,
   useUpdateSequenceMutation,
