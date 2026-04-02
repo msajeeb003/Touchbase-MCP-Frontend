@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, ChevronsUpDown, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -42,6 +43,10 @@ interface AddSequenceDialogProps {
   trigger: ReactNode;
 }
 
+function buildAutoSequenceName(leadName: string, templateName: string) {
+  return `${leadName} — ${templateName}`;
+}
+
 export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
   const [open, setOpen] = useState(false);
   const [leadPickerOpen, setLeadPickerOpen] = useState(false);
@@ -56,7 +61,7 @@ export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
       a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
     );
   }, [leadsData?.data.items]);
-  const templates = templatesData?.data ?? [];
+  const templates = useMemo(() => templatesData?.data ?? [], [templatesData?.data]);
 
   const filteredLeads = useMemo(() => {
     const q = leadSearchQuery.trim().toLowerCase();
@@ -78,6 +83,24 @@ export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
     },
   });
 
+  const lastAutoSequenceNameRef = useRef("");
+  const watchedLeadId = useWatch({ control: form.control, name: "leadId" });
+  const watchedTemplateId = useWatch({ control: form.control, name: "promptTemplateId" });
+
+  useEffect(() => {
+    if (!watchedLeadId || !watchedTemplateId) return;
+    const lead = leads.find((l) => l.id === watchedLeadId);
+    const template = templates.find((t) => t.id === watchedTemplateId);
+    if (!lead || !template) return;
+
+    const generated = buildAutoSequenceName(lead.name, template.name);
+    const current = form.getValues("name");
+    if (current === "" || current === lastAutoSequenceNameRef.current) {
+      form.setValue("name", generated, { shouldValidate: true, shouldDirty: true });
+      lastAutoSequenceNameRef.current = generated;
+    }
+  }, [watchedLeadId, watchedTemplateId, leads, templates, form]);
+
   const onSubmit = async (values: CreateSequenceFormValues) => {
     const loadingToastId = showLoading("Creating sequence...");
 
@@ -96,6 +119,7 @@ export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
         totalSteps: 5,
         promptTemplateId: "",
       });
+      lastAutoSequenceNameRef.current = "";
       setOpen(false);
     } catch (error: unknown) {
       const errorMessage =
@@ -234,74 +258,90 @@ export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
 
             <FormField
               control={form.control}
-              name="name"
+              name="promptTemplateId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sequence Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="NoShow Follow-up for Mosh" {...field} />
-                  </FormControl>
+                  <FormLabel>Prompt Template</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={isTemplatesLoading}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={isTemplatesLoading ? "Loading templates..." : "Select a template"}
+                        >
+                          {field.value
+                            ? templates.find((t) => t.id === field.value)?.name
+                            : undefined}
+                        </SelectValue>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {templates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          <div className="flex flex-row flex-wrap text-left">
+                            <span className="font-medium">
+                              {template.name} <sup className=" text-slate-500">name</sup>{" "}
+                            </span>
+                            <span>
+                              {" "}
+                              <Plus className="mx-2 h-5 w-5" />{" "}
+                            </span>
+                            <span className="text-xs text-blue-700 ">
+                              {template.followUpStage}{" "}
+                              <sup className=" text-blue-500">followUpStage</sup>
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="totalSteps"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Total Steps</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={1}
-                        placeholder="5"
-                        value={field.value}
-                        onChange={(event) => field.onChange(Number(event.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sequence Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Select lead and template to auto-fill"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Built from lead + template when both are chosen. You can edit it anytime.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="promptTemplateId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prompt Template</FormLabel>
-                    <Select
+            <FormField
+              control={form.control}
+              name="totalSteps"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total Steps</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="5"
                       value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={isTemplatesLoading}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={isTemplatesLoading ? "Loading templates..." : "Select a template"}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {templates.map((template) => (
-                          <SelectItem key={template.id} value={template.id}>
-                            <div className="flex flex-row flex-wrap text-left">
-                              <span className="font-medium">{template.name} <sup className=" text-slate-500">name</sup> </span>
-                              <span> <Plus className="h-5 w-5 mx-2" /> </span>
-                              <span className="text-xs text-blue-700 ">{template.followUpStage} <sup className=" text-blue-500">followUpStage</sup></span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                      onChange={(event) => field.onChange(Number(event.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <DialogFooter className="border-t px-0 pt-5">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
