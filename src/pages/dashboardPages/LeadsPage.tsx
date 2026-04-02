@@ -51,7 +51,11 @@ import ImportLeadsDialog from "@/components/leads/ImportLeadsDialog";
 import { LeadsBulkSelectionToolbar } from "@/components/leads/LeadsBulkSelectionToolbar";
 import UpdateLeadDialog from "@/components/leads/UpdateLeadDialog";
 import { useLeadsTableRowSelection } from "@/hooks/useLeadsTableRowSelection";
-import { getShortNotes, getStageBadgeClass } from "@/lib/leads/leadsTableDisplay";
+import {
+  getShortNotes,
+  getStageBadgeClass,
+  getStatusBadgeClass,
+} from "@/lib/leads/leadsTableDisplay";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -297,7 +301,7 @@ export default function LeadsPage() {
                     <TableHead>Location</TableHead>
                     <TableHead>Notes</TableHead>
                     <TableHead>FollowUp Stage</TableHead>
-                    {/* <TableHead>Status</TableHead> */}
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-center">Add Transcript</TableHead>
                     <TableHead className="text-center">Update</TableHead>
                     <TableHead className="text-center">Delete</TableHead>
@@ -350,11 +354,11 @@ export default function LeadsPage() {
                           {lead.followUpStage}
                         </Badge>
                       </TableCell>
-                      {/* <TableCell>
+                      <TableCell>
                         <Badge variant="outline" className={getStatusBadgeClass(lead.status)}>
                           {lead.status}
                         </Badge>
-                      </TableCell> */}
+                      </TableCell>
                       <TableCell className="text-center">
                         <Button asChild variant="ghost" size="sm" className="gap-2 text-indigo-600 hover:text-indigo-700">
                           <Link to={`/dashboard/leads/${lead.id}/transcripts`}>
