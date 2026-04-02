@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Loader2, Pencil, Plus, RefreshCw, Trash2, Wand2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import AddSequenceDialog from "@/components/sequences/AddSequenceDialog";
 import UpdateSequenceDialog from "@/components/sequences/UpdateSequenceDialog";
 import {
@@ -233,7 +234,7 @@ export default function SequencesPage() {
           </div>
         ) : (
           <div className="w-full max-w-full overflow-x-auto">
-            <Table className="min-w-[1180px]">
+            <Table className="min-w-[1320px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -244,6 +245,7 @@ export default function SequencesPage() {
                   <TableHead className="text-center">Step Details</TableHead>
                   <TableHead className="text-center">Generate Steps</TableHead>
                   <TableHead className="text-center">Edit</TableHead>
+                  <TableHead className="text-center min-w-[140px]">Active</TableHead>
                   <TableHead className="text-center">Delete</TableHead>
                 </TableRow>
               </TableHeader>
@@ -318,6 +320,50 @@ export default function SequencesPage() {
                           </Button>
                         }
                       />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div
+                        className="flex items-center justify-center gap-2"
+                        title={sequence.status === "completed" ? "Completed sequences cannot be toggled" : undefined}
+                      >
+                        <span
+                          className={cn(
+                            "text-xs",
+                            sequence.status === "active"
+                              ? "text-muted-foreground"
+                              : "font-medium text-slate-700",
+                          )}
+                        >
+                          Paused
+                        </span>
+                        <Switch
+                          checked={sequence.status === "active"}
+                          disabled={
+                            updatingStatusId === sequence.id || sequence.status === "completed"
+                          }
+                          aria-label={
+                            sequence.status === "active"
+                              ? "Pause sequence"
+                              : "Activate sequence"
+                          }
+                          onCheckedChange={(checked) =>
+                            void handleStatusUpdate(
+                              sequence.id,
+                              checked ? "active" : "paused",
+                            )
+                          }
+                        />
+                        <span
+                          className={cn(
+                            "text-xs",
+                            sequence.status === "active"
+                              ? "font-medium text-emerald-700"
+                              : "text-muted-foreground",
+                          )}
+                        >
+                          Active
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <AlertDialog>
