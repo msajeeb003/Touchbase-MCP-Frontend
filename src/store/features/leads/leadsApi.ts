@@ -1,5 +1,7 @@
 import { baseApi } from "@/store/api/baseApi";
 import type {
+  BulkDeleteLeadsRequestBody,
+  BulkDeleteLeadsResponse,
   CreateLeadRequestBody,
   CreateLeadResponse,
   DeleteLeadResponse,
@@ -59,6 +61,14 @@ export const leadsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Leads"],
     }),
+    bulkDeleteLeads: builder.mutation<BulkDeleteLeadsResponse, BulkDeleteLeadsRequestBody>({
+      query: (body) => ({
+        url: "/leads/bulk-delete",
+        method: "DELETE",
+        body,
+      }),
+      invalidatesTags: ["Leads"],
+    }),
     importLeadsCsv: builder.mutation<ImportLeadsCsvResponse, FormData>({
       query: (body) => ({
         url: "/leads/import-csv",
@@ -77,5 +87,6 @@ export const {
   useCreateLeadMutation,
   useUpdateLeadMutation,
   useDeleteLeadMutation,
+  useBulkDeleteLeadsMutation,
   useImportLeadsCsvMutation,
 } = leadsApi;

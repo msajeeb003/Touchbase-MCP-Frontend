@@ -15,6 +15,7 @@ import {
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Pagination,
@@ -47,7 +48,10 @@ import {
 } from "@/components/ui/tooltip";
 import AddLeadDialog from "@/components/leads/AddLeadDialog";
 import ImportLeadsDialog from "@/components/leads/ImportLeadsDialog";
+import { LeadsBulkSelectionToolbar } from "@/components/leads/LeadsBulkSelectionToolbar";
 import UpdateLeadDialog from "@/components/leads/UpdateLeadDialog";
+import { useLeadsTableRowSelection } from "@/hooks/useLeadsTableRowSelection";
+import { getShortNotes, getStageBadgeClass } from "@/lib/leads/leadsTableDisplay";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,31 +65,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useDeleteLeadMutation, useGetLeadsQuery } from "@/store/features/leads/leadsApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
-
-const getStatusBadgeClass = (status: string) => {
-  const value = status.toLowerCase();
-  if (value === "active") return "bg-green-100 text-green-700 border-green-200";
-  if (value === "processing") return "bg-orange-100 text-orange-700 border-orange-200";
-  if (value === "replied") return "bg-indigo-100 text-indigo-700 border-indigo-200";
-  if (value === "booked") return "bg-violet-100 text-violet-700 border-violet-200";
-  if (value === "won") return "bg-emerald-100 text-emerald-700 border-emerald-200";
-  if (value === "lost") return "bg-rose-100 text-rose-700 border-rose-200";
-  return "bg-slate-100 text-slate-700 border-slate-200";
-};
-
-const getStageBadgeClass = (stage: string) => {
-  const value = stage.toLowerCase();
-  if (value.includes("no")) return "bg-indigo-100 text-indigo-700 border-indigo-200";
-  if (value.includes("after")) return "bg-purple-100 text-purple-700 border-purple-200";
-  if (value.includes("prd")) return "bg-violet-100 text-violet-700 border-violet-200";
-  if (value.includes("hot")) return "bg-emerald-100 text-emerald-700 border-emerald-200";
-  return "bg-slate-100 text-slate-700 border-slate-200";
-};
-
-const getShortNotes = (notes: string, maxLength = 15) => {
-  if (notes.length <= maxLength) return notes;
-  return `${notes.slice(0, maxLength)}...`;
-};
 
 export default function LeadsPage() {
   const [page, setPage] = useState(1);
@@ -126,7 +105,22 @@ export default function LeadsPage() {
   const totalPages = data?.data.pagination.totalPages ?? 1;
   const startItem = total === 0 ? 0 : (page - 1) * limit + 1;
   const endItem = Math.min(page * limit, total);
-  const leads = data?.data.items ?? [];
+  const leads = useMemo(() => data?.data.items ?? [], [data?.data.items]);
+
+  const selectionResetParams = useMemo(
+    () => ({ page, debouncedSearch, status, stage }),
+    [page, debouncedSearch, status, stage],
+  );
+
+  const {
+    selectedLeadIds,
+    selectedIds,
+    toggleLeadSelected,
+    toggleSelectAllOnPage,
+    headerCheckboxState,
+    clearSelection,
+  } = useLeadsTableRowSelection(leads, selectionResetParams);
+
   const filterSourceItems = useMemo(
     () => filterSourceData?.data.items ?? [],
     [filterSourceData?.data.items],
@@ -267,6 +261,8 @@ export default function LeadsPage() {
           </div>
         </div>
 
+        <LeadsBulkSelectionToolbar selectedIds={selectedIds} onDeleted={clearSelection} />
+
         {isLoading ? (
           <div className="rounded-md border border-dashed p-8 text-center text-slate-500">
             Loading leads...
@@ -285,9 +281,17 @@ export default function LeadsPage() {
         ) : (
           <>
             <div className="w-full max-w-full overflow-x-auto">
-              <Table className="min-w-[1080px]">
+              <Table className="min-w-[1120px]">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12 pr-2">
+                      <Checkbox
+                        aria-label="Select all leads on this page"
+                        checked={headerCheckboxState}
+                        onCheckedChange={(value) => toggleSelectAllOnPage(value === true)}
+                        disabled={leads.length === 0}
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Address</TableHead>
                     <TableHead>Location</TableHead>
@@ -302,6 +306,13 @@ export default function LeadsPage() {
                 <TableBody>
                   {leads.map((lead) => (
                     <TableRow key={lead.id}>
+                      <TableCell className="w-12 pr-2 align-middle">
+                        <Checkbox
+                          aria-label={`Select ${lead.name}`}
+                          checked={selectedLeadIds.has(lead.id)}
+                          onCheckedChange={(value) => toggleLeadSelected(lead.id, value === true)}
+                        />
+                      </TableCell>
                       <TableCell className="">
                         <div className="flex flex-col gap-y-0.5">
                           <h3 className="font-medium">{lead.name}</h3>

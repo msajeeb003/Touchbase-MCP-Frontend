@@ -88,6 +88,23 @@ export interface DeleteLeadResponse {
   data: null;
 }
 
+export interface BulkDeleteLeadsRequestBody {
+  leadIds: string[];
+}
+
+export interface BulkDeleteLeadsResult {
+  deletedCount: number;
+  requestedCount: number;
+  skippedCount: number;
+}
+
+export interface BulkDeleteLeadsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: BulkDeleteLeadsResult;
+}
+
 export interface LeadImportErrorItem {
   row: number;
   email: string;
