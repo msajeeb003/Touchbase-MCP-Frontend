@@ -3,6 +3,8 @@ import type {
   CreatePromptTemplateRequestBody,
   CreatePromptTemplateResponse,
   DeletePromptTemplateResponse,
+  GeneratePromptTextRequestBody,
+  GeneratePromptTextResponse,
   GetPromptTemplateByIdResponse,
   GetPromptTemplatesResponse,
   UpdatePromptTemplateRequestBody,
@@ -54,6 +56,16 @@ export const templatesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Templates"],
     }),
+    generatePromptText: builder.mutation<
+      GeneratePromptTextResponse,
+      GeneratePromptTextRequestBody
+    >({
+      query: (body) => ({
+        url: "/prompt-templates/generate-prompt-text",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -65,4 +77,5 @@ export const {
   useCreatePromptTemplateMutation,
   useUpdatePromptTemplateMutation,
   useDeletePromptTemplateMutation,
+  useGeneratePromptTextMutation,
 } = templatesApi;

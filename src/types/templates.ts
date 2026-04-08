@@ -53,3 +53,25 @@ export interface DeletePromptTemplateResponse {
   message: string;
   data: null;
 }
+
+export interface GeneratePromptTextRequestBody {
+  followUpScenario: string;
+  serviceDescription: string;
+  sequenceGoal: string;
+  senderName: string;
+  ctaLink?: string;
+  companyName?: string;
+  stepTypesPattern: ("SMS" | "EMAIL")[];
+  intervalDays: number;
+  toneStyle: string;
+  additionalNotes?: string;
+}
+
+export interface GeneratePromptTextResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    promptText: string;
+  };
+}
