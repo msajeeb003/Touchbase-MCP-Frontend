@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Sparkles } from "lucide-react";
+import { CircleHelp, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,6 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Form,
   FormControl,
@@ -33,8 +39,6 @@ interface GeneratePromptTextDialogProps {
   onGenerated: (promptText: string) => void;
 }
 
-const DEFAULT_STEP_TYPES = "SMS, EMAIL, SMS, EMAIL, SMS, EMAIL";
-
 const parseStepTypesPattern = (input: string) =>
   input
     .split(",")
@@ -43,36 +47,31 @@ const parseStepTypesPattern = (input: string) =>
 
 export default function GeneratePromptTextDialog({ onGenerated }: GeneratePromptTextDialogProps) {
   const [open, setOpen] = useState(false);
-  const [stepTypesInput, setStepTypesInput] = useState(DEFAULT_STEP_TYPES);
+  const [stepTypesInput, setStepTypesInput] = useState("");
   const [generatePromptText, { isLoading }] = useGeneratePromptTextMutation();
 
   const form = useForm<GeneratePromptTextFormValues>({
     resolver: zodResolver(generatePromptTextSchema),
     defaultValues: {
-      followUpScenario: "Client booked a call but didn't show up. Need to re-engage.",
-      serviceDescription:
-        "We provide AI-powered recruitment automation that reduces hiring time by 60%.",
-      sequenceGoal: "Book a 15-minute discovery call to demonstrate our platform.",
-      senderName: "Artur Abdullin",
-      ctaLink: "https://calendly.com/artech-digital/30min-call",
-      companyName: "Artech Digital",
-      stepTypesPattern: parseStepTypesPattern(DEFAULT_STEP_TYPES),
+      followUpScenario: "",
+      serviceDescription: "",
+      sequenceGoal: "",
+      senderName: "",
+      ctaLink: "",
+      companyName: "",
+      stepTypesPattern: [],
       intervalDays: 3,
-      toneStyle: "Professional but warm and conversational",
-      additionalNotes: "Never mention competitors",
+      toneStyle: "",
+      additionalNotes: "",
     },
   });
-
-  const stepTypesHelpText = useMemo(
-    () => 'Use comma-separated values like "SMS, EMAIL, SMS". Only SMS and EMAIL are allowed.',
-    [],
-  );
 
   const onSubmit = async (values: GeneratePromptTextFormValues) => {
     const loadingToastId = showLoading("Generating prompt text...");
 
     try {
-      const response = await generatePromptText(values).unwrap();
+      const payload = generatePromptTextSchema.parse(values);
+      const response = await generatePromptText(payload).unwrap();
       const generated = response.data.promptText;
       onGenerated(generated);
       showSuccess(response.message || "Prompt text generated successfully");
@@ -101,13 +100,14 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
           Generate with AI
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-2xl">
+      <DialogContent className="my-4 w-[calc(100vw-2rem)] max-h-[calc(90vh-2rem)] overflow-y-auto p-0 sm:max-w-2xl">
         <DialogHeader className="border-b px-6 py-5 text-left">
           <DialogTitle className="text-2xl font-semibold text-slate-800">
             Generate Prompt Text
           </DialogTitle>
         </DialogHeader>
 
+        <TooltipProvider delayDuration={120}>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 px-6 py-5">
             <FormField
@@ -115,9 +115,17 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
               name="followUpScenario"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Follow-up Scenario</FormLabel>
+                  <FieldLabel
+                    label="Follow-up Scenario"
+                    required
+                    hint="Describe the exact situation. Example: Client booked a call but did not show up, now needs a re-engagement sequence."
+                  />
                   <FormControl>
-                    <Textarea className="min-h-20 resize-y" {...field} />
+                    <Textarea
+                      className="min-h-20 resize-y"
+                      placeholder="Example: Client booked a call but did not show up. Need to re-engage politely."
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,9 +137,17 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
               name="serviceDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Service Description</FormLabel>
+                  <FieldLabel
+                    label="Service Description"
+                    required
+                    hint="Briefly explain what you offer and the outcome. Example: AI-powered recruitment automation that reduces hiring time by 60%."
+                  />
                   <FormControl>
-                    <Textarea className="min-h-20 resize-y" {...field} />
+                    <Textarea
+                      className="min-h-20 resize-y"
+                      placeholder="Example: We provide AI-powered recruitment automation that reduces hiring time by 60%."
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -144,9 +160,13 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
                 name="sequenceGoal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Sequence Goal</FormLabel>
+                    <FieldLabel
+                      label="Sequence Goal"
+                      required
+                      hint="What outcome should this follow-up sequence achieve? Example: Book a 15-minute discovery call."
+                    />
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="Example: Book a 15-minute discovery call." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -157,9 +177,13 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
                 name="senderName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Sender Name</FormLabel>
+                    <FieldLabel
+                      label="Sender Name"
+                      required
+                      hint="Name that should appear as the sender in generated messages. Example: Artur Abdullin."
+                    />
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="Example: Artur Abdullin" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -173,9 +197,12 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
                 name="companyName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Company Name</FormLabel>
+                    <FieldLabel
+                      label="Company Name"
+                      hint="Company name to mention in prompt context. Example: Artech Digital."
+                    />
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="Example: Artech Digital" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -186,9 +213,12 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
                 name="ctaLink"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>CTA Link</FormLabel>
+                    <FieldLabel
+                      label="CTA Link"
+                      hint="Call-to-action URL for booking or next step. Example: https://calendly.com/yourname/30min-call"
+                    />
                     <FormControl>
-                      <Input placeholder="https://..." {...field} />
+                      <Input placeholder="Example: https://calendly.com/yourname/30min-call" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -202,7 +232,11 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
                 name="stepTypesPattern"
                 render={() => (
                   <FormItem>
-                    <FormLabel>Step Types Pattern</FormLabel>
+                    <FieldLabel
+                      label="Step Types Pattern"
+                      required
+                      hint='Use comma-separated values. Example: "SMS, EMAIL, SMS, EMAIL". Upper/lowercase both work.'
+                    />
                     <FormControl>
                       <Input
                         value={stepTypesInput}
@@ -214,10 +248,12 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
                             shouldDirty: true,
                           });
                         }}
-                        placeholder="SMS, EMAIL, SMS"
+                        placeholder="Example: SMS, EMAIL, SMS, EMAIL"
                       />
                     </FormControl>
-                    <p className="text-xs text-slate-500">{stepTypesHelpText}</p>
+                    <p className="text-xs text-slate-500">
+                      Use comma-separated values like "SMS, EMAIL, SMS". Only SMS and EMAIL are allowed.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -228,13 +264,22 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
                 name="intervalDays"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Interval Days</FormLabel>
+                    <FieldLabel
+                      label="Interval Days"
+                      required
+                      hint="Gap between follow-ups in days. Example: 3 means every 3 days."
+                    />
                     <FormControl>
                       <Input
                         type="number"
                         min={1}
-                        value={field.value}
-                        onChange={(event) => field.onChange(Number(event.target.value))}
+                        placeholder="Example: 3"
+                        value={field.value ?? ""}
+                        onChange={(event) =>
+                          field.onChange(
+                            event.target.value === "" ? undefined : Number(event.target.value),
+                          )
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -248,9 +293,16 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
               name="toneStyle"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tone Style</FormLabel>
+                  <FieldLabel
+                    label="Tone Style"
+                    required
+                    hint="Describe writing tone. Example: Professional but warm and conversational."
+                  />
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      placeholder="Example: Professional but warm and conversational"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -262,11 +314,14 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
               name="additionalNotes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Additional Notes (optional)</FormLabel>
+                  <FieldLabel
+                    label="Additional Notes"
+                    hint="Extra constraints or instructions. Example: Never mention competitors."
+                  />
                   <FormControl>
                     <Textarea
                       className="min-h-20 resize-y"
-                      placeholder="Anything else AI should keep in mind"
+                      placeholder="Example: Never mention competitors"
                       {...field}
                     />
                   </FormControl>
@@ -292,7 +347,47 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
             </DialogFooter>
           </form>
         </Form>
+        </TooltipProvider>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function FieldHint({ text }: { text: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label="Field information"
+          className="inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition-colors hover:text-slate-600"
+        >
+          <CircleHelp className="h-4 w-4" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs whitespace-pre-wrap text-left text-xs leading-5">
+        {text}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function FieldLabel({
+  label,
+  hint,
+  required = false,
+}: {
+  label: string;
+  hint: string;
+  required?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <FormLabel>
+        {label}
+        {required ? <span className="ml-0.5 text-destructive">*</span> : null}
+      </FormLabel>
+      <FieldHint text={hint} />
+    </div>
   );
 }
