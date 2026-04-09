@@ -1,6 +1,16 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Loader2, Pencil, Plus, RefreshCw, Trash2, Wand2 } from "lucide-react";
+import {
+  ChevronRight,
+  Loader2,
+  Mail,
+  MessageSquare,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -54,6 +64,8 @@ const getStatusBadgeClass = (status: SequenceStatus) => {
 };
 
 const getStatusLabel = (status: SequenceStatus) => status.charAt(0).toUpperCase() + status.slice(1);
+
+const clampProgress = (value: number) => Math.max(0, Math.min(100, value));
 
 export default function SequencesPage() {
   const [stageFilter, setStageFilter] = useState("All");
@@ -239,13 +251,14 @@ export default function SequencesPage() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Lead</TableHead>
-                  <TableHead>Steps</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Template</TableHead>
+                  <TableHead>Steps</TableHead>
+                  <TableHead className="min-w-[200px]">Progress</TableHead>
                   <TableHead className="text-center">Step Details</TableHead>
                   <TableHead className="text-center">Generate Steps</TableHead>
-                  <TableHead className="text-center">Edit</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-center min-w-[140px]">Active</TableHead>
+                  <TableHead className="text-center">Edit</TableHead>
                   <TableHead className="text-center">Delete</TableHead>
                 </TableRow>
               </TableHeader>
@@ -255,34 +268,62 @@ export default function SequencesPage() {
                     <TableCell className="font-medium text-slate-900">{sequence.name}</TableCell>
                     <TableCell className="text-slate-600">{sequence.lead?.name || "N/A"}</TableCell>
                     <TableCell className="text-slate-600">
+                      {sequence.promptTemplate?.followUpStage || sequence.promptTemplate?.name || "N/A"}
+                    </TableCell>
+                    <TableCell className="text-slate-600">
                       {sequence._count?.steps ?? 0}/{sequence.totalSteps}
                     </TableCell>
                     <TableCell>
-                      <Select
-                        value={sequence.status}
-                        onValueChange={(value) =>
-                          handleStatusUpdate(sequence.id, value as SequenceStatus)
-                        }
-                        disabled={updatingStatusId === sequence.id || sequence.status === "completed"}
-                      >
-                        <SelectTrigger className={`h-9 w-[150px] ${getStatusBadgeClass(sequence.status)}`}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {VALID_STATUSES.map((status) => (
-                            <SelectItem
-                              key={status}
-                              value={status}
-                              disabled={status === "completed"}
-                            >
-                              {getStatusLabel(status)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-slate-600">
-                      {sequence.promptTemplate?.followUpStage || sequence.promptTemplate?.name || "N/A"}
+                      {(() => {
+                        const counts = sequence._count ?? {
+                          steps: 0,
+                          emailSteps: 0,
+                          smsSteps: 0,
+                          emailSent: 0,
+                          smsSent: 0,
+                        };
+                        const emailTotal = Math.max(counts.emailSteps, 0);
+                        const smsTotal = Math.max(counts.smsSteps, 0);
+                        const emailSent = Math.min(Math.max(counts.emailSent, 0), emailTotal);
+                        const smsSent = Math.min(Math.max(counts.smsSent, 0), smsTotal);
+
+                        const totalForProgress = Math.max(emailTotal + smsTotal, 0);
+                        const sentCount = Math.min(emailSent + smsSent, totalForProgress);
+                        const progressValue = clampProgress(
+                          (sentCount / Math.max(totalForProgress, 1)) * 100,
+                        );
+
+                        return (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs text-slate-600">
+                              <span>{sentCount}/{totalForProgress} sent</span>
+                              <span>{Math.round(progressValue)}%</span>
+                            </div>
+                            <div className="h-2 overflow-hidden rounded-full bg-indigo-100">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-700 transition-all duration-500"
+                                style={{ width: `${progressValue}%` }}
+                              />
+                            </div>
+                            {(emailTotal > 0 || smsTotal > 0) && (
+                              <div className="flex items-center gap-2 text-[11px] text-slate-600">
+                                {emailTotal > 0 && (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-indigo-700">
+                                    <Mail className="h-3 w-3" />
+                                    {emailSent}/{emailTotal}
+                                  </span>
+                                )}
+                                {smsTotal > 0 && (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-violet-700">
+                                    <MessageSquare className="h-3 w-3" />
+                                    {smsSent}/{smsTotal}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button asChild variant="ghost" className="gap-1 text-indigo-600 hover:text-indigo-700">
@@ -310,16 +351,29 @@ export default function SequencesPage() {
                         <span className="sr-only">Generate steps with AI</span>
                       </button>
                     </TableCell>
-                    <TableCell className="text-center">
-                      <UpdateSequenceDialog
-                        sequenceId={sequence.id}
-                        trigger={
-                          <Button variant="ghost" size="icon" className="text-indigo-600 hover:text-indigo-700">
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Update sequence</span>
-                          </Button>
+                    <TableCell>
+                      <Select
+                        value={sequence.status}
+                        onValueChange={(value) =>
+                          handleStatusUpdate(sequence.id, value as SequenceStatus)
                         }
-                      />
+                        disabled={updatingStatusId === sequence.id || sequence.status === "completed"}
+                      >
+                        <SelectTrigger className={`h-9 w-[150px] ${getStatusBadgeClass(sequence.status)}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {VALID_STATUSES.map((status) => (
+                            <SelectItem
+                              key={status}
+                              value={status}
+                              disabled={status === "completed"}
+                            >
+                              {getStatusLabel(status)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell className="text-center">
                       <div
@@ -357,13 +411,24 @@ export default function SequencesPage() {
                           className={cn(
                             "text-xs",
                             sequence.status === "active"
-                              ? "font-medium text-emerald-700"
+                              ? "font-medium text-green-600"
                               : "text-muted-foreground",
                           )}
                         >
-                          Active
+                          Start
                         </span>
                       </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <UpdateSequenceDialog
+                        sequenceId={sequence.id}
+                        trigger={
+                          <Button variant="ghost" size="icon" className="text-indigo-600 hover:text-indigo-700">
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Update sequence</span>
+                          </Button>
+                        }
+                      />
                     </TableCell>
                     <TableCell className="text-center">
                       <AlertDialog>

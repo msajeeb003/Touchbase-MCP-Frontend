@@ -56,7 +56,7 @@ export default function DashboardPage() {
         <SentTrendLineChart data={dashboardData.sentTrend} />
         <DeliveryStatsChart data={dashboardData.deliveryStats} />
       </div>
-      <LeadsOverTimeAreaChart data={dashboardData.leadsOverTime} />
+      {/* <LeadsOverTimeAreaChart data={dashboardData.leadsOverTime} /> */}
       <UpcomingStepsSection data={dashboardData.upcomingSteps} />
     </div>
   );

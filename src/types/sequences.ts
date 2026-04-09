@@ -15,6 +15,10 @@ export interface SequencePromptTemplateInfo {
 
 export interface SequenceCountInfo {
   steps: number;
+  emailSteps: number;
+  smsSteps: number;
+  emailSent: number;
+  smsSent: number;
 }
 
 export interface SequenceItem {
