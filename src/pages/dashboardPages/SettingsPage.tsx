@@ -28,7 +28,7 @@ import {
   useUpdateSettingsMutation,
 } from "@/store/features/settings/settingsApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
-import type { SettingsItem, UpdateSettingsRequestBody } from "@/types/settings";
+import { AI_PROVIDER, type SettingsItem, type UpdateSettingsRequestBody } from "@/types/settings";
 
 const sectionCardClass = "rounded-xl border bg-white shadow-sm";
 const generalSettingsKeys = [
@@ -52,6 +52,18 @@ const twilioSettingsKeys = [
 type DirtySettingsFields = Partial<Record<keyof SettingsFormValues, boolean>>;
 type SettingsPayloadKey = keyof UpdateSettingsRequestBody & keyof SettingsFormValues;
 
+const normalizeAiProvider = (value?: string | null): NonNullable<SettingsFormValues["aiProvider"]> => {
+  if (!value) return "";
+
+  const normalizedValue = value.trim().toLowerCase();
+
+  if (normalizedValue === AI_PROVIDER.OPENAI) return AI_PROVIDER.OPENAI;
+  if (normalizedValue === AI_PROVIDER.GEMINI) return AI_PROVIDER.GEMINI;
+  if (normalizedValue === AI_PROVIDER.CLAUDE) return AI_PROVIDER.CLAUDE;
+
+  return "";
+};
+
 const normalizeSmsProvider = (value?: string | null): NonNullable<SettingsFormValues["smsProvider"]> => {
   if (!value) return "";
 
@@ -65,7 +77,7 @@ const normalizeSmsProvider = (value?: string | null): NonNullable<SettingsFormVa
 
 const toInitialValues = (data?: SettingsItem): SettingsFormValues => {
   return {
-    aiProvider: data?.aiProvider ?? "",
+    aiProvider: normalizeAiProvider(data?.aiProvider),
     aiApiKey: data?.aiApiKey ?? "",
     aiModel: data?.aiModel ?? "",
     fathomApiKey: data?.fathomApiKey ?? "",
@@ -92,6 +104,12 @@ const assignPayloadField = (
 
   if (key === "smtpPort") {
     payload.smtpPort = typeof value === "number" ? value : null;
+    return;
+  }
+
+  if (key === "aiProvider") {
+    const aiProviderValue = normalizeAiProvider(typeof value === "string" ? value : null);
+    payload.aiProvider = aiProviderValue === "" ? null : aiProviderValue;
     return;
   }
 
@@ -147,6 +165,11 @@ export default function SettingsPage() {
     resolver: zodResolver(settingsFormSchema),
     defaultValues: toInitialValues(),
   });
+  const initialAiProvider = normalizeAiProvider(data?.data?.aiProvider);
+  const watchedAiProvider = normalizeAiProvider(form.watch("aiProvider"));
+  const aiProvider = form.formState.dirtyFields.aiProvider
+    ? watchedAiProvider
+    : watchedAiProvider || initialAiProvider;
   const initialSmsProvider = normalizeSmsProvider(data?.data?.smsProvider);
   const watchedSmsProvider = normalizeSmsProvider(form.watch("smsProvider"));
   const smsProvider = form.formState.dirtyFields.smsProvider
@@ -156,6 +179,11 @@ export default function SettingsPage() {
   useEffect(() => {
     if (data?.data) {
       form.reset(toInitialValues(data.data));
+      form.setValue("aiProvider", normalizeAiProvider(data.data.aiProvider), {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
       form.setValue("smsProvider", normalizeSmsProvider(data.data.smsProvider), {
         shouldDirty: false,
         shouldTouch: false,
@@ -176,7 +204,6 @@ export default function SettingsPage() {
     }
 
     const loadingToastId = showLoading("Saving settings...");
-    console.log({payload});
     try {
       const response = await updateSettings(payload).unwrap();
       showSuccess(response.message || "Settings updated successfully");
@@ -229,9 +256,23 @@ export default function SettingsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>AI Provider</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. openai or gemini" {...field} value={field.value ?? ""} />
-                    </FormControl>
+                    <Select
+                      key={aiProvider || "none"}
+                      value={aiProvider || "none"}
+                      onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select provider" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value={AI_PROVIDER.OPENAI}>OpenAI</SelectItem>
+                        <SelectItem value={AI_PROVIDER.GEMINI}>Gemini</SelectItem>
+                        <SelectItem value={AI_PROVIDER.CLAUDE}>Claude</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

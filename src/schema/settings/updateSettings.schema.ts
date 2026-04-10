@@ -1,7 +1,10 @@
 import { z } from "zod";
+import { AI_PROVIDER } from "@/types/settings";
 
 const optionalText = z.string().optional();
-const optionalAiProvider = z.string().optional();
+const optionalAiProvider = z
+  .enum(["", AI_PROVIDER.OPENAI, AI_PROVIDER.GEMINI, AI_PROVIDER.CLAUDE])
+  .optional();
 const optionalAiModel = z.string().optional();
 const optionalSmsProvider = z.enum(["", "textmagic", "twilio"]).optional();
 

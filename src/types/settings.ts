@@ -1,9 +1,16 @@
+export const AI_PROVIDER = {
+  OPENAI: "openai",
+  GEMINI: "gemini",
+  CLAUDE: "claude",
+} as const;
+
+export type AiProvider = (typeof AI_PROVIDER)[keyof typeof AI_PROVIDER];
 export type SmsProvider = "textmagic" | "twilio";
 
 export interface SettingsItem {
   id: string;
   userId: string;
-  aiProvider: string | null;
+  aiProvider: AiProvider | null;
   aiApiKey: string | null;
   aiModel: string | null;
   fathomApiKey: string | null;
@@ -30,7 +37,7 @@ export interface GetSettingsResponse {
 }
 
 export interface UpdateSettingsRequestBody {
-  aiProvider?: string | null;
+  aiProvider?: AiProvider | null;
   aiApiKey?: string | null;
   aiModel?: string | null;
   fathomApiKey?: string | null;
