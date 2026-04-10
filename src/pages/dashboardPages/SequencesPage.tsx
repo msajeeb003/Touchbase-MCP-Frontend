@@ -391,6 +391,7 @@ export default function SequencesPage() {
                           Paused
                         </span>
                         <Switch
+                          className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-slate-300"
                           checked={sequence.status === "active"}
                           disabled={
                             updatingStatusId === sequence.id || sequence.status === "completed"

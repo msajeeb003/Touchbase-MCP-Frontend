@@ -1,3 +1,5 @@
+export type SmsProvider = "textmagic" | "twilio";
+
 export interface SettingsItem {
   id: string;
   userId: string;
@@ -10,8 +12,12 @@ export interface SettingsItem {
   smtpUsername: string | null;
   smtpPassword: string | null;
   smtpFromName: string | null;
+  smsProvider: SmsProvider | null;
   textmagicUsername: string | null;
   textmagicApiKey: string | null;
+  twilioAccountSid: string | null;
+  twilioAuthToken: string | null;
+  twilioPhoneNumber: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -33,8 +39,12 @@ export interface UpdateSettingsRequestBody {
   smtpUsername?: string | null;
   smtpPassword?: string | null;
   smtpFromName?: string | null;
+  smsProvider?: SmsProvider | null;
   textmagicUsername?: string | null;
   textmagicApiKey?: string | null;
+  twilioAccountSid?: string | null;
+  twilioAuthToken?: string | null;
+  twilioPhoneNumber?: string | null;
 }
 
 export interface UpdateSettingsResponse {

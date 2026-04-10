@@ -3,6 +3,7 @@ import { z } from "zod";
 const optionalText = z.string().optional();
 const optionalAiProvider = z.string().optional();
 const optionalAiModel = z.string().optional();
+const optionalSmsProvider = z.enum(["", "textmagic", "twilio"]).optional();
 
 const optionalPort = z.preprocess((value) => {
   if (value === "" || value === null || typeof value === "undefined") {
@@ -31,8 +32,12 @@ export const updateSettingsSchema = z.object({
     smtpPassword: optionalText,
     smtpFromName: optionalText,
 
+    smsProvider: optionalSmsProvider,
     textmagicUsername: optionalText,
     textmagicApiKey: optionalText,
+    twilioAccountSid: optionalText,
+    twilioAuthToken: optionalText,
+    twilioPhoneNumber: optionalText,
   }),
 });
 

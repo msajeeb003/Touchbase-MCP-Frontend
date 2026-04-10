@@ -5,6 +5,13 @@ import { Bot, BarChart3, Mail, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Form,
   FormControl,
   FormField,
@@ -21,23 +28,42 @@ import {
   useUpdateSettingsMutation,
 } from "@/store/features/settings/settingsApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
-import type { UpdateSettingsRequestBody } from "@/types/settings";
+import type { SettingsItem, UpdateSettingsRequestBody } from "@/types/settings";
 
 const sectionCardClass = "rounded-xl border bg-white shadow-sm";
+const generalSettingsKeys = [
+  "aiProvider",
+  "aiApiKey",
+  "aiModel",
+  "fathomApiKey",
+  "smtpHost",
+  "smtpPort",
+  "smtpUsername",
+  "smtpPassword",
+  "smtpFromName",
+] as const;
+const textmagicSettingsKeys = ["textmagicUsername", "textmagicApiKey"] as const;
+const twilioSettingsKeys = [
+  "twilioAccountSid",
+  "twilioAuthToken",
+  "twilioPhoneNumber",
+] as const;
 
-const toInitialValues = (data?: {
-  aiProvider: string | null;
-  aiApiKey: string | null;
-  aiModel: string | null;
-  fathomApiKey: string | null;
-  smtpHost: string | null;
-  smtpPort: number | null;
-  smtpUsername: string | null;
-  smtpPassword: string | null;
-  smtpFromName: string | null;
-  textmagicUsername: string | null;
-  textmagicApiKey: string | null;
-}): SettingsFormValues => {
+type DirtySettingsFields = Partial<Record<keyof SettingsFormValues, boolean>>;
+type SettingsPayloadKey = keyof UpdateSettingsRequestBody & keyof SettingsFormValues;
+
+const normalizeSmsProvider = (value?: string | null): NonNullable<SettingsFormValues["smsProvider"]> => {
+  if (!value) return "";
+
+  const normalizedValue = value.trim().toLowerCase();
+
+  if (normalizedValue === "textmagic") return "textmagic";
+  if (normalizedValue === "twilio") return "twilio";
+
+  return "";
+};
+
+const toInitialValues = (data?: SettingsItem): SettingsFormValues => {
   return {
     aiProvider: data?.aiProvider ?? "",
     aiApiKey: data?.aiApiKey ?? "",
@@ -48,38 +74,67 @@ const toInitialValues = (data?: {
     smtpUsername: data?.smtpUsername ?? "",
     smtpPassword: data?.smtpPassword ?? "",
     smtpFromName: data?.smtpFromName ?? "",
+    smsProvider: normalizeSmsProvider(data?.smsProvider),
     textmagicUsername: data?.textmagicUsername ?? "",
     textmagicApiKey: data?.textmagicApiKey ?? "",
+    twilioAccountSid: data?.twilioAccountSid ?? "",
+    twilioAuthToken: data?.twilioAuthToken ?? "",
+    twilioPhoneNumber: data?.twilioPhoneNumber ?? "",
   };
+};
+
+const assignPayloadField = (
+  payload: UpdateSettingsRequestBody,
+  values: SettingsFormValues,
+  key: SettingsPayloadKey,
+) => {
+  const value = values[key];
+
+  if (key === "smtpPort") {
+    payload.smtpPort = typeof value === "number" ? value : null;
+    return;
+  }
+
+  if (key === "smsProvider") {
+    payload.smsProvider = value === "textmagic" || value === "twilio" ? value : null;
+    return;
+  }
+
+  payload[key] = typeof value === "string" && value !== "" ? value : null;
 };
 
 const sanitizeUpdatePayload = (
   values: SettingsFormValues,
-  dirtyFields: Partial<Record<keyof SettingsFormValues, boolean>>,
+  dirtyFields: DirtySettingsFields,
 ): UpdateSettingsRequestBody => {
   const payload: UpdateSettingsRequestBody = {};
+  const smsProvider = normalizeSmsProvider(values.smsProvider);
 
-  (Object.keys(dirtyFields) as Array<keyof SettingsFormValues>).forEach((key) => {
-    if (!dirtyFields[key]) return;
-
-    const value = values[key];
-
-    if (key === "smtpPort") {
-      if (typeof value === "number") {
-        payload.smtpPort = value;
-      } else {
-        payload.smtpPort = null;
-      }
-      return;
+  generalSettingsKeys.forEach((key) => {
+    if (dirtyFields[key]) {
+      assignPayloadField(payload, values, key);
     }
-
-    if (typeof value === "string") {
-      payload[key] = value === "" ? null : value;
-      return;
-    }
-
-    payload[key] = null;
   });
+
+  if (dirtyFields.smsProvider) {
+    assignPayloadField(payload, values, "smsProvider");
+  }
+
+  if (smsProvider === "textmagic") {
+    textmagicSettingsKeys.forEach((key) => {
+      if (dirtyFields[key]) {
+        assignPayloadField(payload, values, key);
+      }
+    });
+  }
+
+  if (smsProvider === "twilio") {
+    twilioSettingsKeys.forEach((key) => {
+      if (dirtyFields[key]) {
+        assignPayloadField(payload, values, key);
+      }
+    });
+  }
 
   return payload;
 };
@@ -92,26 +147,36 @@ export default function SettingsPage() {
     resolver: zodResolver(settingsFormSchema),
     defaultValues: toInitialValues(),
   });
+  const initialSmsProvider = normalizeSmsProvider(data?.data?.smsProvider);
+  const watchedSmsProvider = normalizeSmsProvider(form.watch("smsProvider"));
+  const smsProvider = form.formState.dirtyFields.smsProvider
+    ? watchedSmsProvider
+    : watchedSmsProvider || initialSmsProvider;
 
   useEffect(() => {
     if (data?.data) {
       form.reset(toInitialValues(data.data));
+      form.setValue("smsProvider", normalizeSmsProvider(data.data.smsProvider), {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
     }
   }, [data, form]);
 
   const handleSave = async (values: SettingsFormValues) => {
     const payload = sanitizeUpdatePayload(
       values,
-      form.formState.dirtyFields as Partial<Record<keyof SettingsFormValues, boolean>>,
+      form.formState.dirtyFields as DirtySettingsFields,
     );
-    console.log({payload});
+
     if (Object.keys(payload).length === 0) {
       showSuccess("No changes to save");
       return;
     }
 
     const loadingToastId = showLoading("Saving settings...");
-
+    console.log({payload});
     try {
       const response = await updateSettings(payload).unwrap();
       showSuccess(response.message || "Settings updated successfully");
@@ -347,8 +412,10 @@ export default function SettingsPage() {
               <div className="flex items-start gap-2">
                 <MessageSquare className="mt-0.5 h-4 w-4 text-orange-600" />
                 <div>
-                  <h3 className="font-medium text-slate-900">SMS (TextMagic) Settings</h3>
-                  <p className="text-xs text-slate-500">Configure SMS messaging service for text follow-ups.</p>
+                  <h3 className="font-medium text-slate-900">SMS Settings</h3>
+                  <p className="text-xs text-slate-500">
+                    Choose an SMS provider or disable SMS for text follow-ups.
+                  </p>
                 </div>
               </div>
               {/* <Button
@@ -364,31 +431,114 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
               <FormField
                 control={form.control}
-                name="textmagicUsername"
+                name="smsProvider"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>TextMagic Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="username" {...field} value={field.value ?? ""} />
-                    </FormControl>
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>SMS Provider</FormLabel>
+                    <Select
+                      key={smsProvider || "none"}
+                      value={smsProvider || "none"}
+                      onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select provider" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="textmagic">TextMagic</SelectItem>
+                        <SelectItem value="twilio">Twilio</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="textmagicApiKey"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>TextMagic API Key</FormLabel>
-                    <FormControl>
-                      <Input placeholder="tm_api_..." {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {smsProvider === "" ? (
+                <div className="rounded-lg border border-dashed bg-slate-50 px-4 py-3 text-sm text-slate-500 md:col-span-2">
+                  SMS is currently disabled. Select a provider above to configure text follow-ups.
+                </div>
+              ) : null}
+
+              {smsProvider === "textmagic" ? (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="textmagicUsername"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>TextMagic Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="username" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="textmagicApiKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>TextMagic API Key</FormLabel>
+                        <FormControl>
+                          <Input placeholder="tm_api_..." {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              ) : null}
+
+              {smsProvider === "twilio" ? (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="twilioAccountSid"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Twilio Account SID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="AC1234..." {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="twilioAuthToken"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Twilio Auth Token</FormLabel>
+                        <FormControl>
+                          <Input placeholder="twilio_auth_token" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="twilioPhoneNumber"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Twilio Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+1234567890" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              ) : null}
             </div>
           </section>
 
