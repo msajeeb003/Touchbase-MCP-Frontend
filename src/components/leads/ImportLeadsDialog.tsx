@@ -34,18 +34,44 @@ interface ImportLeadsDialogProps {
 
 const REQUIRED_COLUMNS = [
   "name",
+  "followUpStage",
+] as const;
+const OPTIONAL_COLUMNS = [
   "email",
   "phone",
+  "notes",
   "company",
   "location",
+  "status",
+] as const;
+const SUPPORTED_COLUMNS = [...REQUIRED_COLUMNS, ...OPTIONAL_COLUMNS] as const;
+const SAMPLE_TEMPLATE_COLUMNS = [
+  "name",
+  "email",
+  "phone",
+  "notes",
+  "company",
+  "location",
+  "status",
   "followUpStage",
 ] as const;
 
 const sampleCsvContent = [
-  REQUIRED_COLUMNS.join(","),
-  "John Doe,john@example.com,+8801712345678,Acme Corp,Dhaka,PRD",
-  "Jane Smith,jane@example.com,+8801912345678,Biz Lab,Chattogram,No Show",
+  SAMPLE_TEMPLATE_COLUMNS.join(","),
+  "John Doe,john@example.com,+8801712345678,Interested in MVP scope,Acme Corp,Dhaka,active,PRD",
+  "Jane Smith,,,Follow up next week,Biz Lab,Chattogram,,No Show",
 ].join("\n");
+
+const FIELD_VALIDATION_NOTES = [
+  "name: required",
+  "followUpStage: required",
+  "email: optional, must be a valid email if provided",
+  "phone: optional",
+  "notes: optional",
+  "company: optional",
+  "location: optional",
+  "status: optional",
+] as const;
 
 export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
   const fileInputId = useId();
@@ -107,6 +133,43 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
   const handleImport = async () => {
     if (!selectedFile) {
       showError("Please select a CSV file first.");
+      return;
+    }
+
+    try {
+      const fileText = await selectedFile.text();
+      const headerLine = fileText
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .find(Boolean);
+
+      if (!headerLine) {
+        showError("The CSV file is empty.");
+        return;
+      }
+
+      const headers = headerLine
+        .replace(/^\uFEFF/, "")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+      const missingRequiredColumns = REQUIRED_COLUMNS.filter((column) => !headers.includes(column));
+      const unsupportedColumns = headers.filter(
+        (column) => !SUPPORTED_COLUMNS.includes(column as (typeof SUPPORTED_COLUMNS)[number]),
+      );
+
+      if (missingRequiredColumns.length > 0) {
+        showError(`Missing required column(s): ${missingRequiredColumns.join(", ")}`);
+        return;
+      }
+
+      if (unsupportedColumns.length > 0) {
+        showError(`Unsupported column(s): ${unsupportedColumns.join(", ")}`);
+        return;
+      }
+    } catch {
+      showError("Unable to read the CSV file. Please try another file.");
       return;
     }
 
@@ -209,11 +272,26 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
           <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
               <Info className="h-4 w-4 text-blue-600" />
-              Required Columns
+              CSV Fields & Validation
             </div>
-            <div className="mt-4 rounded-lg border bg-white px-4 py-3 text-sm text-slate-500">
-              {REQUIRED_COLUMNS.join(", ")}
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <div className="rounded-lg border bg-white px-4 py-3 text-sm text-slate-500">
+                <p className="font-medium text-slate-900">Required columns</p>
+                <p className="mt-2">{REQUIRED_COLUMNS.join(", ")}</p>
+              </div>
+              <div className="rounded-lg border bg-white px-4 py-3 text-sm text-slate-500">
+                <p className="font-medium text-slate-900">Optional columns</p>
+                <p className="mt-2">{OPTIONAL_COLUMNS.join(", ")}</p>
+              </div>
             </div>
+            {/* <div className="mt-3 rounded-lg border bg-white px-4 py-3 text-sm text-slate-500">
+              <p className="font-medium text-slate-900">Validation rules</p>
+              <div className="mt-2 space-y-1">
+                {FIELD_VALIDATION_NOTES.map((note) => (
+                  <p key={note}>{note}</p>
+                ))}
+              </div>
+            </div> */}
             <p className="mt-4 text-sm text-slate-600">
               Download a{" "}
               <a
@@ -224,7 +302,7 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
                 sample template
                 <Download className="h-3.5 w-3.5" />
               </a>{" "}
-              to ensure correct formatting.
+              to ensure correct formatting. Column names must match exactly.
             </p>
           </div>
 
