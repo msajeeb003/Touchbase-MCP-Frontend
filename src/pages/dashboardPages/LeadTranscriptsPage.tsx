@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   CalendarDays,
@@ -8,11 +8,13 @@ import {
   FileText,
   Loader2,
   Mic,
+  Search,
   Trash2,
   UserRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ViewTranscriptDialog from "@/components/transcripts/ViewTranscriptDialog";
 import { useGetSingleLeadQuery } from "@/store/features/leads/leadsApi";
@@ -130,6 +132,8 @@ export default function LeadTranscriptsPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [addingRecordingId, setAddingRecordingId] = useState<number | null>(null);
   const [deletingTranscriptId, setDeletingTranscriptId] = useState<string | null>(null);
+  const [meetingSearch, setMeetingSearch] = useState("");
+  const [hasInitializedSearch, setHasInitializedSearch] = useState(false);
 
   const { data: leadData, isLoading: isLeadLoading, isError: isLeadError } = useGetSingleLeadQuery(
     leadId,
@@ -147,6 +151,7 @@ export default function LeadTranscriptsPage() {
 
   const lead = leadData?.data;
   const meetings = meetingsData?.data.items ?? [];
+  const normalizedMeetingSearch = meetingSearch.trim().toLowerCase();
   const selectedTranscripts = useMemo(
     () => selectedTranscriptsData?.data ?? [],
     [selectedTranscriptsData?.data],
@@ -155,6 +160,30 @@ export default function LeadTranscriptsPage() {
     () => new Set(selectedTranscripts.map((item) => item.fathomRecordingId)),
     [selectedTranscripts],
   );
+  const filteredMeetings = useMemo(() => {
+    if (!normalizedMeetingSearch) return meetings;
+
+    const queryTokens = normalizedMeetingSearch.split(/\s+/).filter(Boolean);
+
+    return meetings.filter((meeting) => {
+      const meetingTitle = (meeting.meeting_title || meeting.title || "").toLowerCase();
+      return (
+        meetingTitle.includes(normalizedMeetingSearch) ||
+        queryTokens.some((token) => meetingTitle.includes(token))
+      );
+    });
+  }, [meetings, normalizedMeetingSearch]);
+
+  useEffect(() => {
+    if (!lead?.name || hasInitializedSearch) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setMeetingSearch(lead.name);
+      setHasInitializedSearch(true);
+    }, 1000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [hasInitializedSearch, lead?.name]);
 
   const handleAddTranscript = async (meeting: FathomMeetingItem) => {
     const loadingToastId = showLoading("Importing transcript...");
@@ -302,17 +331,49 @@ export default function LeadTranscriptsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {meetings.map((meeting) => (
-                <TranscriptMeetingCard
-                  key={meeting.recording_id}
-                  meeting={meeting}
-                  isAdded={addedRecordingIds.has(meeting.recording_id)}
-                  isAdding={addingRecordingId === meeting.recording_id}
-                  onAdd={handleAddTranscript}
-                />
-              ))}
-            </div>
+            <>
+              <div className="rounded-2xl border bg-white p-4 shadow-sm">
+                <div className="relative max-w-md">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    value={meetingSearch}
+                    onChange={(event) => {
+                      setMeetingSearch(event.target.value);
+                      setHasInitializedSearch(true);
+                    }}
+                    placeholder="Search transcripts by lead name or meeting title"
+                    className="pl-9"
+                  />
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  Matching against meeting title. Auto-filled from lead name after page load, and you can edit it anytime.
+                </p>
+              </div>
+
+              {filteredMeetings.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/40 px-6 py-14 text-center">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-200">
+                    <Search className="h-5 w-5 text-slate-600" />
+                  </div>
+                  <h3 className="text-2xl font-semibold text-slate-900">No matching transcripts found.</h3>
+                  <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">
+                    Try updating the search text to match part of the meeting title.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {filteredMeetings.map((meeting) => (
+                    <TranscriptMeetingCard
+                      key={meeting.recording_id}
+                      meeting={meeting}
+                      isAdded={addedRecordingIds.has(meeting.recording_id)}
+                      isAdding={addingRecordingId === meeting.recording_id}
+                      onAdd={handleAddTranscript}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </TabsContent>
 
