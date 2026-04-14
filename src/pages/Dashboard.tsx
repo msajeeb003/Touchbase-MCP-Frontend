@@ -36,6 +36,7 @@ import { Separator } from "@/components/ui/separator";
 import { logout } from "@/store/features/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useCurrentUser } from "@/store/features/auth/authSlice";
+import Logo from "@/components/logo/Logo";
 
 const navItems = [
   { title: "Dashboard", to: "/dashboard", icon: Home },
@@ -98,8 +99,10 @@ export default function Dashboard() {
       <Sidebar collapsible="offcanvas" className="border-r bg-white">
         <SidebarHeader className="border-b bg-slate-50/70 px-4 py-3">
           <div className="flex items-center gap-2 text-indigo-600">
-            <Bot className="h-4 w-4" />
-            <p className="text-sm font-semibold">Follow-Up Agent</p>
+            {/* <Bot className="h-4 w-4" /> */}
+            <Logo className="h-8 w-8"></Logo>
+            <p className="text-sm font-semibold">Touch Base AI</p>
+            {/* <p className="text-sm font-semibold">Follow-Up Agent</p> */}
           </div>
         </SidebarHeader>
         <SidebarContent className="px-2 py-3">

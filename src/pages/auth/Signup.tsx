@@ -20,6 +20,7 @@ import { useRegisterMutation } from '@/store/features/auth/authApi'
 import { setCredentials } from '@/store/features/auth/authSlice'
 import { useAppDispatch } from '@/store/hooks'
 import { dismissToast, showError, showLoading, showSuccess } from '@/utils/toast'
+import Logo from '@/components/logo/Logo'
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false)
@@ -72,8 +73,8 @@ export default function Signup() {
       <Card className='w-full max-w-[28rem] rounded-2xl border-slate-200 bg-white py-8 shadow-sm'>
         <CardContent className='px-8'>
           <div className='mb-6 flex justify-center'>
-            <div className='flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white'>
-              <Send className='h-6 w-6' />
+            <div className='flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-600'>
+              <Logo></Logo>
             </div>
           </div>
 

@@ -19,6 +19,8 @@ import { useLoginMutation } from '@/store/features/auth/authApi'
 import { setCredentials } from '@/store/features/auth/authSlice'
 import { useAppDispatch } from '@/store/hooks'
 import { dismissToast, showError, showLoading, showSuccess } from '@/utils/toast'
+import Logo from '@/components/logo/Logo'
+
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
@@ -67,13 +69,14 @@ export default function SignIn() {
       <Card className='w-full max-w-[28rem] rounded-2xl border-slate-200 bg-white py-8 shadow-sm'>
         <CardContent className='px-8'>
           <div className='mb-6 flex justify-center'>
-            <div className='flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white'>
-              <Send className='h-6 w-6' />
+            <div className='flex h-14 w-14 items-center justify-center rounded-2xl border  border-indigo-600'>
+              <Logo></Logo>
             </div>
           </div>
 
           <div className='mb-8 space-y-2 text-center'>
-            <h1 className='text-4xl font-semibold tracking-tight text-slate-900'>Follow-Up Agent</h1>
+            <h1 className='text-4xl font-semibold tracking-tight text-slate-900'>Touch Base AI</h1>
+            {/* <h1 className='text-4xl font-semibold tracking-tight text-slate-900'>Follow-Up Agent</h1> */}
             <p className='text-lg text-slate-600'>
               Transform your call transcripts into personalized follow-ups with AI
             </p>
