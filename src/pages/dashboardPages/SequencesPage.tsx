@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Loader2,
   Mail,
+  MessageCircle,
   MessageSquare,
   Pencil,
   Plus,
@@ -48,7 +49,7 @@ import {
   useGetSequencesQuery,
   useUpdateSequenceMutation,
 } from "@/store/features/sequences/sequencesApi";
-import type { SequenceStatus } from "@/types/sequences";
+import type { SequenceCountInfo, SequenceStatus } from "@/types/sequences";
 import { cn } from "@/lib/utils";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
@@ -66,6 +67,58 @@ const getStatusBadgeClass = (status: SequenceStatus) => {
 const getStatusLabel = (status: SequenceStatus) => status.charAt(0).toUpperCase() + status.slice(1);
 
 const clampProgress = (value: number) => Math.max(0, Math.min(100, value));
+
+const EMPTY_SEQUENCE_COUNTS: SequenceCountInfo = {
+  steps: 0,
+  emailSteps: 0,
+  smsSteps: 0,
+  whatsappSteps: 0,
+  emailSent: 0,
+  smsSent: 0,
+  whatsappSent: 0,
+};
+
+const toNonNegative = (value: number | undefined) => Math.max(value ?? 0, 0);
+
+const buildProgressMetrics = (counts: SequenceCountInfo) => {
+  const emailTotal = toNonNegative(counts?.emailSteps);
+  const smsTotal = toNonNegative(counts?.smsSteps);
+  const whatsappTotal = toNonNegative(counts?.whatsappSteps);
+
+  const emailSent = Math.min(toNonNegative(counts?.emailSent), emailTotal);
+  const smsSent = Math.min(toNonNegative(counts?.smsSent), smsTotal);
+  const whatsappSent = Math.min(toNonNegative(counts?.whatsappSent), whatsappTotal);
+
+  const totalForProgress = emailTotal + smsTotal + whatsappTotal;
+  const sentCount = Math.min(emailSent + smsSent + whatsappSent, totalForProgress);
+  const progressValue = clampProgress((sentCount / Math.max(totalForProgress, 1)) * 100);
+
+  const channels = [
+    {
+      key: "email",
+      total: emailTotal,
+      sent: emailSent,
+      icon: Mail,
+      className: "bg-indigo-50 text-indigo-700",
+    },
+    {
+      key: "sms",
+      total: smsTotal,
+      sent: smsSent,
+      icon: MessageSquare,
+      className: "bg-violet-50 text-violet-700",
+    },
+    {
+      key: "whatsapp",
+      total: whatsappTotal,
+      sent: whatsappSent,
+      icon: MessageCircle,
+      className: "bg-emerald-50 text-emerald-700",
+    },
+  ].filter((channel) => channel.total > 0);
+
+  return { sentCount, totalForProgress, progressValue, channels };
+};
 
 export default function SequencesPage() {
   const [stageFilter, setStageFilter] = useState("All");
@@ -275,23 +328,8 @@ export default function SequencesPage() {
                     </TableCell>
                     <TableCell>
                       {(() => {
-                        const counts = sequence._count ?? {
-                          steps: 0,
-                          emailSteps: 0,
-                          smsSteps: 0,
-                          emailSent: 0,
-                          smsSent: 0,
-                        };
-                        const emailTotal = Math.max(counts.emailSteps, 0);
-                        const smsTotal = Math.max(counts.smsSteps, 0);
-                        const emailSent = Math.min(Math.max(counts.emailSent, 0), emailTotal);
-                        const smsSent = Math.min(Math.max(counts.smsSent, 0), smsTotal);
-
-                        const totalForProgress = Math.max(emailTotal + smsTotal, 0);
-                        const sentCount = Math.min(emailSent + smsSent, totalForProgress);
-                        const progressValue = clampProgress(
-                          (sentCount / Math.max(totalForProgress, 1)) * 100,
-                        );
+                        const { sentCount, totalForProgress, progressValue, channels } =
+                          buildProgressMetrics(sequence._count ?? EMPTY_SEQUENCE_COUNTS);
 
                         return (
                           <div className="space-y-2">
@@ -305,20 +343,23 @@ export default function SequencesPage() {
                                 style={{ width: `${progressValue}%` }}
                               />
                             </div>
-                            {(emailTotal > 0 || smsTotal > 0) && (
+                            {channels.length > 0 && (
                               <div className="flex items-center gap-2 text-[11px] text-slate-600">
-                                {emailTotal > 0 && (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-indigo-700">
-                                    <Mail className="h-3 w-3" />
-                                    {emailSent}/{emailTotal}
-                                  </span>
-                                )}
-                                {smsTotal > 0 && (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-violet-700">
-                                    <MessageSquare className="h-3 w-3" />
-                                    {smsSent}/{smsTotal}
-                                  </span>
-                                )}
+                                {channels.map((channel) => {
+                                  const Icon = channel.icon;
+                                  return (
+                                    <span
+                                      key={channel.key}
+                                      className={cn(
+                                        "inline-flex items-center gap-1 rounded-full px-2 py-0.5",
+                                        channel.className,
+                                      )}
+                                    >
+                                      <Icon className="h-3 w-3" />
+                                      {channel.sent}/{channel.total}
+                                    </span>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>

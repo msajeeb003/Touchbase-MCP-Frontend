@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { Loader2, Plus, RefreshCw, Sparkles, Trash2 } from "lucide-react";
+import {
+  Loader2, Plus, RefreshCw, Sparkles, Trash2, Mail,
+  MessageCircle,
+  MessageSquare,
+} from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +30,9 @@ import {
   useRegenerateAllStepContentMutation,
 } from "@/store/features/sequences/sequencesApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
+
+
+
 
 const formatDateTime = (value: string | null | undefined) => {
   if (!value) return "N/A";
@@ -285,12 +292,15 @@ export default function SequenceStepsPage() {
                         </span>
                         <Badge
                           variant="outline"
-                          className={
+                          className={ 
                             step.stepType === "EMAIL"
-                              ? "border-indigo-200 bg-indigo-100 text-indigo-700"
-                              : "border-violet-200 bg-violet-100 text-violet-700"
+                              ? "border-indigo-200 bg-indigo-100 text-indigo-700 flex items-center gap-1"
+                              : step.stepType === "SMS"
+                                ? "border-violet-200 bg-violet-100 text-violet-700 flex items-center gap-1"
+                                : "border-emerald-200 bg-emerald-100 text-emerald-700 flex items-center gap-1"
                           }
                         >
+                          {step.stepType === "EMAIL" ? <Mail className="h-4 w-4" /> : step.stepType === "SMS" ? <MessageSquare className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
                           {step.stepType}
                         </Badge>
                         <Badge variant="outline" className={getStepStatusBadgeClass(step.status)}>

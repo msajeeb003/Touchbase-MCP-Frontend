@@ -17,8 +17,10 @@ export interface SequenceCountInfo {
   steps: number;
   emailSteps: number;
   smsSteps: number;
+  whatsappSteps: number;
   emailSent: number;
   smsSent: number;
+  whatsappSent: number;
 }
 
 export interface SequenceItem {
