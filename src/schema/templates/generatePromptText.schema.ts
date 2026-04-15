@@ -1,12 +1,11 @@
 import { z } from "zod";
+import { STEP_TYPE_VALUES } from "@/constants/stepType";
 
-const stepTypeSchema = z
-  .string()
-  .trim()
-  .transform((value) => value.toUpperCase())
-  .refine((value): value is "SMS" | "EMAIL" => value === "SMS" || value === "EMAIL", {
-    message: "Step type must be SMS or EMAIL",
-  });
+const stepTypeSchema = z.enum(STEP_TYPE_VALUES, {
+  errorMap: () => ({
+    message: `Step type must be one of: ${STEP_TYPE_VALUES.join(", ")}`,
+  }),
+});
 
 export const generatePromptTextSchema = z.object({
   followUpScenario: z.string().min(1, "Follow-up scenario is required"),

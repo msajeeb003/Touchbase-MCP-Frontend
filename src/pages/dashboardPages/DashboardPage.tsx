@@ -12,6 +12,7 @@ export default function DashboardPage() {
   const { data, isLoading, isError } = useGetDashboardQuery();
   const dashboardData = data?.data;
   const summary = dashboardData?.summary;
+  console.log({dashboardData});
 
   if (isLoading) {
     return (

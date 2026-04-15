@@ -31,7 +31,9 @@ import {
   generatePromptTextSchema,
   type GeneratePromptTextFormValues,
 } from "@/schema/templates/generatePromptText.schema";
+import { STEP_TYPE, STEP_TYPE_VALUES, type StepType } from "@/constants/stepType";
 import { useGeneratePromptTextMutation } from "@/store/features/templates/templatesApi";
+import type { GeneratePromptTextRequestBody } from "@/types/templates";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { cn } from "@/lib/utils";
 
@@ -39,11 +41,13 @@ interface GeneratePromptTextDialogProps {
   onGenerated: (promptText: string) => void;
 }
 
-const parseStepTypesPattern = (input: string) =>
+const stepTypeSet = new Set<string>(STEP_TYPE_VALUES);
+
+const parseStepTypesPattern = (input: string): StepType[] =>
   input
     .split(",")
     .map((part) => part.trim().toUpperCase())
-    .filter((part): part is "SMS" | "EMAIL" => part === "SMS" || part === "EMAIL");
+    .filter((part): part is StepType => stepTypeSet.has(part));
 
 export default function GeneratePromptTextDialog({ onGenerated }: GeneratePromptTextDialogProps) {
   const [open, setOpen] = useState(false);
@@ -70,7 +74,20 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
     const loadingToastId = showLoading("Generating prompt text...");
 
     try {
-      const payload = generatePromptTextSchema.parse(values);
+      const payload: GeneratePromptTextRequestBody = {
+        followUpScenario: values.followUpScenario,
+        serviceDescription: values.serviceDescription,
+        sequenceGoal: values.sequenceGoal,
+        senderName: values.senderName,
+        stepTypesPattern: values.stepTypesPattern,
+        intervalDays: values.intervalDays,
+        toneStyle: values.toneStyle,
+        ...(values.ctaLink ? { ctaLink: values.ctaLink } : {}),
+        ...(values.companyName ? { companyName: values.companyName } : {}),
+        ...(values.additionalNotes ? { additionalNotes: values.additionalNotes } : {}),
+      };
+
+      generatePromptTextSchema.parse(payload);
       const response = await generatePromptText(payload).unwrap();
       const generated = response.data.promptText;
       onGenerated(generated);
@@ -235,7 +252,7 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
                     <FieldLabel
                       label="Step Types Pattern"
                       required
-                      hint='Use comma-separated values. Example: "SMS, EMAIL, SMS, EMAIL". Upper/lowercase both work.'
+                      hint={`Use comma-separated values. Example: "${STEP_TYPE.SMS}, ${STEP_TYPE.EMAIL}, ${STEP_TYPE.WHATSAPP}". Upper/lowercase both work.`}
                     />
                     <FormControl>
                       <Input
@@ -248,11 +265,11 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
                             shouldDirty: true,
                           });
                         }}
-                        placeholder="Example: SMS, EMAIL, SMS, EMAIL"
+                        placeholder={`Example: ${STEP_TYPE.SMS}, ${STEP_TYPE.EMAIL}, ${STEP_TYPE.WHATSAPP}`}
                       />
                     </FormControl>
                     <p className="text-xs text-slate-500">
-                      Use comma-separated values like "SMS, EMAIL, SMS". Only SMS and EMAIL are allowed.
+                      Allowed values: {STEP_TYPE_VALUES.join(", ")}.
                     </p>
                     <FormMessage />
                   </FormItem>
