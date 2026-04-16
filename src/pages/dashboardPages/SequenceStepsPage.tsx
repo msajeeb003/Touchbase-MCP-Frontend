@@ -280,6 +280,7 @@ export default function SequenceStepsPage() {
         </div>
       ) : (
         <div className="rounded-2xl border bg-white p-5 shadow-sm">
+          {/* All steps in this sequence: */}
           <Accordion type="multiple" className="w-full">
             {steps.map((step) => (
               <AccordionItem key={step.id} value={step.id}>
