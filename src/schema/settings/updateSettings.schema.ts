@@ -41,6 +41,7 @@ export const updateSettingsSchema = z.object({
     twilioAccountSid: optionalText,
     twilioAuthToken: optionalText,
     twilioPhoneNumber: optionalText,
+    twilioWhatsappNumber: optionalText,
   }),
 });
 

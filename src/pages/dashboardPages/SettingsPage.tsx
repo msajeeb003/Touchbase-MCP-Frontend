@@ -47,6 +47,7 @@ const twilioSettingsKeys = [
   "twilioAccountSid",
   "twilioAuthToken",
   "twilioPhoneNumber",
+  "twilioWhatsappNumber",
 ] as const;
 
 type DirtySettingsFields = Partial<Record<keyof SettingsFormValues, boolean>>;
@@ -92,6 +93,7 @@ const toInitialValues = (data?: SettingsItem): SettingsFormValues => {
     twilioAccountSid: data?.twilioAccountSid ?? "",
     twilioAuthToken: data?.twilioAuthToken ?? "",
     twilioPhoneNumber: data?.twilioPhoneNumber ?? "",
+    twilioWhatsappNumber: data?.twilioWhatsappNumber ?? "",
   };
 };
 
@@ -537,6 +539,10 @@ export default function SettingsPage() {
 
               {smsProvider === "twilio" ? (
                 <>
+                  <div className="rounded-lg border border-dashed bg-slate-50 px-4 py-3 text-xs text-slate-600 md:col-span-2">
+                    Use one Twilio account for both channels. Account SID and Auth Token are required for
+                    sending SMS and WhatsApp messages.
+                  </div>
                   <FormField
                     control={form.control}
                     name="twilioAccountSid"
@@ -544,8 +550,15 @@ export default function SettingsPage() {
                       <FormItem>
                         <FormLabel>Twilio Account SID</FormLabel>
                         <FormControl>
-                          <Input placeholder="AC1234..." {...field} value={field.value ?? ""} />
+                          <Input
+                            placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                            {...field}
+                            value={field.value ?? ""}
+                          />
                         </FormControl>
+                        <p className="text-xs text-slate-500">
+                          Found in Twilio Console. Used to authenticate API requests.
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -560,6 +573,9 @@ export default function SettingsPage() {
                         <FormControl>
                           <Input placeholder="twilio_auth_token" {...field} value={field.value ?? ""} />
                         </FormControl>
+                        <p className="text-xs text-slate-500">
+                          Keep this secret. Required with SID for SMS and WhatsApp send APIs.
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -570,10 +586,30 @@ export default function SettingsPage() {
                     name="twilioPhoneNumber"
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
-                        <FormLabel>Twilio Phone Number</FormLabel>
+                        <FormLabel>Twilio SMS Number</FormLabel>
                         <FormControl>
                           <Input placeholder="+1234567890" {...field} value={field.value ?? ""} />
                         </FormControl>
+                        <p className="text-xs text-slate-500">
+                          E.164 format. This number sends regular SMS.
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="twilioWhatsappNumber"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Twilio WhatsApp Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+12345678910" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <p className="text-xs text-slate-500">
+                          WhatsApp-enabled Twilio sender in format: +countrycode-number.
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}

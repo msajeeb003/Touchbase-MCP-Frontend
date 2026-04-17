@@ -25,6 +25,7 @@ export interface SettingsItem {
   twilioAccountSid: string | null;
   twilioAuthToken: string | null;
   twilioPhoneNumber: string | null;
+  twilioWhatsappNumber: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +53,7 @@ export interface UpdateSettingsRequestBody {
   twilioAccountSid?: string | null;
   twilioAuthToken?: string | null;
   twilioPhoneNumber?: string | null;
+  twilioWhatsappNumber?: string | null;
 }
 
 export interface UpdateSettingsResponse {
