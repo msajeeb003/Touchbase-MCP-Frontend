@@ -2,6 +2,7 @@ export interface DashboardSummary {
   totalLeads: number;
   totalEmailsSent: number;
   totalSmsSent: number;
+  totalWhatsAppSent: number;
   activeSequences: number;
   totalTranscripts: number;
 }
@@ -20,6 +21,7 @@ export interface DashboardSentTrendItem {
   date: string;
   emails: number;
   sms: number;
+  whatsapp: number;
 }
 
 export interface DashboardDeliveryStatsItem {

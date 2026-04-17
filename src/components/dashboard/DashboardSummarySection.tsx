@@ -2,6 +2,7 @@ import {
   FileText,
   Layers3,
   MailCheck,
+  MessageCircle,
   MessageSquareText,
   Users2,
 } from "lucide-react";
@@ -34,6 +35,14 @@ const summaryCards = [
     valueClassName: "text-slate-900",
   },
   {
+    key: "totalWhatsAppSent",
+    title: "WhatsApp Sent",
+    description: "Sent to WhatsApp leads",
+    icon: MessageCircle,
+    iconClassName: "bg-emerald-100 text-emerald-700",
+    valueClassName: "text-slate-900",
+  },
+  {
     key: "activeSequences",
     title: "Active Sequences",
     description: "Currently running follow-ups",
@@ -59,7 +68,7 @@ export default function DashboardSummarySection({
   summary,
 }: DashboardSummarySectionProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
       {summaryCards.map((item, index) => (
         <DashboardSummaryCard
           key={item.key}

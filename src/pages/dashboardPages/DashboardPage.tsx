@@ -1,4 +1,4 @@
-import { Loader2, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Loader2, TrendingUp } from "lucide-react";
 import DeliveryStatsChart from "@/components/dashboard/DeliveryStatsChart";
 import LeadsByStageDonutChart from "@/components/dashboard/LeadsByStageDonutChart";
 import LeadsOverTimeAreaChart from "@/components/dashboard/LeadsOverTimeAreaChart";
@@ -42,9 +42,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-semibold text-slate-900">Dashboard Overview</h2>
+        <h2 className="inline-flex items-center gap-2 text-3xl font-semibold text-slate-900">
+          <LayoutDashboard className="h-7 w-7 text-indigo-600" />
+          Dashboard Overview
+        </h2>
         <p className="mt-1 text-sm text-slate-500">
-          A quick snapshot of leads, delivery activity, sequences, and transcripts.
+          A quick snapshot of leads, email/SMS/WhatsApp delivery activity, sequences, and transcripts.
         </p>
       </div>
 

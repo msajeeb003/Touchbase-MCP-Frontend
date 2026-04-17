@@ -1,5 +1,13 @@
 import { format, parseISO } from "date-fns";
-import { CalendarClock, Hash, Mail, MessageSquareText, UserRound } from "lucide-react";
+import {
+  CalendarClock,
+  Clock3,
+  Hash,
+  Mail,
+  MessageCircle,
+  MessageSquareText,
+  UserRound,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -27,7 +35,15 @@ const formatDateTime = (value: string) => {
 const getStepTypeBadgeClass = (stepType: string) => {
   if (stepType === "EMAIL") return "border-indigo-200 bg-indigo-50 text-indigo-700";
   if (stepType === "SMS") return "border-amber-200 bg-amber-50 text-amber-700";
+  if (stepType === "WHATSAPP") return "border-emerald-200 bg-emerald-50 text-emerald-700";
   return "border-slate-200 bg-slate-50 text-slate-700";
+};
+
+const getStepTypeIcon = (stepType: string) => {
+  if (stepType === "EMAIL") return Mail;
+  if (stepType === "SMS") return MessageSquareText;
+  if (stepType === "WHATSAPP") return MessageCircle;
+  return MessageSquareText;
 };
 
 export default function UpcomingStepsSection({
@@ -37,7 +53,8 @@ export default function UpcomingStepsSection({
     return (
       <Card className="border-slate-200 bg-white shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-semibold text-slate-900">
+          <CardTitle className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
+            <Clock3 className="h-5 w-5 text-indigo-600" />
             Upcoming Activity
           </CardTitle>
         </CardHeader>
@@ -53,7 +70,8 @@ export default function UpcomingStepsSection({
   return (
     <Card className="border-slate-200 bg-white shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold text-slate-900">
+        <CardTitle className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
+          <Clock3 className="h-5 w-5 text-indigo-600" />
           Upcoming Activity
         </CardTitle>
         <p className="text-sm text-slate-500">
@@ -79,7 +97,13 @@ export default function UpcomingStepsSection({
                   variant="outline"
                   className={getStepTypeBadgeClass(step.stepType)}
                 >
-                  {step.stepType}
+                  <span className="inline-flex items-center gap-1.5">
+                    {(() => {
+                      const Icon = getStepTypeIcon(step.stepType);
+                      return <Icon className="h-3.5 w-3.5" />;
+                    })()}
+                    {step.stepType}
+                  </span>
                 </Badge>
               </div>
 
@@ -122,11 +146,10 @@ export default function UpcomingStepsSection({
                       className={getStepTypeBadgeClass(step.stepType)}
                     >
                       <span className="inline-flex items-center gap-1.5">
-                        {step.stepType === "EMAIL" ? (
-                          <Mail className="h-3.5 w-3.5" />
-                        ) : (
-                          <MessageSquareText className="h-3.5 w-3.5" />
-                        )}
+                        {(() => {
+                          const Icon = getStepTypeIcon(step.stepType);
+                          return <Icon className="h-3.5 w-3.5" />;
+                        })()}
                         {step.stepType}
                       </span>
                     </Badge>

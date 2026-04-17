@@ -1,4 +1,5 @@
 import DashboardDonutChart from "@/components/dashboard/DashboardDonutChart";
+import { Users2 } from "lucide-react";
 import type { DashboardLeadsByStageItem } from "@/types/dashboard";
 
 interface LeadsByStageDonutChartProps {
@@ -11,6 +12,7 @@ export default function LeadsByStageDonutChart({
   return (
     <DashboardDonutChart
       title="Leads by Stage"
+      titleIcon={Users2}
       description="Distribution of your leads across follow-up stages."
       emptyMessage="No stage data available yet."
       centerLabel="Total Leads"

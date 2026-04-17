@@ -1,4 +1,5 @@
 import { format, parseISO } from "date-fns";
+import { Activity } from "lucide-react";
 import DashboardLineChart from "@/components/dashboard/DashboardLineChart";
 import type { DashboardSentTrendItem } from "@/types/dashboard";
 
@@ -18,12 +19,14 @@ export default function SentTrendLineChart({ data }: SentTrendLineChartProps) {
   return (
     <DashboardLineChart
       title="Sent Trend"
-      description="Email and SMS sending activity over time."
+      titleIcon={Activity}
+      description="Email, SMS, and WhatsApp sending activity over time."
       emptyMessage="No sent trend data available yet."
       data={data.map((item) => ({
         label: item.date,
         emails: item.emails,
         sms: item.sms,
+        whatsapp: item.whatsapp,
       }))}
       series={[
         {
@@ -35,6 +38,11 @@ export default function SentTrendLineChart({ data }: SentTrendLineChartProps) {
           dataKey: "sms",
           label: "SMS",
           color: "#f59e0b",
+        },
+        {
+          dataKey: "whatsapp",
+          label: "WhatsApp",
+          color: "#22c55e",
         },
       ]}
       xAxisTickFormatter={formatDateLabel}

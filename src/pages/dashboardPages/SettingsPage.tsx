@@ -539,7 +539,7 @@ export default function SettingsPage() {
 
               {smsProvider === "twilio" ? (
                 <>
-                  <div className="rounded-lg border border-dashed bg-slate-50 px-4 py-3 text-xs text-slate-600 md:col-span-2">
+                  <div className="rounded-lg border border-dashed bg-green-50 px-4 py-3 text-xs text-green-600 md:col-span-2">
                     Use one Twilio account for both channels. Account SID and Auth Token are required for
                     sending SMS and WhatsApp messages.
                   </div>

@@ -1,4 +1,5 @@
 import { Label, Pie, PieChart } from "recharts";
+import type { LucideIcon } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -9,6 +10,7 @@ export interface DashboardDonutChartItem {
 
 interface DashboardDonutChartProps {
   title: string;
+  titleIcon?: LucideIcon;
   description: string;
   emptyMessage: string;
   centerLabel: string;
@@ -29,6 +31,7 @@ const getChartColor = (label: string) => {
 
 export default function DashboardDonutChart({
   title,
+  titleIcon: TitleIcon,
   description,
   emptyMessage,
   centerLabel,
@@ -46,7 +49,10 @@ export default function DashboardDonutChart({
     return (
       <Card className="border-slate-200 bg-white shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-semibold text-slate-900">{title}</CardTitle>
+          <CardTitle className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
+            {TitleIcon ? <TitleIcon className="h-5 w-5 text-indigo-600" /> : null}
+            {title}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-6 py-10 text-center text-sm text-slate-500">
@@ -60,7 +66,10 @@ export default function DashboardDonutChart({
   return (
     <Card className="border-slate-200 bg-white shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold text-slate-900">{title}</CardTitle>
+        <CardTitle className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
+          {TitleIcon ? <TitleIcon className="h-5 w-5 text-indigo-600" /> : null}
+          {title}
+        </CardTitle>
         <p className="text-sm text-slate-500">{description}</p>
       </CardHeader>
 

@@ -1,4 +1,5 @@
 import DashboardDonutChart from "@/components/dashboard/DashboardDonutChart";
+import { Layers3 } from "lucide-react";
 import type { DashboardSequencesByStatusItem } from "@/types/dashboard";
 
 interface SequencesByStatusDonutChartProps {
@@ -11,6 +12,7 @@ export default function SequencesByStatusDonutChart({
   return (
     <DashboardDonutChart
       title="Sequences by Status"
+      titleIcon={Layers3}
       description="Current status distribution across your sequences."
       emptyMessage="No sequence status data available yet."
       centerLabel="Total Sequences"
