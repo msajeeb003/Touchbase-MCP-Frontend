@@ -3,6 +3,7 @@ import {
   Loader2, Plus, RefreshCw, Sparkles, Trash2, Mail,
   MessageCircle,
   MessageSquare,
+  PhoneCall,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -298,10 +299,20 @@ export default function SequenceStepsPage() {
                               ? "border-indigo-200 bg-indigo-100 text-indigo-700 flex items-center gap-1"
                               : step.stepType === "SMS"
                                 ? "border-violet-200 bg-violet-100 text-violet-700 flex items-center gap-1"
-                                : "border-emerald-200 bg-emerald-100 text-emerald-700 flex items-center gap-1"
+                                : step.stepType === "WHATSAPP"
+                                  ? "border-emerald-200 bg-emerald-100 text-emerald-700 flex items-center gap-1"
+                                  : "border-amber-200 bg-amber-100 text-amber-700 flex items-center gap-1"
                           }
                         >
-                          {step.stepType === "EMAIL" ? <Mail className="h-4 w-4" /> : step.stepType === "SMS" ? <MessageSquare className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
+                          {step.stepType === "EMAIL" ? (
+                            <Mail className="h-4 w-4" />
+                          ) : step.stepType === "SMS" ? (
+                            <MessageSquare className="h-4 w-4" />
+                          ) : step.stepType === "WHATSAPP" ? (
+                            <MessageCircle className="h-4 w-4" />
+                          ) : (
+                            <PhoneCall className="h-4 w-4" />
+                          )}
                           {step.stepType}
                         </Badge>
                         <Badge variant="outline" className={getStepStatusBadgeClass(step.status)}>

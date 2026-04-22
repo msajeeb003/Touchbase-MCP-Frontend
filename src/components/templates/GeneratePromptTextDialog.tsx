@@ -88,6 +88,7 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
       };
 
       generatePromptTextSchema.parse(payload);
+      console.log({payload});
       const response = await generatePromptText(payload).unwrap();
       const generated = response.data.promptText;
       onGenerated(generated);

@@ -6,6 +6,7 @@ import {
   Mail,
   MessageCircle,
   MessageSquare,
+  PhoneCall,
   Pencil,
   Plus,
   RefreshCw,
@@ -73,9 +74,11 @@ const EMPTY_SEQUENCE_COUNTS: SequenceCountInfo = {
   emailSteps: 0,
   smsSteps: 0,
   whatsappSteps: 0,
+  callSteps: 0,
   emailSent: 0,
   smsSent: 0,
   whatsappSent: 0,
+  callSent: 0,
 };
 
 const toNonNegative = (value: number | undefined) => Math.max(value ?? 0, 0);
@@ -84,13 +87,15 @@ const buildProgressMetrics = (counts: SequenceCountInfo) => {
   const emailTotal = toNonNegative(counts?.emailSteps);
   const smsTotal = toNonNegative(counts?.smsSteps);
   const whatsappTotal = toNonNegative(counts?.whatsappSteps);
+  const callTotal = toNonNegative(counts?.callSteps);
 
   const emailSent = Math.min(toNonNegative(counts?.emailSent), emailTotal);
   const smsSent = Math.min(toNonNegative(counts?.smsSent), smsTotal);
   const whatsappSent = Math.min(toNonNegative(counts?.whatsappSent), whatsappTotal);
+  const callSent = Math.min(toNonNegative(counts?.callSent), callTotal);
 
-  const totalForProgress = emailTotal + smsTotal + whatsappTotal;
-  const sentCount = Math.min(emailSent + smsSent + whatsappSent, totalForProgress);
+  const totalForProgress = emailTotal + smsTotal + whatsappTotal + callTotal;
+  const sentCount = Math.min(emailSent + smsSent + whatsappSent + callSent, totalForProgress);
   const progressValue = clampProgress((sentCount / Math.max(totalForProgress, 1)) * 100);
 
   const channels = [
@@ -114,6 +119,13 @@ const buildProgressMetrics = (counts: SequenceCountInfo) => {
       sent: whatsappSent,
       icon: MessageCircle,
       className: "bg-emerald-50 text-emerald-700",
+    },
+    {
+      key: "call",
+      total: callTotal,
+      sent: callSent,
+      icon: PhoneCall,
+      className: "bg-amber-50 text-amber-700",
     },
   ].filter((channel) => channel.total > 0);
 
