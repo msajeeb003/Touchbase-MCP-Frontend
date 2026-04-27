@@ -26,6 +26,9 @@ export interface SettingsItem {
   twilioAuthToken: string | null;
   twilioPhoneNumber: string | null;
   twilioWhatsappNumber: string | null;
+  retellApiKey: string | null;
+  retellAgentId: string | null;
+  retellCallerNumber: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -54,6 +57,9 @@ export interface UpdateSettingsRequestBody {
   twilioAuthToken?: string | null;
   twilioPhoneNumber?: string | null;
   twilioWhatsappNumber?: string | null;
+  retellApiKey?: string | null;
+  retellAgentId?: string | null;
+  retellCallerNumber?: string | null;
 }
 
 export interface UpdateSettingsResponse {

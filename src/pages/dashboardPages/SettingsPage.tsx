@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Bot, BarChart3, Mail, MessageSquare } from "lucide-react";
+import { Bot, BarChart3, Mail, MessageSquare, PhoneCall } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,6 +49,7 @@ const twilioSettingsKeys = [
   "twilioPhoneNumber",
   "twilioWhatsappNumber",
 ] as const;
+const retellSettingsKeys = ["retellApiKey", "retellAgentId", "retellCallerNumber"] as const;
 
 type DirtySettingsFields = Partial<Record<keyof SettingsFormValues, boolean>>;
 type SettingsPayloadKey = keyof UpdateSettingsRequestBody & keyof SettingsFormValues;
@@ -94,6 +95,9 @@ const toInitialValues = (data?: SettingsItem): SettingsFormValues => {
     twilioAuthToken: data?.twilioAuthToken ?? "",
     twilioPhoneNumber: data?.twilioPhoneNumber ?? "",
     twilioWhatsappNumber: data?.twilioWhatsappNumber ?? "",
+    retellApiKey: data?.retellApiKey ?? "",
+    retellAgentId: data?.retellAgentId ?? "",
+    retellCallerNumber: data?.retellCallerNumber ?? "",
   };
 };
 
@@ -156,12 +160,19 @@ const sanitizeUpdatePayload = (
     });
   }
 
+  retellSettingsKeys.forEach((key) => {
+    if (dirtyFields[key]) {
+      assignPayloadField(payload, values, key);
+    }
+  });
+
   return payload;
 };
 
 export default function SettingsPage() {
   const { data, isLoading, isError } = useGetSettingsQuery();
   const [updateSettings, { isLoading: isSaving }] = useUpdateSettingsMutation();
+  console.log({data});
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
@@ -341,6 +352,75 @@ export default function SettingsPage() {
                     <FormControl>
                       <Input placeholder="fathom_api_..." {...field} value={field.value ?? ""} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </section>
+
+          <section className={sectionCardClass}>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50/70 px-4 py-3">
+              <div className="flex items-start gap-2">
+                <PhoneCall className="mt-0.5 h-4 w-4 text-sky-600" />
+                <div>
+                  <h3 className="font-medium text-slate-900">AI Calling (Retell)</h3>
+                  <p className="text-xs text-slate-500">
+                    Connect Retell to run outbound AI voice calls from your sequences.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="retellApiKey"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Retell API Key</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="key_..."
+                        {...field}
+                        value={field.value ?? ""}
+                        autoComplete="off"
+                      />
+                    </FormControl>
+                    <p className="text-xs text-slate-500">
+                      From Retell dashboard. Used to authenticate Retell API requests.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="retellAgentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Retell Agent ID</FormLabel>
+                    <FormControl>
+                      <Input placeholder="agent_..." {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <p className="text-xs text-slate-500">The voice agent that handles your calls.</p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="retellCallerNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Retell Caller Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="+1234567890" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <p className="text-xs text-slate-500">
+                      E.164 phone number shown or used as the outbound caller ID (per your Retell setup).
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
