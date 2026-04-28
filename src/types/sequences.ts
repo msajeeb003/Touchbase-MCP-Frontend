@@ -1,4 +1,23 @@
+import type { StepType } from "@/constants/stepType";
+
 export type SequenceStatus = "draft" | "active" | "paused" | "completed" | "cancelled";
+
+/** Retell call record attached to a sequence step when stepType is CALL. */
+export interface SequenceStepCallLog {
+  id: string;
+  stepId: string;
+  userId: string;
+  retellCallId: string;
+  callStatus: string;
+  duration: number;
+  recordingUrl: string | null;
+  transcript: string | null;
+  disconnectionReason: string | null;
+  fromNumber: string;
+  toNumber: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface SequenceLeadInfo {
   name: string;
@@ -44,13 +63,14 @@ export interface SequenceStepItem {
   id: string;
   sequenceId: string;
   stepOrder: number;
-  stepType: "EMAIL" | "SMS";
+  stepType: StepType;
   subject: string | null;
   content: string | null;
   status: string;
   scheduledAt: string;
   sentAt: string | null;
   sendLog: string | null;
+  callLog: SequenceStepCallLog | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -116,7 +136,7 @@ export interface GetSequenceStepsResponse {
 
 export interface CreateSequenceStepRequestBody {
   stepOrder: number;
-  stepType: "EMAIL" | "SMS";
+  stepType: StepType;
   scheduledAt: string;
 }
 

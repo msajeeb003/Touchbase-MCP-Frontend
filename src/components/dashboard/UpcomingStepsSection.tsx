@@ -6,6 +6,7 @@ import {
   Mail,
   MessageCircle,
   MessageSquareText,
+  PhoneCall,
   UserRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ const getStepTypeBadgeClass = (stepType: string) => {
   if (stepType === "EMAIL") return "border-indigo-200 bg-indigo-50 text-indigo-700";
   if (stepType === "SMS") return "border-amber-200 bg-amber-50 text-amber-700";
   if (stepType === "WHATSAPP") return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  if (stepType === "CALL") return "border-amber-200 bg-amber-50 text-amber-800";
   return "border-slate-200 bg-slate-50 text-slate-700";
 };
 
@@ -43,6 +45,7 @@ const getStepTypeIcon = (stepType: string) => {
   if (stepType === "EMAIL") return Mail;
   if (stepType === "SMS") return MessageSquareText;
   if (stepType === "WHATSAPP") return MessageCircle;
+  if (stepType === "CALL") return PhoneCall;
   return MessageSquareText;
 };
 

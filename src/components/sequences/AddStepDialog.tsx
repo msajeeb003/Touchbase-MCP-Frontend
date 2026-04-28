@@ -143,6 +143,8 @@ export default function AddStepDialog({
                     <SelectContent>
                       <SelectItem value="EMAIL">EMAIL</SelectItem>
                       <SelectItem value="SMS">SMS</SelectItem>
+                      <SelectItem value="WHATSAPP">WHATSAPP</SelectItem>
+                      <SelectItem value="CALL">CALL</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

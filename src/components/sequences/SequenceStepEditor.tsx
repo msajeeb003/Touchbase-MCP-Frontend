@@ -1,7 +1,17 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarDays, Clock3, Loader2, Mail, MessageSquare, Send, StickyNote } from "lucide-react";
+import {
+  CalendarDays,
+  Clock3,
+  Loader2,
+  Mail,
+  MessageCircle,
+  MessageSquare,
+  PhoneCall,
+  Send,
+  StickyNote,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { SequenceStepCallLogSummary } from "@/components/sequences/steps/SequenceStepCallLogSummary";
 import {
   updateStepFormSchema,
   type UpdateStepFormValues,
@@ -135,8 +146,12 @@ export default function SequenceStepEditor({ sequenceId, step }: SequenceStepEdi
                 <FormLabel className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
                   {step.stepType === "EMAIL" ? (
                     <Mail className="h-4 w-4 text-slate-400" />
-                  ) : (
+                  ) : step.stepType === "SMS" ? (
                     <MessageSquare className="h-4 w-4 text-slate-400" />
+                  ) : step.stepType === "WHATSAPP" ? (
+                    <MessageCircle className="h-4 w-4 text-slate-400" />
+                  ) : (
+                    <PhoneCall className="h-4 w-4 text-slate-400" />
                   )}
                   Content
                 </FormLabel>
@@ -182,10 +197,12 @@ export default function SequenceStepEditor({ sequenceId, step }: SequenceStepEdi
         <div className="flex items-start gap-3 lg:col-span-2">
           <Clock3 className="mt-0.5 h-4 w-4 text-slate-400" />
           <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Send Log</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Send log</p>
             <p className="text-sm text-slate-700">{step.sendLog || "No send log available."}</p>
           </div>
         </div>
+
+        {step.callLog ? <SequenceStepCallLogSummary log={step.callLog} /> : null}
 
         <div className="flex justify-end lg:col-span-2">
           <Button type="submit" disabled={isLoading} className="bg-indigo-600 hover:bg-indigo-700">
