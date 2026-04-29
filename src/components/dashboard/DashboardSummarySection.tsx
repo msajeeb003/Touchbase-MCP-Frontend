@@ -4,6 +4,7 @@ import {
   MailCheck,
   MessageCircle,
   MessageSquareText,
+  PhoneCall,
   Users2,
 } from "lucide-react";
 import DashboardSummaryCard from "@/components/dashboard/DashboardSummaryCard";
@@ -43,11 +44,19 @@ const summaryCards = [
     valueClassName: "text-slate-900",
   },
   {
+    key: "totalCallsMade",
+    title: "Calls Made",
+    description: "AI voice calls completed",
+    icon: PhoneCall,
+    iconClassName: "bg-amber-100 text-amber-800",
+    valueClassName: "text-slate-900",
+  },
+  {
     key: "activeSequences",
     title: "Active Sequences",
     description: "Currently running follow-ups",
     icon: Layers3,
-    iconClassName: "bg-amber-100 text-amber-700",
+    iconClassName: "bg-orange-100 text-orange-800",
     valueClassName: "text-slate-900",
   },
   {
@@ -68,7 +77,7 @@ export default function DashboardSummarySection({
   summary,
 }: DashboardSummarySectionProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:grid-cols-4 xl:grid-cols-7">
       {summaryCards.map((item, index) => (
         <DashboardSummaryCard
           key={item.key}

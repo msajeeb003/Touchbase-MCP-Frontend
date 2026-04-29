@@ -1,8 +1,12 @@
+import type { StepType } from "@/constants/stepType";
+
 export interface DashboardSummary {
   totalLeads: number;
   totalEmailsSent: number;
   totalSmsSent: number;
   totalWhatsAppSent: number;
+  /** AI / Retell voice calls completed via sequences */
+  totalCallsMade: number;
   activeSequences: number;
   totalTranscripts: number;
 }
@@ -22,10 +26,12 @@ export interface DashboardSentTrendItem {
   emails: number;
   sms: number;
   whatsapp: number;
+  calls: number;
 }
 
 export interface DashboardDeliveryStatsItem {
-  type: string;
+  /** Channel — same values as sequence step types (EMAIL, SMS, WHATSAPP, CALL). */
+  type: StepType;
   sent: number;
   failed: number;
 }

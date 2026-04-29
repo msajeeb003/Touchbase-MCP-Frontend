@@ -20,13 +20,14 @@ export default function SentTrendLineChart({ data }: SentTrendLineChartProps) {
     <DashboardLineChart
       title="Sent Trend"
       titleIcon={Activity}
-      description="Email, SMS, and WhatsApp sending activity over time."
+      description="Email, SMS, WhatsApp, and AI call volume over time."
       emptyMessage="No sent trend data available yet."
       data={data.map((item) => ({
         label: item.date,
         emails: item.emails,
         sms: item.sms,
         whatsapp: item.whatsapp,
+        calls: item.calls,
       }))}
       series={[
         {
@@ -43,6 +44,11 @@ export default function SentTrendLineChart({ data }: SentTrendLineChartProps) {
           dataKey: "whatsapp",
           label: "WhatsApp",
           color: "#22c55e",
+        },
+        {
+          dataKey: "calls",
+          label: "Calls",
+          color: "#ea580c",
         },
       ]}
       xAxisTickFormatter={formatDateLabel}

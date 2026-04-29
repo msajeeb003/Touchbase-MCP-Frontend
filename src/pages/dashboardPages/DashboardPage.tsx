@@ -12,8 +12,6 @@ export default function DashboardPage() {
   const { data, isLoading, isError } = useGetDashboardQuery();
   const dashboardData = data?.data;
   const summary = dashboardData?.summary;
-  console.log({dashboardData});
-
   if (isLoading) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-sm text-slate-500">
@@ -47,7 +45,7 @@ export default function DashboardPage() {
           Dashboard Overview
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          A quick snapshot of leads, email/SMS/WhatsApp delivery activity, sequences, and transcripts.
+          A quick snapshot of leads, email/SMS/WhatsApp/call activity, sequences, and transcripts.
         </p>
       </div>
 
