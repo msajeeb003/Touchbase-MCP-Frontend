@@ -15,6 +15,8 @@ import TemplatesPage from "./pages/dashboardPages/TemplatesPage";
 import CreateTemplatePage from "./pages/dashboardPages/CreateTemplatePage";
 import EditTemplatePage from "./pages/dashboardPages/EditTemplatePage";
 import SettingsPage from "./pages/dashboardPages/SettingsPage";
+import AiCredentialsDocsPage from "./pages/docsPages/AiCredentialsDocsPage";
+import FathomTranscriptsDocsPage from "./pages/docsPages/FathomTranscriptsDocsPage";
 import RequireAuth from "./routes/RequireAuth";
 import SignIn from "./pages/auth/SignIn";
 import Signup from "./pages/auth/Signup";
@@ -33,17 +35,21 @@ const App = () => (
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<Signup />} />
           <Route element={<RequireAuth />}>
-            <Route path="/dashboard" element={<Dashboard />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="leads" element={<LeadsPage />} />
-              <Route path="leads/:id/transcripts" element={<LeadTranscriptsPage />} />
-              <Route path="sequences" element={<SequencesPage />} />
-              <Route path="sequences/:id/steps" element={<SequenceStepsPage />} />
-              <Route path="transcripts" element={<TranscriptsPage />} />
-              <Route path="templates" element={<TemplatesPage />} />
-              <Route path="templates/new" element={<CreateTemplatePage />} />
-              <Route path="templates/:id/edit" element={<EditTemplatePage />} />
-              <Route path="settings" element={<SettingsPage />} />
+            <Route element={<Dashboard />}>
+              <Route path="dashboard">
+                <Route index element={<DashboardPage />} />
+                <Route path="leads" element={<LeadsPage />} />
+                <Route path="leads/:id/transcripts" element={<LeadTranscriptsPage />} />
+                <Route path="sequences" element={<SequencesPage />} />
+                <Route path="sequences/:id/steps" element={<SequenceStepsPage />} />
+                <Route path="transcripts" element={<TranscriptsPage />} />
+                <Route path="templates" element={<TemplatesPage />} />
+                <Route path="templates/new" element={<CreateTemplatePage />} />
+                <Route path="templates/:id/edit" element={<EditTemplatePage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
+              <Route path="docs/ai-credentials" element={<AiCredentialsDocsPage />} />
+              <Route path="docs/fathom-transcripts" element={<FathomTranscriptsDocsPage />} />
             </Route>
           </Route>
           <Route path="/index" element={<Index />} />

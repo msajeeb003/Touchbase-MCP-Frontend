@@ -49,6 +49,9 @@ const navItems = [
 
 const breadcrumbLabelMap: Record<string, string> = {
   dashboard: "Dashboard",
+  docs: "Docs",
+  "ai-credentials": "AI credentials",
+  "fathom-transcripts": "Fathom transcripts",
   leads: "Leads",
   sequences: "Sequences",
   transcripts: "Transcripts",

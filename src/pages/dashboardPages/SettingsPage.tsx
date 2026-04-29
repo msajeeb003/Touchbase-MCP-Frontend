@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Bot, BarChart3, Mail, MessageSquare, PhoneCall } from "lucide-react";
@@ -258,6 +259,12 @@ export default function SettingsPage() {
                   <p className="text-xs text-slate-500">Configure your AI assistant settings and models.</p>
                 </div>
               </div>
+              <Link
+                to="/docs/ai-credentials"
+                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
+              >
+                Credential help and official docs
+              </Link>
               {/* <Button type="button" variant="outline" size="sm" onClick={() => handleTestConnection("AI")}>
                 Test Connection
               </Button> */}
@@ -332,15 +339,12 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
-              {/* <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="text-emerald-700"
-                onClick={() => handleTestConnection("Fathom")}
+              <Link
+                to="/docs/fathom-transcripts"
+                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
               >
-                Test Connection
-              </Button> */}
+                Fathom help and official docs
+              </Link>
             </div>
             <div className="p-4">
               <FormField
