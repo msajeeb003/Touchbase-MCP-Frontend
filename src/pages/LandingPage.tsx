@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import Logo from "@/components/logo/Logo";
+import landingPageLogo from "@/assets/landingpage logo.png";
 import {
   ArrowRight,
   Box,
@@ -40,15 +42,14 @@ function WhatsIcon({ className }: { className?: string }) {
   );
 }
 
-/** Swap this for `<img>` / `<Logo>` when your landing logo asset is ready. */
-function BrandMark({ className }: { className?: string }) {
+/** Landing-only mark — `src/assets/landingpage logo.png` */
+function LandingBrandMark({ className }: { className?: string }) {
   return (
-    <div
-      className={`flex items-center justify-center rounded-sm text-white ${className ?? ""}`}
-      style={{ backgroundColor: brandBlack }}
-    >
-      <span className="text-[10px] font-bold">T</span>
-    </div>
+    <img
+      src={landingPageLogo}
+      alt="Touch Base AI"
+      className={`h-6 w-6 shrink-0 object-contain ${className ?? ""}`}
+    />
   );
 }
 
@@ -61,7 +62,7 @@ export default function LandingPage() {
       <nav className="fixed z-50 flex h-16 w-full items-center justify-center border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
         <div className="flex w-full max-w-[1040px] items-center justify-between px-6">
           <div className="flex items-center space-x-2">
-            <BrandMark className="h-6 w-6" />
+            <LandingBrandMark />
             <span className="font-semibold tracking-tight text-[#111111]">TouchBase.ai</span>
           </div>
 
@@ -72,7 +73,7 @@ export default function LandingPage() {
             <a href="#flows" className="transition-colors hover:text-[#111111]">
               Flows
             </a>
-            <a href="#pilot" className="transition-colors hover:text-[#111111]">
+            <a href="#get-started" className="transition-colors hover:text-[#111111]">
               Pricing
             </a>
           </div>
@@ -80,17 +81,17 @@ export default function LandingPage() {
           <div className="flex items-center space-x-4">
             <Link
               to="/auth/signin"
-              className="hidden text-sm font-medium text-[#6B7280] transition-colors hover:text-[#111111] sm:block"
+              className="text-sm font-medium text-[#6B7280] transition-colors hover:text-[#111111]"
             >
               Log in
             </Link>
-            <a
-              href="#pilot"
+            <Link
+              to="/auth/signin"
               className="rounded-[10px] px-4 py-2 text-sm font-medium text-white shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] transition-colors hover:bg-gray-800"
               style={{ backgroundColor: brandBlack }}
             >
               Get Access
-            </a>
+            </Link>
           </div>
         </div>
       </nav>
@@ -123,14 +124,14 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
-                href="#pilot"
+              <Link
+                to="/auth/signin"
                 className="group flex w-full items-center justify-center rounded-[12px] px-6 py-3 text-center text-base font-semibold text-white shadow-sm transition-all hover:opacity-95 sm:w-auto"
                 style={{ backgroundColor: accent }}
               >
                 Book a 15-min walkthrough
                 <ArrowRight className="ml-2 h-4 w-4 opacity-80 transition-transform group-hover:translate-x-0.5" />
-              </a>
+              </Link>
               <span className="text-sm text-[#6B7280]">No credit card required</span>
             </div>
           </div>
@@ -213,7 +214,7 @@ export default function LandingPage() {
                 <Star key={i} className="mr-px h-3 w-3 fill-yellow-500" aria-hidden />
               ))}
             </div>
-            <span className="text-xs font-medium text-[#6B7280]">120+ pilot reviews</span>
+            <span className="text-xs font-medium text-[#6B7280]">120+ five-star reviews</span>
           </div>
         </div>
       </section>
@@ -413,7 +414,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
               {[
                 { n: 1, t: "Record Call", sub: "Fathom/Otter" },
-                { n: 2, t: "Sync Data", sub: "Zapier/Make" },
+                { n: 2, t: "Sync Data", sub: "Webhooks / CRM / Sheets" },
                 { n: 3, t: "Analyze", sub: "LLM Processing" },
                 { n: 4, t: "Draft", sub: "Personalized Email" },
                 { n: 5, t: "Schedule", sub: "VA Review & Send" },
@@ -623,18 +624,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="pilot" className="py-20 md:py-28">
+      <section id="get-started" className="py-20 md:py-28">
         <div className="mx-auto max-w-[1040px] px-6">
           <div
             className={`mx-auto max-w-4xl rounded-2xl border border-[#E5E7EB] bg-white p-8 ring-1 ring-[#111111]/5 md:p-12 ${shadowCard}`}
           >
             <div className="flex flex-col gap-12 md:flex-row">
               <div className="md:w-1/2">
-                <div className="mb-6 inline-block rounded-full border border-[#E5E7EB] bg-[#F3F4F6] px-3 py-1 text-xs font-bold text-[#111111]">
-                  LIMITED PILOT
-                </div>
                 <h2 className="mb-4 text-3xl font-bold tracking-tight text-[#111111]">
-                  Pilot Setup: fast, small, measurable
+                  Setup: fast, small, measurable
                 </h2>
                 <p className="mb-8 text-[#6B7280]">
                   We install the system, run it for 30 days, and prove the ROI before you commit to
@@ -647,14 +645,14 @@ export default function LandingPage() {
                   pause — you don&apos;t continue.
                 </div>
 
-                <a
-                  href="#pilot"
+                <Link
+                  to="/auth/signin"
                   className="group inline-flex w-full items-center justify-center rounded-[12px] px-6 py-3 text-base font-semibold text-white shadow-sm transition-opacity hover:opacity-95 md:w-auto"
                   style={{ backgroundColor: accent }}
                 >
                   Book a 15-min walkthrough
                   <ArrowRight className="ml-2 h-4 w-4 opacity-80 transition-transform group-hover:translate-x-0.5" />
-                </a>
+                </Link>
               </div>
 
               <div className="border-t border-[#E5E7EB] pt-8 md:w-1/2 md:border-l md:border-t-0 md:pl-12 md:pt-0">
@@ -712,40 +710,28 @@ export default function LandingPage() {
           <div className="mb-16 flex flex-col items-center justify-between md:flex-row">
             <div className="mb-8 text-center md:mb-0 md:text-left">
               <h2 className="mb-2 text-2xl font-bold tracking-tight">Stop losing deals to silence.</h2>
-              <p className="text-gray-400">Automate the follow-up. Close more pilots.</p>
+              <p className="text-gray-400">Automate the follow-up. Close more deals.</p>
             </div>
-            <a
-              href="#pilot"
+            <Link
+              to="/auth/signin"
               className="group flex items-center rounded-[12px] px-6 py-3 text-base font-semibold text-white shadow-sm transition-opacity hover:opacity-95"
               style={{ backgroundColor: accent }}
             >
               Book a 15-min walkthrough
               <ArrowRight className="ml-2 h-4 w-4 opacity-80 transition-transform group-hover:translate-x-0.5" />
-            </a>
+            </Link>
           </div>
 
-          <div className="flex flex-col items-center justify-between border-t border-gray-800 pt-8 text-sm text-gray-500 md:flex-row">
+          <div className="flex flex-col items-center justify-center border-t border-gray-800 pt-8 text-sm text-gray-500 md:flex-row">
             <div className="mb-4 flex items-center gap-2 md:mb-0">
-              <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-white">
-                <span className="text-[10px] font-bold text-[#111111]">F</span>
-              </div>
+              <span className="flex items-center justify-center rounded-md bg-white p-1 shadow-sm">
+                {/* <Logo className="h-6 w-6 shrink-0 object-contain" /> */}
+                <LandingBrandMark></LandingBrandMark>
+              </span>
               <span className="font-semibold text-white">TouchBase.ai</span>
               <span>© {new Date().getFullYear()}</span>
             </div>
-            <div className="flex gap-6">
-              <a href="#" className="transition-colors hover:text-white">
-                Privacy
-              </a>
-              <a href="#" className="transition-colors hover:text-white">
-                Terms
-              </a>
-              <a href="#" className="transition-colors hover:text-white">
-                Twitter
-              </a>
-              <a href="#" className="transition-colors hover:text-white">
-                LinkedIn
-              </a>
-            </div>
+            
           </div>
         </div>
       </footer>
