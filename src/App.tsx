@@ -16,7 +16,11 @@ import CreateTemplatePage from "./pages/dashboardPages/CreateTemplatePage";
 import EditTemplatePage from "./pages/dashboardPages/EditTemplatePage";
 import SettingsPage from "./pages/dashboardPages/SettingsPage";
 import AiCredentialsDocsPage from "./pages/docsPages/AiCredentialsDocsPage";
+import DocsIndexPage from "./pages/docsPages/DocsIndexPage";
 import FathomTranscriptsDocsPage from "./pages/docsPages/FathomTranscriptsDocsPage";
+import EmailSmtpDocsPage from "./pages/docsPages/EmailSmtpDocsPage";
+import SmsSettingsDocsPage from "./pages/docsPages/SmsSettingsDocsPage";
+import RetellAiCallingDocsPage from "./pages/docsPages/RetellAiCallingDocsPage";
 import RequireAuth from "./routes/RequireAuth";
 import SignIn from "./pages/auth/SignIn";
 import Signup from "./pages/auth/Signup";
@@ -48,8 +52,12 @@ const App = () => (
                 <Route path="templates/:id/edit" element={<EditTemplatePage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
+              <Route path="docs" element={<DocsIndexPage />} />
               <Route path="docs/ai-credentials" element={<AiCredentialsDocsPage />} />
               <Route path="docs/fathom-transcripts" element={<FathomTranscriptsDocsPage />} />
+              <Route path="docs/retell-ai-calling" element={<RetellAiCallingDocsPage />} />
+              <Route path="docs/email-smtp" element={<EmailSmtpDocsPage />} />
+              <Route path="docs/sms-settings" element={<SmsSettingsDocsPage />} />
             </Route>
           </Route>
           <Route path="/index" element={<Index />} />

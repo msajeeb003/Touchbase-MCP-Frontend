@@ -374,6 +374,12 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
+              <Link
+                to="/docs/retell-ai-calling"
+                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
+              >
+                Retell help and setup
+              </Link>
             </div>
             <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
               <FormField
@@ -441,15 +447,12 @@ export default function SettingsPage() {
                   <p className="text-xs text-slate-500">Configure SMTP settings for outgoing email follow-ups.</p>
                 </div>
               </div>
-              {/* <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="text-violet-700"
-                onClick={() => handleTestConnection("SMTP")}
+              <Link
+                to="/docs/email-smtp"
+                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
               >
-                Test Connection
-              </Button> */}
+                SMTP help and setup
+              </Link>
             </div>
             <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
               <FormField
@@ -545,15 +548,12 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
-              {/* <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="text-orange-700"
-                onClick={() => handleTestConnection("TextMagic")}
+              <Link
+                to="/docs/sms-settings"
+                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
               >
-                Test Connection
-              </Button> */}
+                SMS help and setup
+              </Link>
             </div>
             <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
               <FormField
