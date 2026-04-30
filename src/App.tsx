@@ -22,6 +22,7 @@ import EmailSmtpDocsPage from "./pages/docsPages/EmailSmtpDocsPage";
 import SmsSettingsDocsPage from "./pages/docsPages/SmsSettingsDocsPage";
 import RetellAiCallingDocsPage from "./pages/docsPages/RetellAiCallingDocsPage";
 import RequireAuth from "./routes/RequireAuth";
+import LandingPage from "./pages/LandingPage";
 import SignIn from "./pages/auth/SignIn";
 import Signup from "./pages/auth/Signup";
 import NotFound from "./pages/NotFound";
@@ -35,7 +36,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<SignIn />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<Signup />} />
           <Route element={<RequireAuth />}>
