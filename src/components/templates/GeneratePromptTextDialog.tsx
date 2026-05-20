@@ -88,7 +88,6 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
       };
 
       generatePromptTextSchema.parse(payload);
-      console.log({payload});
       const response = await generatePromptText(payload).unwrap();
       const generated = response.data.promptText;
       onGenerated(generated);
@@ -127,7 +126,19 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
 
         <TooltipProvider delayDuration={120}>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 px-6 py-5">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void form.handleSubmit(onSubmit)(event);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.stopPropagation();
+              }
+            }}
+            className="space-y-5 px-6 py-5"
+          >
             <FormField
               control={form.control}
               name="followUpScenario"
@@ -352,7 +363,16 @@ export default function GeneratePromptTextDialog({ onGenerated }: GeneratePrompt
               <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={isLoading}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading} className="bg-indigo-600 hover:bg-indigo-700">
+              <Button
+                type="button"
+                disabled={isLoading}
+                className="bg-indigo-600 hover:bg-indigo-700"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  void form.handleSubmit(onSubmit)();
+                }}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

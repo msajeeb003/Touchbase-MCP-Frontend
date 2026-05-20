@@ -22,6 +22,7 @@ import {
   useUpdatePromptTemplateMutation,
 } from "@/store/features/templates/templatesApi";
 import PromptTemplateReference from "@/components/templates/PromptTemplateReference";
+import GeneratePromptTextDialog from "@/components/templates/GeneratePromptTextDialog";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 export default function EditTemplatePage() {
@@ -122,7 +123,17 @@ export default function EditTemplatePage() {
               name="promptText"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Prompt Text</FormLabel>
+                  <div className="flex items-center justify-between gap-3">
+                    <FormLabel>Prompt Text</FormLabel>
+                    <GeneratePromptTextDialog
+                      onGenerated={(promptText) => {
+                        form.setValue("promptText", promptText, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
+                      }}
+                    />
+                  </div>
                   <FormControl>
                     <Textarea
                       placeholder="You are a virtual assistant for {{BusinessName}}..."
