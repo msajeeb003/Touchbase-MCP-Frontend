@@ -10,26 +10,46 @@ import type {
 
 export const transcriptsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getFathomMeetings: builder.query<GetFathomMeetingsResponse, void>({
-      query: () => ({
+    getFathomMeetings: builder.query<GetFathomMeetingsResponse, string | void>({
+      query: (cursor) => ({
         url: "/fathom/meetings",
         method: "GET",
+        ...(cursor ? { params: { cursor } } : {}),
       }),
-      providesTags: ["Transcripts"],
+      serializeQueryArgs: ({ endpointName }) => endpointName,
+      merge: (currentCacheData, responseData, { arg }) => {
+        if (!arg) {
+          return responseData;
+        }
+        if (!currentCacheData) {
+          return responseData;
+        }
+        const seen = new Set(currentCacheData.data.items.map((i) => i.recording_id));
+        const newItems = responseData.data.items.filter((i) => !seen.has(i.recording_id));
+        return {
+          ...responseData,
+          data: {
+            ...responseData.data,
+            items: [...currentCacheData.data.items, ...newItems],
+          },
+        };
+      },
+      forceRefetch: ({ currentArg, previousArg }) => currentArg !== previousArg,
+      providesTags: ["FathomMeetings"],
     }),
     getMeetingTranscript: builder.query<GetMeetingTranscriptResponse, number>({
       query: (recordingId) => ({
         url: `/fathom/meetings/${recordingId}/transcript`,
         method: "GET",
       }),
-      providesTags: ["Transcripts"],
+      providesTags: (_result, _error, recordingId) => [{ type: "MeetingTranscript", id: recordingId }],
     }),
     getLeadTranscripts: builder.query<GetLeadTranscriptsResponse, string>({
       query: (leadId) => ({
         url: `/leads/${leadId}/transcripts`,
         method: "GET",
       }),
-      providesTags: ["Transcripts"],
+      providesTags: (_result, _error, leadId) => [{ type: "LeadTranscripts", id: leadId }],
     }),
     importLeadTranscriptFromFathom: builder.mutation<
       ImportLeadTranscriptFromFathomResponse,
@@ -40,7 +60,10 @@ export const transcriptsApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Transcripts"],
+      invalidatesTags: (_result, _error, { leadId }) => [
+        { type: "LeadTranscripts", id: leadId },
+        "Dashboard",
+      ],
     }),
     deleteLeadTranscript: builder.mutation<
       DeleteLeadTranscriptResponse,
@@ -50,7 +73,10 @@ export const transcriptsApi = baseApi.injectEndpoints({
         url: `/leads/${leadId}/transcripts/${transcriptId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Transcripts"],
+      invalidatesTags: (_result, _error, { leadId }) => [
+        { type: "LeadTranscripts", id: leadId },
+        "Dashboard",
+      ],
     }),
   }),
   overrideExisting: false,
@@ -58,6 +84,7 @@ export const transcriptsApi = baseApi.injectEndpoints({
 
 export const {
   useGetFathomMeetingsQuery,
+  useLazyGetFathomMeetingsQuery,
   useGetLeadTranscriptsQuery,
   useLazyGetMeetingTranscriptQuery,
   useDeleteLeadTranscriptMutation,

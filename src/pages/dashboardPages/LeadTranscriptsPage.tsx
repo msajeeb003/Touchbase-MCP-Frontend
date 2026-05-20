@@ -23,6 +23,7 @@ import {
   useGetFathomMeetingsQuery,
   useGetLeadTranscriptsQuery,
   useImportLeadTranscriptFromFathomMutation,
+  useLazyGetFathomMeetingsQuery,
 } from "@/store/features/transcripts/transcriptsApi";
 import type { FathomMeetingItem, LeadTranscriptItem } from "@/types/transcripts";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
@@ -141,16 +142,26 @@ export default function LeadTranscriptsPage() {
   );
   const { data: meetingsData, isLoading: isMeetingsLoading, isError: isMeetingsError } =
     useGetFathomMeetingsQuery();
+  const [fetchMoreMeetings, { isFetching: isLoadingMoreMeetings }] = useLazyGetFathomMeetingsQuery();
   const {
     data: selectedTranscriptsData,
     isLoading: isSelectedTranscriptsLoading,
     isError: isSelectedTranscriptsError,
   } = useGetLeadTranscriptsQuery(leadId, { skip: !leadId });
+
   const [importLeadTranscript] = useImportLeadTranscriptFromFathomMutation();
   const [deleteLeadTranscript] = useDeleteLeadTranscriptMutation();
 
   const lead = leadData?.data;
-  const meetings = meetingsData?.data.items ?? [];
+  const meetings = meetingsData?.data.items;
+  const meetingsHasMore = Boolean(meetingsData?.data.hasMore && meetingsData.data.next_cursor);
+  const meetingsNextCursor = meetingsData?.data.next_cursor ?? "";
+
+  const handleLoadMoreMeetings = () => {
+    if (!meetingsHasMore || !meetingsNextCursor || isLoadingMoreMeetings) return;
+    fetchMoreMeetings(meetingsNextCursor);
+  };
+
   const normalizedMeetingSearch = meetingSearch.trim().toLowerCase();
   const selectedTranscripts = useMemo(
     () => selectedTranscriptsData?.data ?? [],
@@ -161,11 +172,12 @@ export default function LeadTranscriptsPage() {
     [selectedTranscripts],
   );
   const filteredMeetings = useMemo(() => {
-    if (!normalizedMeetingSearch) return meetings;
+    const list = meetings ?? [];
+    if (!normalizedMeetingSearch) return list;
 
     const queryTokens = normalizedMeetingSearch.split(/\s+/).filter(Boolean);
 
-    return meetings.filter((meeting) => {
+    return list.filter((meeting) => {
       const meetingTitle = (meeting.meeting_title || meeting.title || "").toLowerCase();
       return (
         meetingTitle.includes(normalizedMeetingSearch) ||
@@ -320,7 +332,7 @@ export default function LeadTranscriptsPage() {
                 Invalid Fathom API key. Please check your Settings.
               </p>
             </div>
-          ) : meetings.length === 0 ? (
+          ) : (meetings?.length ?? 0) === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/40 px-6 py-14 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
                 <FileText className="h-5 w-5 text-indigo-600" />
@@ -351,26 +363,70 @@ export default function LeadTranscriptsPage() {
               </div>
 
               {filteredMeetings.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/40 px-6 py-14 text-center">
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-200">
-                    <Search className="h-5 w-5 text-slate-600" />
+                <div className="space-y-4">
+                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/40 px-6 py-14 text-center">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-200">
+                      <Search className="h-5 w-5 text-slate-600" />
+                    </div>
+                    <h3 className="text-2xl font-semibold text-slate-900">No matching transcripts found.</h3>
+                    <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">
+                      Try updating the search text to match part of the meeting title.
+                    </p>
                   </div>
-                  <h3 className="text-2xl font-semibold text-slate-900">No matching transcripts found.</h3>
-                  <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">
-                    Try updating the search text to match part of the meeting title.
-                  </p>
+                  {meetingsHasMore ? (
+                    <div className="flex justify-center">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-w-[200px] border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                        onClick={handleLoadMoreMeetings}
+                        disabled={isLoadingMoreMeetings}
+                      >
+                        {isLoadingMoreMeetings ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Loading more...
+                          </>
+                        ) : (
+                          "Load more meetings"
+                        )}
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {filteredMeetings.map((meeting) => (
-                    <TranscriptMeetingCard
-                      key={meeting.recording_id}
-                      meeting={meeting}
-                      isAdded={addedRecordingIds.has(meeting.recording_id)}
-                      isAdding={addingRecordingId === meeting.recording_id}
-                      onAdd={handleAddTranscript}
-                    />
-                  ))}
+                <div className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {filteredMeetings.map((meeting) => (
+                      <TranscriptMeetingCard
+                        key={meeting.recording_id}
+                        meeting={meeting}
+                        isAdded={addedRecordingIds.has(meeting.recording_id)}
+                        isAdding={addingRecordingId === meeting.recording_id}
+                        onAdd={handleAddTranscript}
+                      />
+                    ))}
+                  </div>
+                  {meetingsHasMore ? (
+                    <div className="flex justify-center pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-w-[200px] border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                        onClick={handleLoadMoreMeetings}
+                        disabled={isLoadingMoreMeetings}
+                      >
+                        {isLoadingMoreMeetings ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Loading more...
+                          </>
+                        ) : (
+                          "Load more meetings"
+                        )}
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
               )}
             </>

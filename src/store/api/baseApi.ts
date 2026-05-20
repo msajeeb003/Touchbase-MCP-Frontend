@@ -18,6 +18,15 @@ export const baseApi = createApi({
         },
     }),
     endpoints: () => ({}),
-    tagTypes: ["Leads", "Templates", "Settings", "Transcripts", "Sequences", "Dashboard"],
+    tagTypes: [
+        "Leads",
+        "Templates",
+        "Settings",
+        "FathomMeetings",
+        "LeadTranscripts",
+        "MeetingTranscript",
+        "Sequences",
+        "Dashboard",
+    ],
     // overrideExisting: false,
 });

@@ -1,7 +1,9 @@
 import { CalendarDays, ExternalLink, Eye, FileText, Loader2, Mic, UserRound } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useGetFathomMeetingsQuery } from "@/store/features/transcripts/transcriptsApi";
+import {
+  useGetFathomMeetingsQuery,
+  useLazyGetFathomMeetingsQuery,
+} from "@/store/features/transcripts/transcriptsApi";
 import ViewTranscriptDialog from "@/components/transcripts/ViewTranscriptDialog";
 
 const formatDateTime = (value: string | null | undefined) => {
@@ -24,8 +26,16 @@ const getDurationText = (start: string | null | undefined, end: string | null | 
 
 export default function TranscriptsPage() {
   const { data, isLoading, isError } = useGetFathomMeetingsQuery();
+  const [fetchMoreMeetings, { isFetching: isLoadingMore }] = useLazyGetFathomMeetingsQuery();
+
   const meetings = data?.data.items ?? [];
-  console.log({ data });
+  const hasMore = Boolean(data?.data.hasMore && data.data.next_cursor);
+  const nextCursor = data?.data.next_cursor ?? "";
+
+  const handleLoadMore = () => {
+    if (!hasMore || !nextCursor || isLoadingMore) return;
+    fetchMoreMeetings(nextCursor);
+  };
 
   if (isLoading) {
     return (
@@ -40,7 +50,7 @@ export default function TranscriptsPage() {
 
   if (isError) {
     return (
-      <div className="rounded-xl border border-dashed border-red-200 bg-red-50 p-8 text-sm  text-center">
+      <div className="rounded-xl border border-dashed border-red-200 bg-red-50 p-8 text-center text-sm">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
           <FileText className="h-5 w-5 text-indigo-600" />
         </div>
@@ -75,9 +85,8 @@ export default function TranscriptsPage() {
         <p className="mt-1 text-sm text-slate-500">Latest meetings from Fathom integration.</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {meetings.map((meeting) => {
-          const hasTranscript = Boolean(meeting.transcript);
           const host = meeting.recorded_by?.name || meeting.calendar_invitees[0]?.name || "Unknown";
           const attendeesCount = meeting.calendar_invitees?.length ?? 0;
 
@@ -85,12 +94,14 @@ export default function TranscriptsPage() {
             <div key={meeting.recording_id} className="rounded-2xl border bg-white p-5 shadow-sm">
               <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">{meeting.meeting_title || meeting.title}</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    {meeting.meeting_title || meeting.title}
+                  </h3>
                   <p className="mt-1 text-xs text-slate-500">Recording ID: {meeting.recording_id}</p>
                 </div>
               </div>
 
-              <div className="space-y-2 flex flex-col text-sm text-slate-600">
+              <div className="flex flex-col space-y-2 text-sm text-slate-600">
                 <p className="inline-flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-slate-400" />
                   {formatDateTime(meeting.scheduled_start_time)}
@@ -118,9 +129,9 @@ export default function TranscriptsPage() {
                 />
 
                 {meeting.share_url ? (
-                  <Button asChild size="sm" variant="outline" className="w-full" >
+                  <Button asChild size="sm" variant="outline" className="w-full">
                     <a href={meeting.share_url} target="_blank" rel="noreferrer">
-                      Open 
+                      Open
                       <ExternalLink className="ml-1 h-3.5 w-3.5" />
                     </a>
                   </Button>
@@ -130,6 +141,27 @@ export default function TranscriptsPage() {
           );
         })}
       </div>
+
+      {hasMore ? (
+        <div className="flex justify-center pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="min-w-[200px] border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+          >
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading more...
+              </>
+            ) : (
+              "Load more meetings"
+            )}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

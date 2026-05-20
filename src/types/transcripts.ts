@@ -36,6 +36,9 @@ export interface FathomMeetingItem {
 
 export interface GetFathomMeetingsData {
   items: FathomMeetingItem[];
+  limit: number;
+  next_cursor: string;
+  hasMore: boolean;
 }
 
 export interface GetFathomMeetingsResponse {
