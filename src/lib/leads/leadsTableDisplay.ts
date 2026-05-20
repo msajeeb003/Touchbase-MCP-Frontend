@@ -22,3 +22,16 @@ export const getShortNotes = (notes: string, maxLength = 15) => {
   if (notes.length <= maxLength) return notes;
   return `${notes.slice(0, maxLength)}...`;
 };
+
+export const formatLeadAddedAt = (value: string | null | undefined) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};

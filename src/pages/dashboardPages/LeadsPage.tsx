@@ -52,6 +52,7 @@ import { LeadsBulkSelectionToolbar } from "@/components/leads/LeadsBulkSelection
 import UpdateLeadDialog from "@/components/leads/UpdateLeadDialog";
 import { useLeadsTableRowSelection } from "@/hooks/useLeadsTableRowSelection";
 import {
+  formatLeadAddedAt,
   getShortNotes,
   getStageBadgeClass,
   getStatusBadgeClass,
@@ -111,6 +112,7 @@ export default function LeadsPage() {
   const endItem = Math.min(page * limit, total);
   const leads = useMemo(() => data?.data.items ?? [], [data?.data.items]);
 
+  console.log("Leads Page-", leads);
   const selectionResetParams = useMemo(
     () => ({ page, debouncedSearch, status, stage }),
     [page, debouncedSearch, status, stage],
@@ -285,7 +287,7 @@ export default function LeadsPage() {
         ) : (
           <>
             <div className="w-full max-w-full overflow-x-auto">
-              <Table className="min-w-[1120px]">
+              <Table className="min-w-[1240px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12 pr-2">
@@ -302,6 +304,7 @@ export default function LeadsPage() {
                     <TableHead>Notes</TableHead>
                     <TableHead>FollowUp Stage</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Added</TableHead>
                     <TableHead className="text-center">Add Transcript</TableHead>
                     <TableHead className="text-center">Update</TableHead>
                     <TableHead className="text-center">Delete</TableHead>
@@ -358,6 +361,9 @@ export default function LeadsPage() {
                         <Badge variant="outline" className={getStatusBadgeClass(lead.status)}>
                           {lead.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-sm text-slate-600">
+                        {formatLeadAddedAt(lead.createdAt)}
                       </TableCell>
                       <TableCell className="text-center">
                         <Button asChild variant="ghost" size="sm" className="gap-2 text-indigo-600 hover:text-indigo-700">
