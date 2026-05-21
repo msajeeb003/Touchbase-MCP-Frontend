@@ -1,4 +1,12 @@
-import { useId, useMemo, useRef, useState, type DragEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+  type ReactNode,
+} from "react";
 import {
   AlertCircle,
   Download,
@@ -32,45 +40,33 @@ interface ImportLeadsDialogProps {
   trigger: ReactNode;
 }
 
-const REQUIRED_COLUMNS = [
-  "name",
-  "followUpStage",
-] as const;
-const OPTIONAL_COLUMNS = [
+/** Lead fields the backend can map from your CSV headers. */
+const REQUIRED_FIELDS = ["name"] as const;
+const RECOMMENDED_FIELDS = ["email or phone (at least one for follow-up)"] as const;
+const OPTIONAL_FIELDS = [
   "email",
   "phone",
   "notes",
   "company",
   "location",
-  "status",
+  "followUpStage",
 ] as const;
-const SUPPORTED_COLUMNS = [...REQUIRED_COLUMNS, ...OPTIONAL_COLUMNS] as const;
+
 const SAMPLE_TEMPLATE_COLUMNS = [
   "name",
   "email",
   "phone",
-  "notes",
   "company",
   "location",
-  "status",
   "followUpStage",
+  "notes",
 ] as const;
 
-const sampleCsvContent = [
+const SAMPLE_CSV_ROWS = [
   SAMPLE_TEMPLATE_COLUMNS.join(","),
-  "John Doe,john@example.com,+8801712345678,Interested in MVP scope,Acme Corp,Dhaka,active,PRD",
-  "Jane Smith,,,Follow up next week,Biz Lab,Chattogram,,No Show",
-].join("\n");
-
-const FIELD_VALIDATION_NOTES = [
-  "name: required",
-  "followUpStage: required",
-  "email: optional, must be a valid email if provided",
-  "phone: optional",
-  "notes: optional",
-  "company: optional",
-  "location: optional",
-  "status: optional",
+  "John Doe,john@example.com,+8801712345678,Acme Corp,Dhaka,PRD,Interested in MVP scope",
+  "Jane Smith,,+8801812345678,Biz Lab,Chittagong,No Show,Follow up next week",
+  "Alex Lee,alex@company.com,,Startup Inc,Sylhet,Qualified,Met at conference",
 ] as const;
 
 export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
@@ -83,9 +79,15 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
   const [importLeadsCsv, { isLoading }] = useImportLeadsCsvMutation();
 
   const sampleTemplateUrl = useMemo(() => {
-    const blob = new Blob([sampleCsvContent], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([SAMPLE_CSV_ROWS.join("\n")], { type: "text/csv;charset=utf-8;" });
     return URL.createObjectURL(blob);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      URL.revokeObjectURL(sampleTemplateUrl);
+    };
+  }, [sampleTemplateUrl]);
 
   const resetDialogState = () => {
     setSelectedFile(null);
@@ -136,43 +138,6 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
       return;
     }
 
-    try {
-      const fileText = await selectedFile.text();
-      const headerLine = fileText
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .find(Boolean);
-
-      if (!headerLine) {
-        showError("The CSV file is empty.");
-        return;
-      }
-
-      const headers = headerLine
-        .replace(/^\uFEFF/, "")
-        .split(",")
-        .map((value) => value.trim())
-        .filter(Boolean);
-
-      const missingRequiredColumns = REQUIRED_COLUMNS.filter((column) => !headers.includes(column));
-      const unsupportedColumns = headers.filter(
-        (column) => !SUPPORTED_COLUMNS.includes(column as (typeof SUPPORTED_COLUMNS)[number]),
-      );
-
-      if (missingRequiredColumns.length > 0) {
-        showError(`Missing required column(s): ${missingRequiredColumns.join(", ")}`);
-        return;
-      }
-
-      if (unsupportedColumns.length > 0) {
-        showError(`Unsupported column(s): ${unsupportedColumns.join(", ")}`);
-        return;
-      }
-    } catch {
-      showError("Unable to read the CSV file. Please try another file.");
-      return;
-    }
-
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -180,7 +145,6 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
 
     try {
       const response = await importLeadsCsv(formData).unwrap();
-      console.log({response});
       setLastImportResult(response.data);
       showSuccess(response.message || "CSV imported successfully");
     } catch (error: unknown) {
@@ -192,6 +156,10 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
       dismissToast(loadingToastId);
     }
   };
+
+  const columnMappingEntries = lastImportResult
+    ? Object.entries(lastImportResult.columnMapping ?? {})
+    : [];
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -273,28 +241,24 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
           <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
               <Info className="h-4 w-4 text-blue-600" />
-              CSV Fields & Validation
+              What your CSV should include
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div className="rounded-lg border bg-white px-4 py-3 text-sm text-slate-500">
-                <p className="font-medium text-slate-900">Required columns</p>
-                <p className="mt-2">{REQUIRED_COLUMNS.join(", ")}</p>
+                <p className="font-medium text-slate-900">Required</p>
+                <p className="mt-2">{REQUIRED_FIELDS.join(", ")}</p>
               </div>
               <div className="rounded-lg border bg-white px-4 py-3 text-sm text-slate-500">
-                <p className="font-medium text-slate-900">Optional columns</p>
-                <p className="mt-2">{OPTIONAL_COLUMNS.join(", ")}</p>
+                <p className="font-medium text-slate-900">Recommended</p>
+                <p className="mt-2">{RECOMMENDED_FIELDS.join(", ")}</p>
               </div>
             </div>
-            {/* <div className="mt-3 rounded-lg border bg-white px-4 py-3 text-sm text-slate-500">
-              <p className="font-medium text-slate-900">Validation rules</p>
-              <div className="mt-2 space-y-1">
-                {FIELD_VALIDATION_NOTES.map((note) => (
-                  <p key={note}>{note}</p>
-                ))}
-              </div>
-            </div> */}
+            <div className="mt-3 rounded-lg border bg-white px-4 py-3 text-sm text-slate-500">
+              <p className="font-medium text-slate-900">Optional</p>
+              <p className="mt-2">{OPTIONAL_FIELDS.join(", ")}</p>
+            </div>
             <p className="mt-4 text-sm text-slate-600">
-              Download a{" "}
+              Download the{" "}
               <a
                 href={sampleTemplateUrl}
                 download="leads-import-template.csv"
@@ -303,7 +267,7 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
                 sample template
                 <Download className="h-3.5 w-3.5" />
               </a>{" "}
-              to ensure correct formatting. Column names must match exactly.
+              — it uses the column names above ({SAMPLE_TEMPLATE_COLUMNS.join(", ")}).
             </p>
           </div>
 
@@ -315,7 +279,9 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
 
               <div className="grid gap-3 px-5 md:grid-cols-3">
                 <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-5 text-center">
-                  <p className="text-3xl font-semibold text-emerald-600">{lastImportResult.success}</p>
+                  <p className="text-3xl font-semibold text-emerald-600">
+                    {lastImportResult.success}
+                  </p>
                   <p className="mt-1 text-sm font-medium text-emerald-700">Imported</p>
                 </div>
                 <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-5 text-center">
@@ -327,6 +293,32 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
                   <p className="mt-1 text-sm font-medium text-amber-700">Total Rows</p>
                 </div>
               </div>
+
+              {columnMappingEntries.length > 0 ? (
+                <div className="px-5">
+                  <p className="mb-3 text-sm font-medium text-slate-900">Column mapping</p>
+                  <div className="rounded-xl border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>CSV column</TableHead>
+                          <TableHead>Lead field</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {columnMappingEntries.map(([csvColumn, leadField]) => (
+                          <TableRow key={csvColumn}>
+                            <TableCell className="font-medium text-slate-900">
+                              {csvColumn}
+                            </TableCell>
+                            <TableCell className="text-slate-600">{leadField}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              ) : null}
 
               {lastImportResult.errors.length > 0 ? (
                 <div className="px-5 pb-5">
@@ -347,9 +339,11 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
                       <TableBody>
                         {lastImportResult.errors.map((item) => (
                           <TableRow key={`${item.row}-${item.email}-${item.reason}`}>
-                            <TableCell className="font-medium text-slate-900">{item.row}</TableCell>
+                            <TableCell className="font-medium text-slate-900">
+                              {item.row}
+                            </TableCell>
                             <TableCell className="text-slate-600">
-                              {item.email || "N/A"}
+                              {item.email || "—"}
                             </TableCell>
                             <TableCell className="text-rose-600">{item.reason}</TableCell>
                           </TableRow>

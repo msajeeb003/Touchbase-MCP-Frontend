@@ -112,7 +112,6 @@ export default function LeadsPage() {
   const endItem = Math.min(page * limit, total);
   const leads = useMemo(() => data?.data.items ?? [], [data?.data.items]);
 
-  console.log("Leads Page-", leads);
   const selectionResetParams = useMemo(
     () => ({ page, debouncedSearch, status, stage }),
     [page, debouncedSearch, status, stage],

@@ -46,7 +46,6 @@ export default function Signup() {
         email: values.email,
         password: values.password,
       }).unwrap()
-      console.log(response);
 
       if (response.success) {
         dispatch(

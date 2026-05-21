@@ -173,7 +173,6 @@ const sanitizeUpdatePayload = (
 export default function SettingsPage() {
   const { data, isLoading, isError } = useGetSettingsQuery();
   const [updateSettings, { isLoading: isSaving }] = useUpdateSettingsMutation();
-  console.log({data});
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),

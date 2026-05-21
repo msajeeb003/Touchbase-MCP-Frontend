@@ -116,6 +116,8 @@ export interface ImportLeadsCsvData {
   success: number;
   failed: number;
   errors: LeadImportErrorItem[];
+  /** CSV header → lead field (e.g. "Contact Name" → "name"). */
+  columnMapping: Record<string, string>;
 }
 
 export interface ImportLeadsCsvResponse {
