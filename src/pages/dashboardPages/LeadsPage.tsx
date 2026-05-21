@@ -103,7 +103,7 @@ export default function LeadsPage() {
   const { data, isLoading, isError } = useGetLeadsQuery(queryParams);
   const { data: filterSourceData } = useGetLeadsQuery({
     page: 1,
-    limit: 200,
+    limit: 50,
   });
 
   const total = data?.data.pagination.total ?? 0;

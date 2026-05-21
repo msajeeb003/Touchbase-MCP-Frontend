@@ -42,12 +42,12 @@ export interface GetLeadsQueryParams {
 
 export interface CreateLeadRequestBody {
   name: string;
-  followUpStage: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  location?: string;
-  notes?: string;
+  email?: string | null;
+  phone?: string | null;
+  company?: string | null;
+  location?: string | null;
+  followUpStage?: string | null;
+  notes?: string | null;
 }
 
 export interface CreateLeadResponse {
@@ -66,12 +66,12 @@ export interface GetSingleLeadResponse {
 
 export interface UpdateLeadRequestBody {
   name: string;
-  followUpStage: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  location?: string;
-  notes?: string;
+  email?: string | null;
+  phone?: string | null;
+  company?: string | null;
+  location?: string | null;
+  followUpStage?: string | null;
+  notes?: string | null;
 }
 
 export interface UpdateLeadResponse {

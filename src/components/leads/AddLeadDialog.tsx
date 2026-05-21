@@ -31,6 +31,7 @@ import {
   createLeadFormSchema,
   type CreateLeadFormValues,
 } from "@/schema/leads/createLead.schema";
+import { buildCreateLeadPayload } from "@/lib/leads/leadFormPayload";
 import { useCreateLeadMutation } from "@/store/features/leads/leadsApi";
 import { countryCodes, getMinLengthForCountryIso } from "@/utils/countryCode";
 import { normalizePhoneInput } from "@/utils/phone";
@@ -82,21 +83,12 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
     const phoneWithCountryCode = normalizedPhone.startsWith("+")
       ? normalizedPhone
       : `${dial}${normalizedPhone}`;
-    const email = values.email?.trim();
-    const company = values.company?.trim();
-    const location = values.location?.trim();
-    const notes = values.notes?.trim();
-
     try {
-      const response = await createLead({
-        name: values.name,
-        followUpStage: values.followUpStage,
-        ...(email ? { email } : {}),
-        ...(normalizedPhone ? { phone: phoneWithCountryCode } : {}),
-        ...(company ? { company } : {}),
-        ...(location ? { location } : {}),
-        ...(notes ? { notes } : {}),
-      }).unwrap();
+      const response = await createLead(
+        buildCreateLeadPayload(values, {
+          phone: normalizedPhone ? phoneWithCountryCode : undefined,
+        }),
+      ).unwrap();
 
       showSuccess(response.message || "Lead created successfully");
       form.reset();
@@ -127,7 +119,9 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>
+                    Name <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="John Doe" {...field} />
                   </FormControl>
@@ -141,10 +135,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Email Address
-                    
-                  </FormLabel>
+                  <FormLabel>Email Address (optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="john.doe@company.com" {...field} />
                   </FormControl>
@@ -158,7 +149,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number </FormLabel>
+                  <FormLabel>Phone Number (optional)</FormLabel>
                   <FormControl>
                     <div className="flex gap-2">
                       <Select
@@ -223,7 +214,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
               name="followUpStage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Follow-up Stage </FormLabel>
+                  <FormLabel>Follow-up Stage (optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="Follow Up Stage e.g No Show, After Sale, PRD, Hot Lead, Cancel" {...field} />
                   </FormControl>

@@ -24,7 +24,7 @@ export function createLeadFormSchema(getMinNationalDigits: () => number = () => 
       }),
     company: z.string().optional(),
     location: z.string().optional(),
-    followUpStage: z.string().min(1, "Follow-up stage is required"),
+    followUpStage: z.string().optional(),
     notes: z.string().optional(),
   });
 }

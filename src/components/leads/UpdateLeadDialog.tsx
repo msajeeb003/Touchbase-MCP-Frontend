@@ -28,7 +28,7 @@ import {
   useGetSingleLeadQuery,
   useUpdateLeadMutation,
 } from "@/store/features/leads/leadsApi";
-import type { UpdateLeadRequestBody } from "@/types/leads";
+import { buildUpdateLeadPayload } from "@/lib/leads/leadFormPayload";
 import { normalizePhoneInput } from "@/utils/phone";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
@@ -67,7 +67,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
         phone: singleLeadData.data.phone ?? "",
         company: singleLeadData.data.company ?? "",
         location: singleLeadData.data.location ?? "",
-        followUpStage: singleLeadData.data.followUpStage,
+        followUpStage: singleLeadData.data.followUpStage ?? "",
         notes: singleLeadData.data.notes ?? "",
       });
     }
@@ -75,26 +75,12 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
 
   const onSubmit = async (values: CreateLeadFormValues) => {
     const loadingToastId = showLoading("Updating lead...");
-    const email = values.email?.trim();
-    const phone = normalizePhoneInput(values.phone ?? "");
-    const company = values.company?.trim();
-    const location = values.location?.trim();
-    const notes = values.notes?.trim();
-
-    const payload: UpdateLeadRequestBody = {
-      name: values.name,
-      followUpStage: values.followUpStage,
-      ...(email ? { email } : {}),
-      ...(phone ? { phone } : {}),
-      ...(company ? { company } : {}),
-      ...(location ? { location } : {}),
-      ...(notes ? { notes } : {}),
-    };
+    const normalizedPhone = normalizePhoneInput(values.phone ?? "");
 
     try {
       const response = await updateLead({
         id: leadId,
-        body: payload,
+        body: buildUpdateLeadPayload(values, { phone: normalizedPhone }),
       }).unwrap();
 
       showSuccess(response.message || "Lead updated successfully");
@@ -127,7 +113,9 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>
+                      Name <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder="John Doe" {...field} />
                     </FormControl>
@@ -141,7 +129,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel>Email Address (optional)</FormLabel>
                     <FormControl>
                       <Input placeholder="john.doe@company.com" {...field} />
                     </FormControl>
@@ -155,7 +143,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>Phone Number (optional)</FormLabel>
                     <FormControl>
                       <Input placeholder="1234567890" {...field} />
                     </FormControl>
@@ -198,7 +186,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                 name="followUpStage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Follow-up Stage</FormLabel>
+                    <FormLabel>Follow-up Stage (optional)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Follow Up Stage e.g No Show, After Sale, PRD, Hot Lead, Cancel"

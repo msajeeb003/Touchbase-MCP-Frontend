@@ -180,6 +180,7 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
 
     try {
       const response = await importLeadsCsv(formData).unwrap();
+      console.log({response});
       setLastImportResult(response.data);
       showSuccess(response.message || "CSV imported successfully");
     } catch (error: unknown) {
