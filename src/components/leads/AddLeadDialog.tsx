@@ -135,7 +135,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Address (optional)</FormLabel>
+                  <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <Input placeholder="john.doe@company.com" {...field} />
                   </FormControl>
@@ -149,7 +149,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number (optional)</FormLabel>
+                  <FormLabel>Phone Number</FormLabel>
                   <FormControl>
                     <div className="flex gap-2">
                       <Select
@@ -214,7 +214,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
               name="followUpStage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Follow-up Stage (optional)</FormLabel>
+                  <FormLabel>Follow-up Stage</FormLabel>
                   <FormControl>
                     <Input placeholder="Follow Up Stage e.g No Show, After Sale, PRD, Hot Lead, Cancel" {...field} />
                   </FormControl>
@@ -230,7 +230,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Additional notes (optional)"
+                      placeholder="Additional notes"
                       className="min-h-[96px]"
                       {...field}
                     />

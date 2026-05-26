@@ -129,7 +129,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address (optional)</FormLabel>
+                    <FormLabel>Email Address</FormLabel>
                     <FormControl>
                       <Input placeholder="john.doe@company.com" {...field} />
                     </FormControl>
@@ -143,7 +143,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number (optional)</FormLabel>
+                    <FormLabel>Phone Number</FormLabel>
                     <FormControl>
                       <Input placeholder="1234567890" {...field} />
                     </FormControl>
@@ -186,7 +186,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                 name="followUpStage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Follow-up Stage (optional)</FormLabel>
+                    <FormLabel>Follow-up Stage</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Follow Up Stage e.g No Show, After Sale, PRD, Hot Lead, Cancel"
@@ -205,7 +205,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Additional notes (optional)"
+                        placeholder="Additional notes"
                         className="min-h-[96px]"
                         {...field}
                       />
