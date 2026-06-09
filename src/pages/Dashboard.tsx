@@ -6,6 +6,7 @@ import {
   Shapes,
   Users2,
   Bot,
+  BookOpen,
   Home,
   Settings,
 } from "lucide-react";
@@ -45,6 +46,7 @@ const navItems = [
   { title: "Transcripts", to: "/dashboard/transcripts", icon: FileText },
   { title: "Templates", to: "/dashboard/templates", icon: Shapes },
   { title: "Settings", to: "/dashboard/settings", icon: Settings },
+  { title: "How to configure", to: "/dashboard/how-to-configure", icon: BookOpen },
 ];
 
 const breadcrumbLabelMap: Record<string, string> = {
@@ -60,6 +62,7 @@ const breadcrumbLabelMap: Record<string, string> = {
   transcripts: "Transcripts",
   templates: "Templates",
   settings: "Settings",
+  "how-to-configure": "How to configure",
   steps: "Steps",
   new: "New Template",
   edit: "Edit Template",

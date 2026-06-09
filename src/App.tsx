@@ -15,6 +15,7 @@ import TemplatesPage from "./pages/dashboardPages/TemplatesPage";
 import CreateTemplatePage from "./pages/dashboardPages/CreateTemplatePage";
 import EditTemplatePage from "./pages/dashboardPages/EditTemplatePage";
 import SettingsPage from "./pages/dashboardPages/SettingsPage";
+import HowToConfigurePage from "./pages/dashboardPages/HowToConfigurePage";
 import AiCredentialsDocsPage from "./pages/docsPages/AiCredentialsDocsPage";
 import DocsIndexPage from "./pages/docsPages/DocsIndexPage";
 import FathomTranscriptsDocsPage from "./pages/docsPages/FathomTranscriptsDocsPage";
@@ -52,6 +53,7 @@ const App = () => (
                 <Route path="templates/new" element={<CreateTemplatePage />} />
                 <Route path="templates/:id/edit" element={<EditTemplatePage />} />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="how-to-configure" element={<HowToConfigurePage />} />
               </Route>
               <Route path="docs" element={<DocsIndexPage />} />
               <Route path="docs/ai-credentials" element={<AiCredentialsDocsPage />} />
