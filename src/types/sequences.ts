@@ -70,6 +70,7 @@ export interface SequenceStepItem {
   scheduledAt: string;
   sentAt: string | null;
   sendLog: string | null;
+  externalMessageId: string | null;
   callLog: SequenceStepCallLog | null;
   createdAt: string;
   updatedAt: string;
