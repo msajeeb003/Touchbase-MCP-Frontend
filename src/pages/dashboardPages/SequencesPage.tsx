@@ -8,7 +8,6 @@ import {
   MessageSquare,
   PhoneCall,
   Pencil,
-  Plus,
   RefreshCw,
   Trash2,
   Wand2,
@@ -213,16 +212,16 @@ export default function SequencesPage() {
   };
 
   const handleGenerateSteps = async (sequenceId: string) => {
-    const loadingToastId = showLoading("Generating steps...");
+    const loadingToastId = showLoading("Generating steps and content...");
     setGeneratingStepsId(sequenceId);
 
     try {
       const response = await generateSequenceSteps(sequenceId).unwrap();
-      showSuccess(response.message || "Steps generated successfully");
+      showSuccess(response.message || "Steps and content generated successfully");
     } catch (error: unknown) {
       const errorMessage =
         (error as { data?: { message?: string } })?.data?.message ||
-        "Failed to generate steps. Please try again.";
+        "Failed to generate steps and content. Please try again.";
       showError(errorMessage);
     } finally {
       dismissToast(loadingToastId);
@@ -260,11 +259,11 @@ export default function SequencesPage() {
           </h2>
         </div>
         <AddSequenceDialog
-        
+          onSequenceCreated={handleGenerateSteps}
           trigger={
             <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
-              <Plus className="h-4 w-4" />
-              New Sequence
+              <Wand2 className="h-4 w-4" />
+              Generate Sequence
             </Button>
           }
         />
@@ -320,7 +319,7 @@ export default function SequencesPage() {
                   <TableHead>Steps</TableHead>
                   <TableHead className="min-w-[200px]">Progress</TableHead>
                   <TableHead className="text-center">Step Details</TableHead>
-                  <TableHead className="text-center">Generate Steps</TableHead>
+                  <TableHead className="text-center">Generate Steps & Content</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-center min-w-[140px]">Active</TableHead>
                   <TableHead className="text-center">Edit</TableHead>
@@ -389,7 +388,7 @@ export default function SequencesPage() {
                     <TableCell className="text-center">
                       <button
                         type="button"
-                        title="Generate all step content"
+                        title="Use AI to generate steps and content. To regenerate, delete all existing steps first."
                         disabled={generatingStepsId === sequence.id}
                         onClick={() => void handleGenerateSteps(sequence.id)}
                         className={cn(
@@ -401,7 +400,7 @@ export default function SequencesPage() {
                         ) : (
                           <Wand2 className="h-4 w-4 drop-shadow-sm" strokeWidth={2.25} aria-hidden />
                         )}
-                        <span className="sr-only">Generate steps with AI</span>
+                        <span className="sr-only">Use AI to generate steps and content. To regenerate, delete all existing steps first.</span>
                       </button>
                     </TableCell>
                     <TableCell>

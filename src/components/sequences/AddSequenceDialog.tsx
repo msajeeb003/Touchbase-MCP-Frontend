@@ -40,13 +40,14 @@ import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast
 
 interface AddSequenceDialogProps {
   trigger: ReactNode;
+  onSequenceCreated?: (sequenceId: string) => void | Promise<void>;
 }
 
 function buildAutoSequenceName(leadName: string, templateName: string) {
   return `${leadName} — ${templateName}`;
 }
 
-export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
+export default function AddSequenceDialog({ trigger, onSequenceCreated }: AddSequenceDialogProps) {
   const [open, setOpen] = useState(false);
   const [createSequence, { isLoading: isCreating }] = useCreateSequenceMutation();
   const { data: templatesData, isLoading: isTemplatesLoading } = useGetPromptTemplatesQuery();
@@ -86,7 +87,7 @@ export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
   }, [watchedLeadId, watchedTemplateId, selectedLeadData?.data, templates, form]);
 
   const onSubmit = async (values: CreateSequenceFormValues) => {
-    const loadingToastId = showLoading("Creating sequence...");
+    const loadingToastId = showLoading("Generating sequence...");
 
     try {
       const response = await createSequence({
@@ -96,7 +97,8 @@ export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
         promptTemplateId: values.promptTemplateId,
       }).unwrap();
 
-      showSuccess(response.message || "Sequence created successfully");
+      dismissToast(loadingToastId);
+      showSuccess(response.message || "Sequence generated successfully");
       form.reset({
         leadId: "",
         name: "",
@@ -105,10 +107,14 @@ export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
       });
       lastAutoSequenceNameRef.current = "";
       setOpen(false);
+
+      if (onSequenceCreated) {
+        await onSequenceCreated(response.data.id);
+      }
     } catch (error: unknown) {
       const errorMessage =
         (error as { data?: { message?: string } })?.data?.message ||
-        "Failed to create sequence. Please try again.";
+        "Failed to generate sequence. Please try again.";
       showError(errorMessage);
     } finally {
       dismissToast(loadingToastId);
@@ -120,7 +126,12 @@ export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-w-2xl p-0">
         <DialogHeader className="border-b px-6 py-5 text-left">
-          <DialogTitle className="text-3xl font-semibold text-slate-800">Create New Sequence</DialogTitle>
+          <DialogTitle className="text-3xl font-semibold text-slate-800">
+            Generate Sequence
+          </DialogTitle>
+          <p className="text-sm text-slate-500">
+            Steps and content will be generated automatically after creation.
+          </p>
         </DialogHeader>
 
         <Form {...form}>
@@ -239,7 +250,7 @@ export default function AddSequenceDialog({ trigger }: AddSequenceDialogProps) {
                 disabled={isCreating || isTemplatesLoading}
                 className="bg-indigo-600 hover:bg-indigo-700"
               >
-                {isCreating ? "Creating..." : "Create Sequence"}
+                {isCreating ? "Generating..." : "Generate Sequence & Steps"}
               </Button>
             </DialogFooter>
           </form>
