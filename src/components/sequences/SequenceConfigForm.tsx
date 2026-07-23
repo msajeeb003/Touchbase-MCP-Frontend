@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   CalendarX2,
   Phone,
@@ -12,12 +11,18 @@ import {
   Plus,
   Mail,
   Settings,
+  Loader2,
+  X,
+  BookOpen,
 } from "lucide-react";
+import { useState } from "react";
 import WizardProgress from "@/components/sequences/WizardProgress";
+import ManageTemplatesDialog from "@/components/sequences/ManageTemplatesDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -26,9 +31,44 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function SequenceConfigForm() {
-  const [selectedSituation, setSelectedSituation] = useState("No-show");
-  const [selectedGoal, setSelectedGoal] = useState("Book another call");
+interface SequenceConfigFormProps {
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  situation: string | null;
+  setSituation: (val: string) => void;
+  goal: string | null;
+  setGoal: (val: string) => void;
+  isGenerating: boolean;
+  setIsGenerating: (val: boolean) => void;
+  setIsGenerated: (val: boolean) => void;
+}
+
+export default function SequenceConfigForm({
+  currentStep,
+  setCurrentStep,
+  situation,
+  setSituation,
+  goal,
+  setGoal,
+  isGenerating,
+  setIsGenerating,
+  setIsGenerated,
+}: SequenceConfigFormProps) {
+  const [isManageTemplatesOpen, setIsManageTemplatesOpen] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
+
+  const templates = [
+    { id: 1, title: "NO SHOW", tag: "NOSHOW1", desc: "You are a Virtual Assistant representing Artur Abdullin from Artech Digita..." },
+    { id: 2, title: "No Show NEW", tag: "No Show NEW", desc: "You are a Virtual Assistant representing Artur from Artech Digital. A meet..." },
+    { id: 3, title: "test", tag: "test", desc: "You are a Virtual Assistant representing Tanumoy Bosu from toto. A mee..." },
+    { id: 4, title: "After sales-No Number", tag: "Post call2", desc: "You are a Virtual Assistant for Artech Digital, an AI development agency ..." },
+    { id: 5, title: "NO SHOW - Artur", tag: "No Show1", desc: "You are a Virtual Assistant representing Artech Digital and the sender Art..." },
+    { id: 6, title: "Admin test", tag: "No Show (admin test)", desc: "You are a Virtual Assistant writing on behalf of Artech Digital and the sen..." },
+    { id: 7, title: "Final PRD Follow Up", tag: "PRD Follow up3", desc: "You are a Virtual Assistant for Artech Digital, an AI development agency ..." },
+    { id: 8, title: "Post call", tag: "Post call", desc: "You are a Virtual Assistant for Artech Digital, an AI development agency ..." },
+    { id: 9, title: "GOOD Leads - Follow Up", tag: "Good Leads", desc: "You are a Virtual Assistant for Artech Digital, an AI services company run..." },
+    { id: 10, title: "MAIL SMS", tag: "No Show new", desc: "You are a Virtual Assistant for Artech Digital, a company that provides AI..." },
+  ];
 
   const situations = [
     {
@@ -77,12 +117,34 @@ export default function SequenceConfigForm() {
     { id: "Other goal", label: "Other goal", icon: Plus },
   ];
 
+  const handleSituationSelect = (id: string) => {
+    setSituation(id);
+    if (goal && currentStep === 1) setCurrentStep(2);
+  };
+
+  const handleGoalSelect = (id: string) => {
+    setGoal(id);
+    if (situation && currentStep === 1) setCurrentStep(2);
+  };
+
+  const handleGenerate = () => {
+    setIsGenerating(true);
+    setCurrentStep(3);
+
+    // Simulate API delay
+    setTimeout(() => {
+      setIsGenerating(false);
+      setIsGenerated(true);
+      setCurrentStep(4);
+    }, 1500);
+  };
+
   return (
     <Card className="border shadow-sm">
       <CardContent className="flex flex-col gap-8 p-6">
-        <WizardProgress />
+        <WizardProgress currentStep={currentStep} />
         <hr className="border-slate-100" />
-        
+
         {/* Section 1 */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -94,7 +156,12 @@ export default function SequenceConfigForm() {
                 This helps us choose the right follow-up strategy.
               </p>
             </div>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setIsManageTemplatesOpen(true)}
+            >
               <Settings className="h-4 w-4" />
               Manage templates
             </Button>
@@ -102,33 +169,29 @@ export default function SequenceConfigForm() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {situations.map((item) => {
-              const isSelected = selectedSituation === item.id;
+              const isSelected = situation === item.id;
               return (
                 <div
                   key={item.id}
-                  onClick={() => setSelectedSituation(item.id)}
-                  className={`cursor-pointer rounded-xl border p-4 transition-all ${
-                    isSelected
-                      ? "border-indigo-600 bg-indigo-50 shadow-sm"
-                      : "border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50"
-                  }`}
+                  onClick={() => handleSituationSelect(item.id)}
+                  className={`cursor-pointer rounded-xl border p-4 transition-all ${isSelected
+                    ? "border-indigo-600 bg-indigo-50 shadow-sm"
+                    : "border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50"
+                    }`}
                 >
                   <item.icon
-                    className={`mb-3 h-5 w-5 ${
-                      isSelected ? "text-indigo-600" : "text-slate-500"
-                    }`}
+                    className={`mb-3 h-5 w-5 ${isSelected ? "text-indigo-600" : "text-slate-500"
+                      }`}
                   />
                   <h3
-                    className={`text-sm font-semibold ${
-                      isSelected ? "text-indigo-900" : "text-slate-900"
-                    }`}
+                    className={`text-sm font-semibold ${isSelected ? "text-indigo-900" : "text-slate-900"
+                      }`}
                   >
                     {item.title}
                   </h3>
                   <p
-                    className={`mt-1 text-xs ${
-                      isSelected ? "text-indigo-700" : "text-slate-500"
-                    }`}
+                    className={`mt-1 text-xs ${isSelected ? "text-indigo-700" : "text-slate-500"
+                      }`}
                   >
                     {item.desc}
                   </p>
@@ -136,6 +199,69 @@ export default function SequenceConfigForm() {
               );
             })}
           </div>
+
+          {situation === "Custom" && (
+            <div className="flex flex-col gap-4 rounded-xl border border-indigo-100 bg-slate-50/50 p-5 mt-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-indigo-600">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-sm font-semibold text-slate-900">Describe your situation</span>
+                </div>
+                <button
+                  onClick={() => setSituation("")}
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                  Cancel
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <Textarea
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  placeholder="e.g. Lead downloaded our pricing PDF twice but hasn't booked a demo..."
+                  className="min-h-[120px] resize-none bg-white border-slate-200 placeholder:text-slate-400 focus-visible:ring-indigo-600"
+                />
+                <div className="flex items-center justify-between px-1 mt-1">
+                  <span className="text-xs text-slate-500">
+                    Write it in your own words — the AI follows this exactly.
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    {customPrompt.length}/400
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-700">Or use one of your saved prompts</span>
+                  <button
+                    onClick={() => setIsManageTemplatesOpen(true)}
+                    className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                  >
+                    <Settings className="h-3.5 w-3.5" />
+                    Manage templates
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {templates.map((tpl) => (
+                    <button
+                      key={tpl.id}
+                      onClick={() => setCustomPrompt(tpl.desc)}
+                      className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:border-indigo-200 hover:bg-slate-50 transition-colors"
+                    >
+                      <BookOpen className="h-3.5 w-3.5 text-slate-400" />
+                      {tpl.title}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-xs text-slate-500 mt-1">
+                  Pick a saved prompt to steer the AI, type your own situation above, or both.
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Section 2 */}
@@ -145,22 +271,20 @@ export default function SequenceConfigForm() {
           </h2>
           <div className="flex flex-wrap gap-3">
             {goals.map((item) => {
-              const isSelected = selectedGoal === item.id;
+              const isSelected = goal === item.id;
               return (
                 <Button
                   key={item.id}
                   variant={isSelected ? "default" : "outline"}
-                  className={`gap-2 rounded-full ${
-                    isSelected
-                      ? "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 shadow-none"
-                      : "text-slate-700"
-                  }`}
-                  onClick={() => setSelectedGoal(item.id)}
+                  className={`gap-2 rounded-full ${isSelected
+                    ? "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 shadow-none"
+                    : "text-slate-700"
+                    }`}
+                  onClick={() => handleGoalSelect(item.id)}
                 >
                   <item.icon
-                    className={`h-4 w-4 ${
-                      isSelected ? "text-indigo-600" : "text-slate-400"
-                    }`}
+                    className={`h-4 w-4 ${isSelected ? "text-indigo-600" : "text-slate-400"
+                      }`}
                   />
                   {item.label}
                 </Button>
@@ -187,6 +311,21 @@ export default function SequenceConfigForm() {
                       <span>🙂</span> Friendly & Professional
                     </span>
                   </SelectItem>
+                  <SelectItem value="Direct & Assertive">
+                    <span className="flex items-center gap-2">
+                      <span>💪</span> Direct & Assertive
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="Casual & Conversational">
+                    <span className="flex items-center gap-2">
+                      <span>😎</span> Casual & Conversational
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="Formal & Polished">
+                    <span className="flex items-center gap-2">
+                      <span>🎩</span> Formal & Polished
+                    </span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -200,6 +339,12 @@ export default function SequenceConfigForm() {
                 <SelectContent>
                   <SelectItem value="Standard">Standard</SelectItem>
                 </SelectContent>
+                <SelectContent>
+                  <SelectItem value="Light">Light</SelectItem>
+                </SelectContent>
+                <SelectContent>
+                  <SelectItem value="Aggressive">Aggressive</SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
@@ -212,6 +357,12 @@ export default function SequenceConfigForm() {
                 <SelectContent>
                   <SelectItem value="5 steps over 7 days">
                     5 steps over 7 days
+                  </SelectItem>
+                  <SelectItem value="3 steps over 5 days">
+                    3 steps over 5 days
+                  </SelectItem>
+                  <SelectItem value="7 steps over 14 days">
+                    7 steps over 14 days
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -255,13 +406,26 @@ export default function SequenceConfigForm() {
 
         {/* Generate Button */}
         <div className="flex items-center gap-3 pt-2">
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-10 px-6 font-semibold">
-            <Sparkles className="h-4 w-4" />
-            Generate Follow-up Sequence
+          <Button
+            onClick={handleGenerate}
+            disabled={currentStep < 2 || isGenerating}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-10 px-6 font-semibold"
+          >
+            {isGenerating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            {isGenerating ? "Generating..." : "Generate Follow-up Sequence"}
           </Button>
           <span className="text-sm text-slate-400">Takes ~10 seconds</span>
         </div>
       </CardContent>
+      <ManageTemplatesDialog
+        open={isManageTemplatesOpen}
+        onOpenChange={setIsManageTemplatesOpen}
+        templates={templates}
+      />
     </Card>
   );
 }

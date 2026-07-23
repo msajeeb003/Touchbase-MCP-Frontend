@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Users,
   PenLine,
@@ -12,16 +13,26 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import LeadSelectorDialog, { Lead } from "@/components/sequences/LeadSelectorDialog";
+import EditLeadDialog from "@/components/sequences/EditLeadDialog";
 
-export default function SequenceSidebar() {
+interface SequenceSidebarProps {
+  situation: string | null;
+  goal: string | null;
+}
+
+export default function SequenceSidebar({ situation, goal }: SequenceSidebarProps) {
+  const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead>({
+    id: "1",
+    initials: "KP",
+    name: "Kishon Pashi",
+    email: "kishonpashi@gmail.com",
+    phone: "+8801705361661",
+  });
+
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Lead Card */}
@@ -29,35 +40,37 @@ export default function SequenceSidebar() {
         <CardHeader className="flex flex-row items-center justify-between pb-3 pt-5 px-5">
           <CardTitle className="text-sm font-semibold">Lead</CardTitle>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="h-7 text-xs px-2 gap-1.5 text-indigo-600 border-indigo-200 hover:bg-indigo-50">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsLeadDialogOpen(true)}
+              className="h-7 text-xs px-2 gap-1.5 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+            >
               <Users className="h-3 w-3" />
               Pick from Leads
             </Button>
-            <Button variant="outline" size="sm" className="h-7 text-xs px-2 gap-1.5 text-slate-600">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsEditDialogOpen(true)}
+              className="h-7 text-xs px-2 gap-1.5 text-slate-600"
+            >
               <PenLine className="h-3 w-3" />
               Edit
             </Button>
           </div>
         </CardHeader>
         <CardContent className="px-5 pb-5 pt-0">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-1">
             <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-indigo-600 text-white font-medium">KP</AvatarFallback>
+              <AvatarFallback className="bg-indigo-600 text-white font-medium">{selectedLead.initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-semibold text-slate-900 truncate">Kishon Pashi</span>
-              <span className="text-xs text-slate-500 truncate">kishonpashi@gmail.com</span>
-              <span className="text-xs text-slate-500 truncate">+8801705361661</span>
+              <span className="text-sm font-semibold text-slate-900 truncate">{selectedLead.name}</span>
+              <span className="text-xs text-slate-500 truncate">{selectedLead.email}</span>
+              <span className="text-xs text-slate-500 truncate">{selectedLead.phone}</span>
             </div>
           </div>
-          <Select defaultValue="default">
-            <SelectTrigger className="w-full h-9 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="default">Kishon Pashi — kishonpashi@gmail.c...</SelectItem>
-            </SelectContent>
-          </Select>
         <Separator className="my-5" />
 
         {/* Follow-up Summary */}
@@ -66,11 +79,11 @@ export default function SequenceSidebar() {
           <div className="flex flex-col gap-3 text-sm px-1">
             <div className="flex justify-between items-center">
               <span className="text-slate-500">Situation</span>
-              <span className="font-medium text-slate-900">No-show</span>
+              <span className="font-medium text-slate-900">{situation || "-"}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-slate-500">Goal</span>
-              <span className="font-medium text-slate-900">Book another call</span>
+              <span className="font-medium text-slate-900">{goal || "-"}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-slate-500">Tone</span>
@@ -143,6 +156,20 @@ export default function SequenceSidebar() {
         <BookOpen className="h-4 w-4" />
         View Playbook (No-show)
       </Button>
+
+      <LeadSelectorDialog 
+        open={isLeadDialogOpen}
+        onOpenChange={setIsLeadDialogOpen}
+        selectedLeadId={selectedLead.id}
+        onSelectLead={setSelectedLead}
+      />
+
+      <EditLeadDialog 
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        lead={selectedLead}
+        onSave={setSelectedLead}
+      />
     </div>
   );
 }

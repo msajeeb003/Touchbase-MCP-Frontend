@@ -1,8 +1,15 @@
+import { useState } from "react";
 import SequenceConfigForm from "@/components/sequences/SequenceConfigForm";
 import GeneratedSequenceList from "@/components/sequences/GeneratedSequenceList";
 import SequenceSidebar from "@/components/sequences/SequenceSidebar";
 
 export default function CreateSequencePage() {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [situation, setSituation] = useState<string | null>(null);
+  const [goal, setGoal] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false);
+
   return (
     <div className="flex flex-col space-y-6 pb-10">
       <div className="flex flex-col gap-1">
@@ -17,13 +24,26 @@ export default function CreateSequencePage() {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col gap-8 min-w-0">
-          <SequenceConfigForm />
-          <GeneratedSequenceList />
+          <SequenceConfigForm
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            situation={situation}
+            setSituation={setSituation}
+            goal={goal}
+            setGoal={setGoal}
+            isGenerating={isGenerating}
+            setIsGenerating={setIsGenerating}
+            setIsGenerated={setIsGenerated}
+          />
+          <GeneratedSequenceList 
+            isGenerated={isGenerated}
+            onActivate={() => setCurrentStep(5)} 
+          />
         </div>
 
         {/* Right Sidebar */}
         <div className="w-full lg:w-80 shrink-0">
-          <SequenceSidebar />
+          <SequenceSidebar situation={situation} goal={goal} />
         </div>
       </div>
     </div>
