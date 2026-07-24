@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import AddSequenceDialog from "@/components/sequences/AddSequenceDialog";
+
 import UpdateSequenceDialog from "@/components/sequences/UpdateSequenceDialog";
 import {
   AlertDialog,
@@ -258,15 +258,12 @@ export default function SequencesPage() {
             Sequences
           </h2>
         </div>
-        <AddSequenceDialog
-          onSequenceCreated={handleGenerateSteps}
-          trigger={
-            <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
-              <Wand2 className="h-4 w-4" />
-              Generate Sequence
-            </Button>
-          }
-        />
+        <Link to="/dashboard/sequences/new">
+          <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+            <Wand2 className="h-4 w-4" />
+            Generate Sequence
+          </Button>
+        </Link>
       </div>
 
       <div className="w-full min-w-0 rounded-xl border bg-white shadow-sm">
@@ -319,7 +316,6 @@ export default function SequencesPage() {
                   <TableHead>Steps</TableHead>
                   <TableHead className="min-w-[200px]">Progress</TableHead>
                   <TableHead className="text-center">Step Details</TableHead>
-                  <TableHead className="text-center">Generate Steps & Content</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-center min-w-[140px]">Active</TableHead>
                   <TableHead className="text-center">Edit</TableHead>
@@ -384,24 +380,6 @@ export default function SequencesPage() {
                           <ChevronRight className="h-4 w-4" />
                         </Link>
                       </Button>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <button
-                        type="button"
-                        title="Use AI to generate steps and content. To regenerate, delete all existing steps first."
-                        disabled={generatingStepsId === sequence.id}
-                        onClick={() => void handleGenerateSteps(sequence.id)}
-                        className={cn(
-                          "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 via-fuchsia-500 to-amber-400 text-white shadow-md shadow-violet-500/35 ring-2 ring-violet-200/80 transition-transform hover:scale-105 hover:from-violet-600 hover:via-fuchsia-600 hover:to-amber-500 hover:shadow-lg hover:shadow-fuchsia-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60 disabled:hover:scale-100",
-                        )}
-                      >
-                        {generatingStepsId === sequence.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                        ) : (
-                          <Wand2 className="h-4 w-4 drop-shadow-sm" strokeWidth={2.25} aria-hidden />
-                        )}
-                        <span className="sr-only">Use AI to generate steps and content. To regenerate, delete all existing steps first.</span>
-                      </button>
                     </TableCell>
                     <TableCell>
                       <Select

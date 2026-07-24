@@ -54,9 +54,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { SequenceStepItem } from "@/types/sequences";
+import { STEP_TYPE } from "@/constants/stepType";
+import { 
+  useUpdateSequenceStepMutation, 
+  useDeleteSequenceStepMutation,
+  useRegenerateSequenceStepsMutation
+} from "@/store/features/sequences/sequencesApi";
+import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 export interface SequenceStep {
-  id: number;
+  id: string | number;
   type: string;
   time: string;
   icon: any;
@@ -130,7 +138,7 @@ interface SortableStepProps {
   setPreviewStep: (step: SequenceStep) => void;
   setEditStep: (step: SequenceStep) => void;
   handleDuplicateStep: (index: number) => void;
-  handleDeleteStep: (id: number) => void;
+  handleDeleteStep: (id: string | number) => void;
 }
 
 function SortableStep({
@@ -239,13 +247,56 @@ function SortableStep({
 }
 
 interface GeneratedSequenceListProps {
-  onActivate: () => void;
   isGenerated: boolean;
+  onActivate: () => void;
+  sequenceId?: string;
+  apiSteps?: SequenceStepItem[];
+  sequenceStatus?: string;
+  onRegenerated?: (steps: SequenceStepItem[]) => void;
 }
 
-export default function GeneratedSequenceList({ onActivate, isGenerated }: GeneratedSequenceListProps) {
-  const [steps, setSteps] = useState<SequenceStep[]>(initialSteps);
+const mapApiStepToUiStep = (apiStep: SequenceStepItem, index: number): SequenceStep => {
+  const isEmail = apiStep.stepType === STEP_TYPE.EMAIL;
+  const isSms = apiStep.stepType === STEP_TYPE.SMS;
+  const isWhatsapp = apiStep.stepType === STEP_TYPE.WHATSAPP;
+  const isCall = apiStep.stepType === STEP_TYPE.CALL;
+
+  return {
+    id: apiStep.id || `temp-${index}`,
+    type: isEmail ? "Email" : isSms ? "SMS" : isWhatsapp ? "WhatsApp" : isCall ? "AI Call" : "Unknown",
+    time: `Step ${apiStep.stepOrder}`, // Simplify time mapping for now or calculate based on scheduledAt
+    icon: isEmail ? Mail : isSms ? MessageSquare : isWhatsapp ? MessageCircle : isCall ? Phone : Mail,
+    iconColor: isEmail ? "text-blue-500" : isSms ? "text-purple-500" : isWhatsapp ? "text-green-500" : "text-amber-500",
+    iconBg: isEmail ? "bg-blue-50" : isSms ? "bg-purple-50" : isWhatsapp ? "bg-green-50" : "bg-amber-50",
+    subject: apiStep.subject || undefined,
+    content: apiStep.content || "",
+    hasPreview: !isCall,
+    editLabel: isCall ? "Edit Script" : "Edit",
+  };
+};
+
+export default function GeneratedSequenceList({
+  isGenerated,
+  onActivate,
+  sequenceId,
+  apiSteps,
+  sequenceStatus,
+  onRegenerated,
+}: GeneratedSequenceListProps) {
+  const [steps, setSteps] = useState<SequenceStep[]>([]);
   
+  const [updateStep] = useUpdateSequenceStepMutation();
+  const [deleteStep] = useDeleteSequenceStepMutation();
+  const [regenerateSteps] = useRegenerateSequenceStepsMutation();
+  
+  useEffect(() => {
+    if (apiSteps && apiSteps.length > 0) {
+      setSteps(apiSteps.map(mapApiStepToUiStep));
+    } else {
+      setSteps(initialSteps);
+    }
+  }, [apiSteps]);
+
   // Dialog states
   const [previewStep, setPreviewStep] = useState<SequenceStep | null>(null);
   const [editStep, setEditStep] = useState<SequenceStep | null>(null);
@@ -299,7 +350,20 @@ export default function GeneratedSequenceList({ onActivate, isGenerated }: Gener
     setSteps(recalculateTimes(newSteps));
   };
 
-  const handleDeleteStep = (id: number) => {
+  const handleDeleteStep = async (id: string | number) => {
+    if (sequenceId && typeof id === 'string') {
+      const loadingToastId = showLoading("Deleting step...");
+      try {
+        await deleteStep({ sequenceId, stepId: id }).unwrap();
+        dismissToast(loadingToastId);
+        showSuccess("Step deleted successfully");
+      } catch (err: any) {
+        dismissToast(loadingToastId);
+        showError(err?.data?.message || "Failed to delete step");
+        return; // Stop local update if API fails
+      }
+    }
+    
     setSteps((prev) => recalculateTimes(prev.filter(step => step.id !== id)));
   };
 
@@ -320,9 +384,29 @@ export default function GeneratedSequenceList({ onActivate, isGenerated }: Gener
     setSteps((prev) => recalculateTimes([...prev, newStep]));
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editStep) return;
     
+    if (sequenceId && typeof editStep.id === 'string') {
+      const loadingToastId = showLoading("Saving changes...");
+      try {
+        await updateStep({
+          sequenceId,
+          stepId: editStep.id,
+          body: {
+            subject: editStep.type === "Email" ? editSubject : null,
+            content: editContent,
+          }
+        }).unwrap();
+        dismissToast(loadingToastId);
+        showSuccess("Step updated successfully");
+      } catch (err: any) {
+        dismissToast(loadingToastId);
+        showError(err?.data?.message || "Failed to update step");
+        return; // Stop local update if API fails
+      }
+    }
+
     setSteps(steps.map(step => {
       if (step.id === editStep.id) {
         return {
@@ -334,6 +418,22 @@ export default function GeneratedSequenceList({ onActivate, isGenerated }: Gener
       return step;
     }));
     setEditStep(null);
+  };
+
+  const handleRegenerate = async () => {
+    if (!sequenceId) return;
+    const toastId = showLoading("Regenerating all steps...");
+    try {
+      const response = await regenerateSteps(sequenceId).unwrap();
+      dismissToast(toastId);
+      showSuccess("Steps regenerated successfully");
+      if (onRegenerated) {
+         onRegenerated(response.data.sequence.steps);
+      }
+    } catch (err: any) {
+      dismissToast(toastId);
+      showError(err?.data?.message || "Failed to regenerate steps");
+    }
   };
 
   return (
@@ -352,17 +452,14 @@ export default function GeneratedSequenceList({ onActivate, isGenerated }: Gener
           </div>
           {isGenerated && (
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2 text-slate-700 h-9">
+              <Button onClick={handleRegenerate} variant="outline" size="sm" className="gap-2 text-slate-700 h-9">
                 <RefreshCw className="h-4 w-4" />
                 Regenerate
               </Button>
-              <Button variant="outline" size="sm" className="gap-2 text-slate-700 h-9">
-                <SlidersHorizontal className="h-4 w-4" />
-                Advanced Edit
-              </Button>
+
               <Button onClick={onActivate} size="sm" className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white h-9 px-4">
                 <Send className="h-4 w-4" />
-                Activate Sequence
+                {sequenceStatus === "active" ? "Pause Sequence" : "Activate Sequence"}
               </Button>
             </div>
           )}

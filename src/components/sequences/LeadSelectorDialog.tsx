@@ -6,29 +6,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-
-export interface Lead {
-  id: string;
-  initials: string;
-  name: string;
-  email: string;
-  phone: string;
-}
-
-const dummyLeads: Lead[] = [
-  { id: "1", initials: "KP", name: "Kishon Pashi", email: "kishonpashi@gmail.com", phone: "+8801705361661" },
-  { id: "2", initials: "JB", name: "James bradley", email: "jamesbradley1986tw@gmail.com", phone: "+447831392278" },
-  { id: "3", initials: "TC", name: "Thelma Chukwu", email: "thelmachukwu@gmail.com", phone: "+14242889379" },
-  { id: "4", initials: "EH", name: "Elie Hneine", email: "elienhneine@gmail.com", phone: "+966566061682" },
-  { id: "5", initials: "BQ", name: "Brittney Quinn", email: "brittney@claimyourpowher.com", phone: "+18289640365" },
-  { id: "6", initials: "MM", name: "Matt Mosholder", email: "matt@mosholder.com", phone: "+15551234567" },
-];
+import { useGetLeadsQuery } from "@/store/features/leads/leadsApi";
+import type { LeadItem } from "@/types/leads";
 
 interface LeadSelectorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedLeadId: string | null;
-  onSelectLead: (lead: Lead) => void;
+  onSelectLead: (lead: LeadItem) => void;
+}
+
+export function getInitials(name?: string) {
+  if (!name) return "??";
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
 }
 
 export default function LeadSelectorDialog({
@@ -37,6 +27,10 @@ export default function LeadSelectorDialog({
   selectedLeadId,
   onSelectLead,
 }: LeadSelectorDialogProps) {
+  const { data: leadsResponse, isLoading } = useGetLeadsQuery({ limit: 50 }, { skip: !open });
+  
+  const leads = leadsResponse?.data?.items || [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md gap-0 p-0 overflow-hidden rounded-xl">
@@ -56,39 +50,51 @@ export default function LeadSelectorDialog({
           </div>
         </div>
 
-        <div className="overflow-y-auto max-h-[350px] p-2 flex flex-col">
-          {dummyLeads.map((lead) => {
-            const isSelected = lead.id === selectedLeadId;
-            return (
-              <div
-                key={lead.id}
-                onClick={() => {
-                  onSelectLead(lead);
-                  onOpenChange(false);
-                }}
-                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${
-                  isSelected 
-                    ? "bg-indigo-50 border border-indigo-200" 
-                    : "border border-transparent hover:bg-slate-50"
-                }`}
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-sm font-semibold text-white">
-                  {lead.initials}
+        <div className="overflow-y-auto max-h-[350px] p-2 flex flex-col min-h-[100px]">
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8 text-sm text-slate-500">
+              Loading leads...
+            </div>
+          ) : leads.length === 0 ? (
+            <div className="flex items-center justify-center p-8 text-sm text-slate-500">
+              No leads found.
+            </div>
+          ) : (
+            leads.map((lead) => {
+              const isSelected = lead.id === selectedLeadId;
+              const initials = getInitials(lead.name);
+              
+              return (
+                <div
+                  key={lead.id}
+                  onClick={() => {
+                    onSelectLead(lead);
+                    onOpenChange(false);
+                  }}
+                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${
+                    isSelected 
+                      ? "bg-indigo-50 border border-indigo-200" 
+                      : "border border-transparent hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-sm font-semibold text-white">
+                    {initials}
+                  </div>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-slate-900 truncate">
+                      {lead.name}
+                    </span>
+                    <span className="text-[13px] text-slate-500 truncate">
+                      {lead.email} {lead.phone && `· ${lead.phone}`}
+                    </span>
+                  </div>
+                  {isSelected && (
+                    <Check className="h-5 w-5 text-indigo-600 shrink-0 ml-2" />
+                  )}
                 </div>
-                <div className="flex flex-col flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-slate-900 truncate">
-                    {lead.name}
-                  </span>
-                  <span className="text-[13px] text-slate-500 truncate">
-                    {lead.email} · {lead.phone}
-                  </span>
-                </div>
-                {isSelected && (
-                  <Check className="h-5 w-5 text-indigo-600 shrink-0 ml-2" />
-                )}
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -18,6 +18,11 @@ import {
 import { useState } from "react";
 import WizardProgress from "@/components/sequences/WizardProgress";
 import ManageTemplatesDialog from "@/components/sequences/ManageTemplatesDialog";
+import { useGetPromptTemplatesQuery } from "@/store/features/templates/templatesApi";
+import { useGenerateSaveSequenceMutation } from "@/store/features/sequences/sequencesApi";
+import type { LeadItem } from "@/types/leads";
+import type { SequenceItem, SequenceStepItem } from "@/types/sequences";
+import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,11 +41,24 @@ interface SequenceConfigFormProps {
   setCurrentStep: (step: number) => void;
   situation: string | null;
   setSituation: (val: string) => void;
-  goal: string | null;
   setGoal: (val: string) => void;
   isGenerating: boolean;
   setIsGenerating: (val: boolean) => void;
   setIsGenerated: (val: boolean) => void;
+  selectedLead: LeadItem | null;
+  onSequenceGenerated: (sequence: SequenceItem, steps: SequenceStepItem[]) => void;
+  tone: string;
+  setTone: (val: string) => void;
+  intensity: string;
+  setIntensity: (val: string) => void;
+  cadence: string;
+  setCadence: (val: string) => void;
+  channels: string[];
+  setChannels: (val: string[] | ((prev: string[]) => string[])) => void;
+  customPrompt: string;
+  setCustomPrompt: (val: string) => void;
+  sequenceStatus?: string;
+  sequenceId?: string;
 }
 
 export default function SequenceConfigForm({
@@ -53,22 +71,27 @@ export default function SequenceConfigForm({
   isGenerating,
   setIsGenerating,
   setIsGenerated,
+  selectedLead,
+  onSequenceGenerated,
+  tone,
+  setTone,
+  intensity,
+  setIntensity,
+  cadence,
+  setCadence,
+  channels,
+  setChannels,
+  customPrompt,
+  setCustomPrompt,
+  sequenceStatus,
+  sequenceId,
 }: SequenceConfigFormProps) {
   const [isManageTemplatesOpen, setIsManageTemplatesOpen] = useState(false);
-  const [customPrompt, setCustomPrompt] = useState("");
 
-  const templates = [
-    { id: 1, title: "NO SHOW", tag: "NOSHOW1", desc: "You are a Virtual Assistant representing Artur Abdullin from Artech Digita..." },
-    { id: 2, title: "No Show NEW", tag: "No Show NEW", desc: "You are a Virtual Assistant representing Artur from Artech Digital. A meet..." },
-    { id: 3, title: "test", tag: "test", desc: "You are a Virtual Assistant representing Tanumoy Bosu from toto. A mee..." },
-    { id: 4, title: "After sales-No Number", tag: "Post call2", desc: "You are a Virtual Assistant for Artech Digital, an AI development agency ..." },
-    { id: 5, title: "NO SHOW - Artur", tag: "No Show1", desc: "You are a Virtual Assistant representing Artech Digital and the sender Art..." },
-    { id: 6, title: "Admin test", tag: "No Show (admin test)", desc: "You are a Virtual Assistant writing on behalf of Artech Digital and the sen..." },
-    { id: 7, title: "Final PRD Follow Up", tag: "PRD Follow up3", desc: "You are a Virtual Assistant for Artech Digital, an AI development agency ..." },
-    { id: 8, title: "Post call", tag: "Post call", desc: "You are a Virtual Assistant for Artech Digital, an AI development agency ..." },
-    { id: 9, title: "GOOD Leads - Follow Up", tag: "Good Leads", desc: "You are a Virtual Assistant for Artech Digital, an AI services company run..." },
-    { id: 10, title: "MAIL SMS", tag: "No Show new", desc: "You are a Virtual Assistant for Artech Digital, a company that provides AI..." },
-  ];
+  const { data: templatesResponse, isLoading: isLoadingTemplates } = useGetPromptTemplatesQuery(undefined, { skip: situation !== "Custom" });
+  const templates = templatesResponse?.data || [];
+
+  const [generateSave] = useGenerateSaveSequenceMutation();
 
   const situations = [
     {
@@ -127,22 +150,57 @@ export default function SequenceConfigForm({
     if (situation && currentStep === 1) setCurrentStep(2);
   };
 
-  const handleGenerate = () => {
+  const toggleChannel = (channel: string) => {
+    setChannels((prev) => 
+      prev.includes(channel) ? prev.filter((c) => c !== channel) : [...prev, channel]
+    );
+  };
+
+  const handleGenerate = async () => {
+    if (!situation || !goal || !selectedLead) return;
+    
     setIsGenerating(true);
     setCurrentStep(3);
+    const loadingToastId = showLoading("Generating sequence...");
 
-    // Simulate API delay
-    setTimeout(() => {
-      setIsGenerating(false);
+    try {
+      const response = await generateSave({
+        ...(sequenceId ? { sequenceId } : {}),
+        leadId: selectedLead.id,
+        situation: {
+          type: situation,
+          ...(situation === "Custom" && { customPrompt }),
+        },
+        goal,
+        preferences: {
+          tone,
+          intensity,
+          cadence,
+          channels,
+        },
+      }).unwrap();
+
       setIsGenerated(true);
       setCurrentStep(4);
-    }, 1500);
+      onSequenceGenerated(response.data.sequence, response.data.sequence.steps);
+      dismissToast(loadingToastId);
+      showSuccess("Sequence generated successfully");
+    } catch (error: any) {
+      console.error("Failed to generate sequence:", error);
+      dismissToast(loadingToastId);
+      const errorMessage = error?.data?.message || "Failed to generate sequence";
+      showError(errorMessage);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
     <Card className="border shadow-sm">
       <CardContent className="flex flex-col gap-8 p-6">
-        <WizardProgress currentStep={currentStep} />
+        <WizardProgress 
+          currentStep={sequenceStatus === "active" ? 6 : currentStep} 
+        />
         <hr className="border-slate-100" />
 
         {/* Section 1 */}
@@ -228,7 +286,7 @@ export default function SequenceConfigForm({
                     Write it in your own words — the AI follows this exactly.
                   </span>
                   <span className="text-xs text-slate-400">
-                    {customPrompt.length}/400
+                    {customPrompt.length} characters
                   </span>
                 </div>
               </div>
@@ -245,14 +303,16 @@ export default function SequenceConfigForm({
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  {isLoadingTemplates && <span className="text-sm text-slate-500 py-1">Loading saved prompts...</span>}
+                  {!isLoadingTemplates && templates.length === 0 && <span className="text-sm text-slate-500 py-1">No saved prompts yet.</span>}
                   {templates.map((tpl) => (
                     <button
                       key={tpl.id}
-                      onClick={() => setCustomPrompt(tpl.desc)}
+                      onClick={() => setCustomPrompt(tpl.promptText)}
                       className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:border-indigo-200 hover:bg-slate-50 transition-colors"
                     >
                       <BookOpen className="h-3.5 w-3.5 text-slate-400" />
-                      {tpl.title}
+                      {tpl.name}
                     </button>
                   ))}
                 </div>
@@ -300,8 +360,8 @@ export default function SequenceConfigForm({
           </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col gap-2">
-              <Label className="text-slate-700">Tone of voice</Label>
-              <Select defaultValue="Friendly & Professional">
+              <Label className="text-slate-700">Tone</Label>
+              <Select value={tone} onValueChange={setTone}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -332,17 +392,13 @@ export default function SequenceConfigForm({
 
             <div className="flex flex-col gap-2">
               <Label className="text-slate-700">Intensity</Label>
-              <Select defaultValue="Standard">
+              <Select value={intensity} onValueChange={setIntensity}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Standard">Standard</SelectItem>
-                </SelectContent>
-                <SelectContent>
                   <SelectItem value="Light">Light</SelectItem>
-                </SelectContent>
-                <SelectContent>
                   <SelectItem value="Aggressive">Aggressive</SelectItem>
                 </SelectContent>
               </Select>
@@ -350,7 +406,7 @@ export default function SequenceConfigForm({
 
             <div className="flex flex-col gap-2">
               <Label className="text-slate-700">Cadence</Label>
-              <Select defaultValue="5 steps over 7 days">
+              <Select value={cadence} onValueChange={setCadence}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -372,28 +428,48 @@ export default function SequenceConfigForm({
               <Label className="text-slate-700">Channels</Label>
               <div className="grid grid-cols-2 gap-y-3 gap-x-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="ch-email" defaultChecked className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" />
+                  <Checkbox 
+                    id="ch-email" 
+                    checked={channels.includes("email")}
+                    onCheckedChange={() => toggleChannel("email")}
+                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" 
+                  />
                   <Label htmlFor="ch-email" className="flex items-center gap-1.5 font-normal text-slate-700">
                     <Mail className="h-3.5 w-3.5 text-blue-500" />
                     Email
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="ch-sms" defaultChecked className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" />
+                  <Checkbox 
+                    id="ch-sms" 
+                    checked={channels.includes("sms")}
+                    onCheckedChange={() => toggleChannel("sms")}
+                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" 
+                  />
                   <Label htmlFor="ch-sms" className="flex items-center gap-1.5 font-normal text-slate-700">
                     <MessageSquare className="h-3.5 w-3.5 text-purple-500" />
                     SMS
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="ch-whatsapp" defaultChecked className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" />
+                  <Checkbox 
+                    id="ch-whatsapp" 
+                    checked={channels.includes("whatsapp")}
+                    onCheckedChange={() => toggleChannel("whatsapp")}
+                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" 
+                  />
                   <Label htmlFor="ch-whatsapp" className="flex items-center gap-1.5 font-normal text-slate-700">
                     <MessageCircle className="h-3.5 w-3.5 text-green-500" />
                     WhatsApp
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="ch-aicall" defaultChecked className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" />
+                  <Checkbox 
+                    id="ch-aicall" 
+                    checked={channels.includes("aicall")}
+                    onCheckedChange={() => toggleChannel("aicall")}
+                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" 
+                  />
                   <Label htmlFor="ch-aicall" className="flex items-center gap-1.5 font-normal text-slate-700">
                     <Phone className="h-3.5 w-3.5 text-amber-500" />
                     AI Call
@@ -408,7 +484,7 @@ export default function SequenceConfigForm({
         <div className="flex items-center gap-3 pt-2">
           <Button
             onClick={handleGenerate}
-            disabled={currentStep < 2 || isGenerating}
+            disabled={currentStep < 2 || isGenerating || !selectedLead}
             className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-10 px-6 font-semibold"
           >
             {isGenerating ? (
@@ -424,7 +500,10 @@ export default function SequenceConfigForm({
       <ManageTemplatesDialog
         open={isManageTemplatesOpen}
         onOpenChange={setIsManageTemplatesOpen}
-        templates={templates}
+        onUseTemplate={(text) => {
+          setSituation("Custom");
+          setCustomPrompt(text);
+        }}
       />
     </Card>
   );

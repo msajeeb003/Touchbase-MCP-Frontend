@@ -107,10 +107,10 @@ export interface GetSingleSequenceResponse {
 }
 
 export interface UpdateSequenceRequestBody {
-  leadId: string;
-  name: string;
-  totalSteps: number;
-  promptTemplateId: string;
+  leadId?: string;
+  name?: string;
+  totalSteps?: number;
+  promptTemplateId?: string | null;
   status?: SequenceStatus;
 }
 
@@ -219,4 +219,57 @@ export interface UpdateSequenceStepResponse {
   statusCode: number;
   message: string;
   data: SequenceStepItem;
+}
+
+export interface GenerateSaveSequenceRequestBody {
+  sequenceId?: string;
+  leadId: string;
+  situation: {
+    type: string;
+    customPrompt?: string;
+  };
+  goal: string;
+  preferences: {
+    tone: string;
+    intensity: string;
+    cadence: string;
+    channels: string[];
+  };
+}
+
+export interface GenerateSaveSequenceResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    sequence: SequenceItem & {
+      steps: SequenceStepItem[];
+    };
+    generationResults: {
+      stepOrder: number;
+      status: string;
+    }[];
+  };
+}
+
+export interface SequenceLogItem {
+  id: string;
+  sequenceId: string;
+  stepId?: string | null;
+  eventType: string;
+  actor: string;
+  meta: any;
+  createdAt: string;
+}
+
+export interface GetSequenceLogsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    items: SequenceLogItem[];
+    total: number;
+    page: number;
+    limit: number;
+  };
 }

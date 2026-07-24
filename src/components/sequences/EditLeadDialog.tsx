@@ -8,13 +8,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Lead } from "@/components/sequences/LeadSelectorDialog";
+import type { LeadItem } from "@/types/leads";
+import { useUpdateLeadMutation } from "@/store/features/leads/leadsApi";
 
 interface EditLeadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  lead: Lead;
-  onSave: (updatedLead: Lead) => void;
+  lead: LeadItem;
+  onSave: (updatedLead: LeadItem) => void;
 }
 
 export default function EditLeadDialog({
@@ -24,28 +25,31 @@ export default function EditLeadDialog({
   onSave,
 }: EditLeadDialogProps) {
   const [name, setName] = useState(lead.name);
-  const [email, setEmail] = useState(lead.email);
-  const [phone, setPhone] = useState(lead.phone);
+  const [email, setEmail] = useState(lead.email || "");
+  const [phone, setPhone] = useState(lead.phone || "");
+
+  const [updateLead, { isLoading }] = useUpdateLeadMutation();
 
   useEffect(() => {
     if (open) {
       setName(lead.name);
-      setEmail(lead.email);
-      setPhone(lead.phone);
+      setEmail(lead.email || "");
+      setPhone(lead.phone || "");
     }
   }, [open, lead]);
 
-  const handleSave = () => {
-    // Basic validation or just passing it back
-    onSave({
-      ...lead,
-      name,
-      email,
-      phone,
-      // update initials if name changed significantly, but for now we can leave it
-      initials: name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) || lead.initials
-    });
-    onOpenChange(false);
+  const handleSave = async () => {
+    try {
+      const response = await updateLead({
+        id: lead.id,
+        body: { name, email, phone },
+      }).unwrap();
+      
+      onSave(response.data);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to update lead", error);
+    }
   };
 
   return (
@@ -65,6 +69,7 @@ export default function EditLeadDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="h-10 text-sm"
+              disabled={isLoading}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -74,6 +79,7 @@ export default function EditLeadDialog({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="h-10 text-sm"
+              disabled={isLoading}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -83,6 +89,7 @@ export default function EditLeadDialog({
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="h-10 text-sm"
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -91,15 +98,17 @@ export default function EditLeadDialog({
           <Button 
             variant="ghost" 
             onClick={() => onOpenChange(false)} 
+            disabled={isLoading}
             className="text-slate-700 hover:text-slate-900 hover:bg-slate-100"
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSave} 
+            disabled={isLoading}
             className="bg-indigo-600 hover:bg-indigo-700 text-white"
           >
-            Save changes
+            {isLoading ? "Saving..." : "Save changes"}
           </Button>
         </div>
       </DialogContent>

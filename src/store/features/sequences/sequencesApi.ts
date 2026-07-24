@@ -17,6 +17,9 @@ import type {
   UpdateSequenceStepResponse,
   UpdateSequenceRequestBody,
   UpdateSequenceResponse,
+  GenerateSaveSequenceRequestBody,
+  GenerateSaveSequenceResponse,
+  GetSequenceLogsResponse,
 } from "@/types/sequences";
 
 export const sequencesApi = baseApi.injectEndpoints({
@@ -33,6 +36,10 @@ export const sequencesApi = baseApi.injectEndpoints({
         url: `/sequences/${id}`,
         method: "GET",
       }),
+      providesTags: ["Sequences"],
+    }),
+    getSequenceLogs: builder.query<GetSequenceLogsResponse, string>({
+      query: (id) => `/sequences/${id}/logs`,
       providesTags: ["Sequences"],
     }),
     getSequenceSteps: builder.query<GetSequenceStepsResponse, string>({
@@ -133,6 +140,21 @@ export const sequencesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Sequences"],
     }),
+    generateSaveSequence: builder.mutation<GenerateSaveSequenceResponse, GenerateSaveSequenceRequestBody>({
+      query: (body) => ({
+        url: `/sequences/generate-save`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Sequences"],
+    }),
+    regenerateSequenceSteps: builder.mutation<GenerateSaveSequenceResponse, string>({
+      query: (id) => ({
+        url: `/sequences/${id}/regenerate-steps`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Sequences"],
+    }),
   }),
   overrideExisting: false,
 });
@@ -141,6 +163,7 @@ export const {
   useGetSequencesQuery,
   useGetSingleSequenceQuery,
   useGetSequenceStepsQuery,
+  useGetSequenceLogsQuery,
   useCreateSequenceStepMutation,
   useDeleteAllSequenceStepsMutation,
   useDeleteSequenceStepMutation,
@@ -151,4 +174,6 @@ export const {
   useCreateSequenceMutation,
   useUpdateSequenceMutation,
   useDeleteSequenceMutation,
+  useGenerateSaveSequenceMutation,
+  useRegenerateSequenceStepsMutation,
 } = sequencesApi;

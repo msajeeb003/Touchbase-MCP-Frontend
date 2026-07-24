@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   PenLine,
@@ -14,24 +14,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import LeadSelectorDialog, { Lead } from "@/components/sequences/LeadSelectorDialog";
+import LeadSelectorDialog, { getInitials } from "@/components/sequences/LeadSelectorDialog";
 import EditLeadDialog from "@/components/sequences/EditLeadDialog";
+import type { LeadItem } from "@/types/leads";
+import { useGetLeadsQuery } from "@/store/features/leads/leadsApi";
 
 interface SequenceSidebarProps {
   situation: string | null;
   goal: string | null;
+  selectedLead: LeadItem | null;
+  setSelectedLead: (lead: LeadItem | null) => void;
 }
 
-export default function SequenceSidebar({ situation, goal }: SequenceSidebarProps) {
+export default function SequenceSidebar({ situation, goal, selectedLead, setSelectedLead }: SequenceSidebarProps) {
   const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<Lead>({
-    id: "1",
-    initials: "KP",
-    name: "Kishon Pashi",
-    email: "kishonpashi@gmail.com",
-    phone: "+8801705361661",
-  });
+  const { data: leadsResponse } = useGetLeadsQuery({ limit: 1 });
+
+  useEffect(() => {
+    if (!selectedLead && leadsResponse?.data?.items?.length) {
+      setSelectedLead(leadsResponse.data.items[0]);
+    }
+  }, [leadsResponse, selectedLead]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -53,6 +57,7 @@ export default function SequenceSidebar({ situation, goal }: SequenceSidebarProp
               variant="outline" 
               size="sm" 
               onClick={() => setIsEditDialogOpen(true)}
+              disabled={!selectedLead}
               className="h-7 text-xs px-2 gap-1.5 text-slate-600"
             >
               <PenLine className="h-3 w-3" />
@@ -61,16 +66,20 @@ export default function SequenceSidebar({ situation, goal }: SequenceSidebarProp
           </div>
         </CardHeader>
         <CardContent className="px-5 pb-5 pt-0">
-          <div className="flex items-center gap-3 mb-1">
-            <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-indigo-600 text-white font-medium">{selectedLead.initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-semibold text-slate-900 truncate">{selectedLead.name}</span>
-              <span className="text-xs text-slate-500 truncate">{selectedLead.email}</span>
-              <span className="text-xs text-slate-500 truncate">{selectedLead.phone}</span>
+          {selectedLead ? (
+            <div className="flex items-center gap-3 mb-1">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-indigo-600 text-white font-medium">{getInitials(selectedLead.name)}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-sm font-semibold text-slate-900 truncate">{selectedLead.name}</span>
+                {selectedLead.email && <span className="text-xs text-slate-500 truncate">{selectedLead.email}</span>}
+                {selectedLead.phone && <span className="text-xs text-slate-500 truncate">{selectedLead.phone}</span>}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-sm text-slate-500 italic mb-1">No lead selected</div>
+          )}
         <Separator className="my-5" />
 
         {/* Follow-up Summary */}
@@ -160,16 +169,18 @@ export default function SequenceSidebar({ situation, goal }: SequenceSidebarProp
       <LeadSelectorDialog 
         open={isLeadDialogOpen}
         onOpenChange={setIsLeadDialogOpen}
-        selectedLeadId={selectedLead.id}
+        selectedLeadId={selectedLead?.id || null}
         onSelectLead={setSelectedLead}
       />
 
-      <EditLeadDialog 
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        lead={selectedLead}
-        onSave={setSelectedLead}
-      />
+      {selectedLead && (
+        <EditLeadDialog 
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          lead={selectedLead}
+          onSave={setSelectedLead}
+        />
+      )}
     </div>
   );
 }

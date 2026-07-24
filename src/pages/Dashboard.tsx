@@ -44,7 +44,6 @@ const navItems = [
   { title: "Dashboard", to: "/dashboard", icon: Home },
   { title: "Leads", to: "/dashboard/leads", icon: Users2 },
   { title: "Sequences", to: "/dashboard/sequences", icon: Layers3 },
-  { title: "Sequences New", to: "/dashboard/sequences/new", icon: PlusCircle },
   { title: "Transcripts", to: "/dashboard/transcripts", icon: FileText },
   { title: "Templates", to: "/dashboard/templates", icon: Shapes },
   { title: "Settings", to: "/dashboard/settings", icon: Settings },
@@ -66,7 +65,7 @@ const breadcrumbLabelMap: Record<string, string> = {
   settings: "Settings",
   "how-to-configure": "How to configure",
   steps: "Steps",
-  new: "New Template",
+  new: "New Sequence",
   edit: "Edit Template",
 };
 
