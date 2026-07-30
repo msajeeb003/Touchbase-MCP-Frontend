@@ -10,6 +10,7 @@ import LeadsPage from "./pages/dashboardPages/LeadsPage";
 import LeadTranscriptsPage from "./pages/dashboardPages/LeadTranscriptsPage";
 import SequencesPage from "./pages/dashboardPages/SequencesPage";
 import SequenceStepsPage from "./pages/dashboardPages/SequenceStepsPage";
+import CreateSequencePage from "./pages/dashboardPages/CreateSequencePage";
 import TranscriptsPage from "./pages/dashboardPages/TranscriptsPage";
 import TemplatesPage from "./pages/dashboardPages/TemplatesPage";
 import CreateTemplatePage from "./pages/dashboardPages/CreateTemplatePage";
@@ -47,7 +48,8 @@ const App = () => (
                 <Route path="leads" element={<LeadsPage />} />
                 <Route path="leads/:id/transcripts" element={<LeadTranscriptsPage />} />
                 <Route path="sequences" element={<SequencesPage />} />
-                <Route path="sequences/:id/steps" element={<SequenceStepsPage />} />
+                <Route path="sequences/new" element={<CreateSequencePage />} />
+                <Route path="sequences/:id/steps" element={<CreateSequencePage />} />
                 <Route path="transcripts" element={<TranscriptsPage />} />
                 <Route path="templates" element={<TemplatesPage />} />
                 <Route path="templates/new" element={<CreateTemplatePage />} />

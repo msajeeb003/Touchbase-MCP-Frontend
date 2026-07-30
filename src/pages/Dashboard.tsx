@@ -9,6 +9,7 @@ import {
   BookOpen,
   Home,
   Settings,
+  PlusCircle,
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -64,7 +65,7 @@ const breadcrumbLabelMap: Record<string, string> = {
   settings: "Settings",
   "how-to-configure": "How to configure",
   steps: "Steps",
-  new: "New Template",
+  new: "New Sequence",
   edit: "Edit Template",
 };
 
