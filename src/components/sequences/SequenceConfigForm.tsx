@@ -14,19 +14,28 @@ import {
   FileText,
   Share2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import WizardProgress from "@/components/sequences/WizardProgress";
 import ManageTemplatesDialog from "@/components/sequences/ManageTemplatesDialog";
 import { useGetPromptTemplatesQuery } from "@/store/features/templates/templatesApi";
 import { useGenerateSaveSequenceMutation } from "@/store/features/sequences/sequencesApi";
 import { GOAL_TYPES } from "@/constants/goalType";
+import {
+  CADENCE_CUSTOM,
+  CADENCE_PRESETS,
+  formatCadence,
+  isCadencePreset,
+  isValidCadence,
+  parseCadence,
+} from "@/constants/cadence";
 import type { LeadItem } from "@/types/leads";
 import type { SequenceItem, SequenceStepItem } from "@/types/sequences";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -98,6 +107,22 @@ export default function SequenceConfigForm({
 }: SequenceConfigFormProps) {
   const navigate = useNavigate();
   const [isManageTemplatesOpen, setIsManageTemplatesOpen] = useState(false);
+  const parsedCadence = parseCadence(cadence);
+  const [isCustomCadence, setIsCustomCadence] = useState(!isCadencePreset(cadence));
+  const [customSteps, setCustomSteps] = useState(parsedCadence?.steps ?? 5);
+  const [customDays, setCustomDays] = useState(parsedCadence?.days ?? 7);
+  const isCadenceValid = isValidCadence(cadence);
+
+  useEffect(() => {
+    const parsed = parseCadence(cadence);
+    if (parsed) {
+      setCustomSteps(parsed.steps);
+      setCustomDays(parsed.days);
+    }
+    if (!isCadencePreset(cadence)) {
+      setIsCustomCadence(true);
+    }
+  }, [cadence]);
 
   const {
     data: templatesResponse,
@@ -146,14 +171,38 @@ export default function SequenceConfigForm({
     if (situation && currentStep === 1) setCurrentStep(2);
   };
 
+  const handleCadenceSelect = (value: string) => {
+    if (value === CADENCE_CUSTOM) {
+      setIsCustomCadence(true);
+      setCadence(formatCadence(customSteps, customDays));
+      return;
+    }
+    setIsCustomCadence(false);
+    setCadence(value);
+  };
+
+  const handleCustomStepsChange = (raw: string) => {
+    const steps = Math.max(1, Number(raw) || 1);
+    setIsCustomCadence(true);
+    setCustomSteps(steps);
+    setCadence(formatCadence(steps, customDays));
+  };
+
+  const handleCustomDaysChange = (raw: string) => {
+    const days = Math.max(1, Number(raw) || 1);
+    setIsCustomCadence(true);
+    setCustomDays(days);
+    setCadence(formatCadence(customSteps, days));
+  };
+
   const toggleChannel = (channel: string) => {
-    setChannels((prev) => 
+    setChannels((prev) =>
       prev.includes(channel) ? prev.filter((c) => c !== channel) : [...prev, channel]
     );
   };
 
   const handleGenerate = async () => {
-    if (!situation || !goal || !selectedLead) return;
+    if (!situation || !goal || !selectedLead || !isCadenceValid) return;
 
     setIsGenerating(true);
     setCurrentStep(3);
@@ -183,12 +232,12 @@ export default function SequenceConfigForm({
       dismissToast(loadingToastId);
       const errorMessage =
         typeof error === "object" &&
-        error !== null &&
-        "data" in error &&
-        typeof error.data === "object" &&
-        error.data !== null &&
-        "message" in error.data &&
-        typeof error.data.message === "string"
+          error !== null &&
+          "data" in error &&
+          typeof error.data === "object" &&
+          error.data !== null &&
+          "message" in error.data &&
+          typeof error.data.message === "string"
           ? error.data.message
           : "Failed to generate sequence";
       showError(errorMessage);
@@ -200,8 +249,8 @@ export default function SequenceConfigForm({
   return (
     <Card className="border shadow-sm">
       <CardContent className="flex flex-col gap-8 p-6">
-        <WizardProgress 
-          currentStep={sequenceStatus === "active" ? 6 : currentStep} 
+        <WizardProgress
+          currentStep={sequenceStatus === "active" ? 6 : currentStep}
         />
         <hr className="border-slate-100" />
 
@@ -414,33 +463,70 @@ export default function SequenceConfigForm({
 
             <div className="flex flex-col gap-2">
               <Label className="text-slate-700">Cadence</Label>
-              <Select value={cadence} onValueChange={setCadence}>
+              <Select
+                value={isCustomCadence ? CADENCE_CUSTOM : cadence}
+                onValueChange={handleCadenceSelect}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5 steps over 7 days">
-                    5 steps over 7 days
-                  </SelectItem>
-                  <SelectItem value="3 steps over 5 days">
-                    3 steps over 5 days
-                  </SelectItem>
-                  <SelectItem value="7 steps over 14 days">
-                    7 steps over 14 days
-                  </SelectItem>
+                  {CADENCE_PRESETS.map((preset) => (
+                    <SelectItem key={preset} value={preset}>
+                      {preset}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value={CADENCE_CUSTOM}>Custom</SelectItem>
                 </SelectContent>
               </Select>
+
+              {isCustomCadence && (
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="cadence-steps" className="text-xs font-normal text-slate-500">
+                      Steps
+                    </Label>
+                    <Input
+                      id="cadence-steps"
+                      type="number"
+                      min={1}
+                      value={customSteps}
+                      onChange={(e) => handleCustomStepsChange(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="cadence-days" className="text-xs font-normal text-slate-500">
+                      Days
+                    </Label>
+                    <Input
+                      id="cadence-days"
+                      type="number"
+                      min={1}
+                      value={customDays}
+                      onChange={(e) => handleCustomDaysChange(e.target.value)}
+                    />
+                  </div>
+                  <p className="col-span-2 text-xs text-slate-500">
+                    <span className="font-medium text-slate-700">{cadence}</span>
+                  </p>
+                  {!isCadenceValid && (
+                    <p className="col-span-2 text-xs text-red-500">
+                      Steps and days must be at least 1.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
               <Label className="text-slate-700">Channels</Label>
               <div className="grid grid-cols-2 gap-y-3 gap-x-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="ch-email" 
+                  <Checkbox
+                    id="ch-email"
                     checked={channels.includes("email")}
                     onCheckedChange={() => toggleChannel("email")}
-                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" 
+                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                   />
                   <Label htmlFor="ch-email" className="flex items-center gap-1.5 font-normal text-slate-700">
                     <Mail className="h-3.5 w-3.5 text-blue-500" />
@@ -448,11 +534,11 @@ export default function SequenceConfigForm({
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="ch-sms" 
+                  <Checkbox
+                    id="ch-sms"
                     checked={channels.includes("sms")}
                     onCheckedChange={() => toggleChannel("sms")}
-                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" 
+                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                   />
                   <Label htmlFor="ch-sms" className="flex items-center gap-1.5 font-normal text-slate-700">
                     <MessageSquare className="h-3.5 w-3.5 text-purple-500" />
@@ -460,11 +546,11 @@ export default function SequenceConfigForm({
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="ch-whatsapp" 
+                  <Checkbox
+                    id="ch-whatsapp"
                     checked={channels.includes("whatsapp")}
                     onCheckedChange={() => toggleChannel("whatsapp")}
-                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" 
+                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                   />
                   <Label htmlFor="ch-whatsapp" className="flex items-center gap-1.5 font-normal text-slate-700">
                     <MessageCircle className="h-3.5 w-3.5 text-green-500" />
@@ -472,11 +558,11 @@ export default function SequenceConfigForm({
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="ch-aicall" 
+                  <Checkbox
+                    id="ch-aicall"
                     checked={channels.includes("aicall")}
                     onCheckedChange={() => toggleChannel("aicall")}
-                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" 
+                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                   />
                   <Label htmlFor="ch-aicall" className="flex items-center gap-1.5 font-normal text-slate-700">
                     <Phone className="h-3.5 w-3.5 text-amber-500" />
@@ -492,7 +578,7 @@ export default function SequenceConfigForm({
         <div className="flex items-center gap-3 pt-2">
           <Button
             onClick={handleGenerate}
-            disabled={currentStep < 2 || isGenerating || !selectedLead}
+            disabled={currentStep < 2 || isGenerating || !selectedLead || !isCadenceValid}
             className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-10 px-6 font-semibold"
           >
             {isGenerating ? (
