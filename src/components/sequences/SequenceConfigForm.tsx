@@ -1,25 +1,26 @@
 import {
-  CalendarX2,
   Phone,
-  FileText,
   MessageSquare,
-  RefreshCw,
   Sparkles,
   Calendar,
   MessageCircle,
   FileCheck,
-  Plus,
   Mail,
   Settings,
   Loader2,
   X,
   BookOpen,
+  Users,
+  FileText,
+  Share2,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import WizardProgress from "@/components/sequences/WizardProgress";
 import ManageTemplatesDialog from "@/components/sequences/ManageTemplatesDialog";
 import { useGetPromptTemplatesQuery } from "@/store/features/templates/templatesApi";
 import { useGenerateSaveSequenceMutation } from "@/store/features/sequences/sequencesApi";
+import { GOAL_TYPES } from "@/constants/goalType";
 import type { LeadItem } from "@/types/leads";
 import type { SequenceItem, SequenceStepItem } from "@/types/sequences";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
@@ -36,11 +37,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const GOAL_ICONS = {
+  "Book another call": Calendar,
+  "Get a reply": MessageSquare,
+  "Build relationship": Users,
+  "Close the deal": FileCheck,
+  "Send proposal": FileText,
+  "Share resources": Share2,
+} as const;
 interface SequenceConfigFormProps {
   currentStep: number;
   setCurrentStep: (step: number) => void;
   situation: string | null;
   setSituation: (val: string) => void;
+  goal: string;
   setGoal: (val: string) => void;
   isGenerating: boolean;
   setIsGenerating: (val: boolean) => void;
@@ -86,61 +96,47 @@ export default function SequenceConfigForm({
   sequenceStatus,
   sequenceId,
 }: SequenceConfigFormProps) {
+  const navigate = useNavigate();
   const [isManageTemplatesOpen, setIsManageTemplatesOpen] = useState(false);
 
-  const { data: templatesResponse, isLoading: isLoadingTemplates } = useGetPromptTemplatesQuery(undefined, { skip: situation !== "Custom" });
+  const {
+    data: templatesResponse,
+    isLoading: isLoadingTemplates,
+    isError: isTemplatesError,
+  } = useGetPromptTemplatesQuery();
   const templates = templatesResponse?.data || [];
 
   const [generateSave] = useGenerateSaveSequenceMutation();
 
   const situations = [
+    ...templates.map((template) => ({
+      id: template.id,
+      title: template.name,
+      desc: template.promptText,
+      icon: BookOpen,
+      isCustom: false,
+    })),
     {
-      id: "No-show",
-      title: "No-show",
-      desc: "Lead missed a scheduled call or meeting",
-      icon: CalendarX2,
-    },
-    {
-      id: "Post-call follow-up",
-      title: "Post-call follow-up",
-      desc: "Follow up after a call or meeting",
-      icon: Phone,
-    },
-    {
-      id: "Proposal sent",
-      title: "Proposal sent",
-      desc: "Follow up after sending a proposal",
-      icon: FileText,
-    },
-    {
-      id: "No reply",
-      title: "No reply",
-      desc: "Lead hasn't replied to your message",
-      icon: MessageSquare,
-    },
-    {
-      id: "Re-engagement",
-      title: "Re-engagement",
-      desc: "Re-connect with an inactive lead",
-      icon: RefreshCw,
-    },
-    {
-      id: "Custom",
+      id: "__custom__",
       title: "Custom",
-      desc: "Describe your own situation",
+      desc: "Create or manage your own template",
       icon: Sparkles,
+      isCustom: true,
     },
   ];
 
-  const goals = [
-    { id: "Book another call", label: "Book another call", icon: Calendar },
-    { id: "Get a reply", label: "Get a reply", icon: MessageSquare },
-    { id: "Close proposal", label: "Close proposal", icon: FileCheck },
-    { id: "Qualify lead", label: "Qualify lead", icon: Plus },
-    { id: "Other goal", label: "Other goal", icon: Plus },
-  ];
+  const goals = GOAL_TYPES.map((goalType) => ({
+    id: goalType,
+    label: goalType,
+    icon: GOAL_ICONS[goalType],
+  }));
 
-  const handleSituationSelect = (id: string) => {
+  const handleSituationSelect = (id: string, isCustom: boolean) => {
+    if (isCustom) {
+      navigate("/dashboard/templates");
+      return;
+    }
+
     setSituation(id);
     if (goal && currentStep === 1) setCurrentStep(2);
   };
@@ -158,7 +154,7 @@ export default function SequenceConfigForm({
 
   const handleGenerate = async () => {
     if (!situation || !goal || !selectedLead) return;
-    
+
     setIsGenerating(true);
     setCurrentStep(3);
     const loadingToastId = showLoading("Generating sequence...");
@@ -167,10 +163,7 @@ export default function SequenceConfigForm({
       const response = await generateSave({
         ...(sequenceId ? { sequenceId } : {}),
         leadId: selectedLead.id,
-        situation: {
-          type: situation,
-          ...(situation === "Custom" && { customPrompt }),
-        },
+        promptTemplateId: situation,
         goal,
         preferences: {
           tone,
@@ -185,10 +178,19 @@ export default function SequenceConfigForm({
       onSequenceGenerated(response.data.sequence, response.data.sequence.steps);
       dismissToast(loadingToastId);
       showSuccess("Sequence generated successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to generate sequence:", error);
       dismissToast(loadingToastId);
-      const errorMessage = error?.data?.message || "Failed to generate sequence";
+      const errorMessage =
+        typeof error === "object" &&
+        error !== null &&
+        "data" in error &&
+        typeof error.data === "object" &&
+        error.data !== null &&
+        "message" in error.data &&
+        typeof error.data.message === "string"
+          ? error.data.message
+          : "Failed to generate sequence";
       showError(errorMessage);
     } finally {
       setIsGenerating(false);
@@ -226,12 +228,18 @@ export default function SequenceConfigForm({
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {isLoadingTemplates && (
+              <p className="text-sm text-slate-500">Loading templates...</p>
+            )}
+            {isTemplatesError && (
+              <p className="text-sm text-red-500">Failed to load templates.</p>
+            )}
             {situations.map((item) => {
               const isSelected = situation === item.id;
               return (
                 <div
                   key={item.id}
-                  onClick={() => handleSituationSelect(item.id)}
+                  onClick={() => handleSituationSelect(item.id, item.isCustom)}
                   className={`cursor-pointer rounded-xl border p-4 transition-all ${isSelected
                     ? "border-indigo-600 bg-indigo-50 shadow-sm"
                     : "border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50"
@@ -248,7 +256,7 @@ export default function SequenceConfigForm({
                     {item.title}
                   </h3>
                   <p
-                    className={`mt-1 text-xs ${isSelected ? "text-indigo-700" : "text-slate-500"
+                    className={`mt-1 line-clamp-2 text-xs ${isSelected ? "text-indigo-700" : "text-slate-500"
                       }`}
                   >
                     {item.desc}

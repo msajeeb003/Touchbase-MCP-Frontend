@@ -52,6 +52,13 @@ export interface SequenceItem {
   name: string;
   totalSteps: number;
   status: SequenceStatus;
+  situationType?: string | null;
+  situationPrompt?: string | null;
+  goal?: string | null;
+  tone?: string | null;
+  intensity?: string | null;
+  cadence?: string | null;
+  channels?: string[] | null;
   createdAt: string;
   updatedAt: string;
   lead: SequenceLeadInfo;
@@ -224,10 +231,7 @@ export interface UpdateSequenceStepResponse {
 export interface GenerateSaveSequenceRequestBody {
   sequenceId?: string;
   leadId: string;
-  situation: {
-    type: string;
-    customPrompt?: string;
-  };
+  promptTemplateId: string;
   goal: string;
   preferences: {
     tone: string;

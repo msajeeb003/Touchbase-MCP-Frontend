@@ -35,17 +35,14 @@ export default function CreateSequencePage() {
   useEffect(() => {
     if (sequenceData?.data) {
       const seq = sequenceData.data;
-      setSituation(seq.situationType || null);
-      if (seq.situationType === "Custom" && seq.situationPrompt) {
-        setCustomPrompt(seq.situationPrompt);
-      }
+      setSituation(seq.promptTemplateId || null);
       setGoal(seq.goal || null);
       setTone(seq.tone || "Friendly & Professional");
       setIntensity(seq.intensity || "Standard");
       setCadence(seq.cadence || "5 steps over 7 days");
       setChannels(seq.channels || ["email", "sms", "whatsapp", "aicall"]);
       
-      setSelectedLead({ ...seq.lead, id: seq.leadId } as unknown as LeadItem); // API returns lead details
+      setSelectedLead({ ...seq.lead, id: seq.leadId } as unknown as LeadItem);
       setGeneratedSequence(seq);
       setGeneratedSteps(seq.steps || []);
       setIsGenerated(true);
@@ -144,7 +141,11 @@ export default function CreateSequencePage() {
         <div className="w-full lg:w-80 shrink-0">
           <SequenceSidebar 
             situation={situation} 
-            goal={goal} 
+            goal={goal}
+            tone={tone}
+            intensity={intensity}
+            cadence={cadence}
+            channels={channels}
             selectedLead={selectedLead}
             setSelectedLead={setSelectedLead}
           />

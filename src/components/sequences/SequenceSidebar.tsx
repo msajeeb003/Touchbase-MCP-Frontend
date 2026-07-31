@@ -18,24 +18,42 @@ import LeadSelectorDialog, { getInitials } from "@/components/sequences/LeadSele
 import EditLeadDialog from "@/components/sequences/EditLeadDialog";
 import type { LeadItem } from "@/types/leads";
 import { useGetLeadsQuery } from "@/store/features/leads/leadsApi";
+import { useGetPromptTemplatesQuery } from "@/store/features/templates/templatesApi";
 
 interface SequenceSidebarProps {
   situation: string | null;
   goal: string | null;
+  tone: string;
+  intensity: string;
+  cadence: string;
+  channels: string[];
   selectedLead: LeadItem | null;
   setSelectedLead: (lead: LeadItem | null) => void;
 }
 
-export default function SequenceSidebar({ situation, goal, selectedLead, setSelectedLead }: SequenceSidebarProps) {
+export default function SequenceSidebar({
+  situation,
+  goal,
+  tone,
+  intensity,
+  cadence,
+  channels,
+  selectedLead,
+  setSelectedLead,
+}: SequenceSidebarProps) {
   const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { data: leadsResponse } = useGetLeadsQuery({ limit: 1 });
+  const { data: templatesResponse } = useGetPromptTemplatesQuery();
+
+  const selectedPromptName =
+    templatesResponse?.data?.find((template) => template.id === situation)?.name ?? null;
 
   useEffect(() => {
     if (!selectedLead && leadsResponse?.data?.items?.length) {
       setSelectedLead(leadsResponse.data.items[0]);
     }
-  }, [leadsResponse, selectedLead]);
+  }, [leadsResponse, selectedLead, setSelectedLead]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -86,37 +104,36 @@ export default function SequenceSidebar({ situation, goal, selectedLead, setSele
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold text-slate-900 px-1">Follow-up Summary</h3>
           <div className="flex flex-col gap-3 text-sm px-1">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Situation</span>
-              <span className="font-medium text-slate-900">{situation || "-"}</span>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-slate-500 shrink-0">Prompt</span>
+              <span className="font-medium text-slate-900 text-right truncate">
+                {selectedPromptName || "-"}
+              </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Goal</span>
-              <span className="font-medium text-slate-900">{goal || "-"}</span>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-slate-500 shrink-0">Goal</span>
+              <span className="font-medium text-slate-900 text-right truncate">{goal || "-"}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Tone</span>
-              <span className="font-medium text-slate-900">Friendly & Professional</span>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-slate-500 shrink-0">Tone</span>
+              <span className="font-medium text-slate-900 text-right truncate">{tone || "-"}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Intensity</span>
-              <span className="font-medium text-slate-900">Standard</span>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-slate-500 shrink-0">Intensity</span>
+              <span className="font-medium text-slate-900 text-right truncate">{intensity || "-"}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Cadence</span>
-              <span className="font-medium text-slate-900">5 steps over 7 days</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Template</span>
-              <span className="font-medium text-slate-900">Auto (situation)</span>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-slate-500 shrink-0">Cadence</span>
+              <span className="font-medium text-slate-900 text-right truncate">{cadence || "-"}</span>
             </div>
             <div className="flex justify-between items-center mt-1">
               <span className="text-slate-500">Channels</span>
               <div className="flex gap-2 text-slate-400">
-                <Mail className="h-4 w-4 text-blue-500" />
-                <MessageSquare className="h-4 w-4 text-purple-500" />
-                <MessageCircle className="h-4 w-4 text-green-500" />
-                <Phone className="h-4 w-4 text-amber-500" />
+                {channels.includes("email") && <Mail className="h-4 w-4 text-blue-500" />}
+                {channels.includes("sms") && <MessageSquare className="h-4 w-4 text-purple-500" />}
+                {channels.includes("whatsapp") && <MessageCircle className="h-4 w-4 text-green-500" />}
+                {channels.includes("aicall") && <Phone className="h-4 w-4 text-amber-500" />}
+                {channels.length === 0 && <span className="font-medium text-slate-900">-</span>}
               </div>
             </div>
           </div>
@@ -124,7 +141,7 @@ export default function SequenceSidebar({ situation, goal, selectedLead, setSele
           <div className="mt-2 flex items-start gap-3 rounded-lg bg-indigo-50 p-4 text-indigo-700">
             <Sparkles className="h-5 w-5 shrink-0 mt-0.5" />
             <p className="text-xs font-medium leading-relaxed">
-              AI will generate a sequence optimized for this situation and your goal.
+              AI will generate a sequence optimized for this prompt and your goal.
             </p>
           </div>
         </div>
