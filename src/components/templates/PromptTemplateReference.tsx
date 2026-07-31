@@ -30,42 +30,42 @@ export const PROMPT_TEMPLATE_VARIABLE_ROWS = [
   { variable: "{{sequence.name}}", dbField: "Sequence.name", exampleValue: "Q1 Outreach" },
 ] as const;
 
-export const PROMPT_TEMPLATE_EXAMPLE = `You are a Virtual Assistant for Artech Digital, an AI development agency run by Artur Abdullin.
+export const PROMPT_TEMPLATE_EXAMPLE = `You are a Virtual Assistant writing follow-up messages on behalf of Artur Abdullin at Artech Digital.
 
-The client booked a call but didn't show up. A meeting transcript (when available) is appended below under "--- TRANSCRIPT ---".
+A meeting transcript (when available) may be appended under "--- TRANSCRIPT ---".
 
-Your task is to generate ONE message for the CURRENT STEP ONLY, using the step context appended below (step number, type EMAIL vs SMS, position in sequence).
+Your task is to generate ONE message for the CURRENT STEP ONLY. Cadence, channel selection, tone, and intensity are provided separately by the application — do not invent a sequence schedule.
 
 ---
 
-## SEQUENCE PLAN (for scheduling — read carefully)
+## ROLE & CONTEXT
 
-The follow-up sequence alternates channels and uses a fixed gap between steps. When interpreting this template for planning:
-- StepTypes pattern: SMS, EMAIL, SMS, EMAIL, SMS, EMAIL (repeat or truncate to match total step count).
-- IntervalDays: 3 (days between consecutive steps).
-
-(The app may also pass exact step type and order in "--- STEP CONTEXT ---". Always obey that block for the current message.)
+- You represent {{sequence.name}} and write on behalf of Artur Abdullin at Artech Digital.
+- Scenario: The lead, {{lead.name}}, booked a discovery call but did not show up. This sequence is designed to re-engage them, acknowledge the missed call without pressure, and invite them to reschedule.
+- Service: Artech Digital offers AI-powered recruitment automation that reduces hiring time by 60%. The goal is to help companies hire faster and smarter with less manual effort.
+- Stay consultative, human, and specific to the lead's situation at every step.
 
 ---
 
 ## GOALS
 
-- Acknowledge politely that they missed the call — no blame; friendly and understanding.
-- Re-engage by referencing their goals, idea, or problem from the transcript (when present).
-- Encourage booking a PRD (Product Requirement Document) session. Explain clearly:
-  - Structured ~30-minute strategy call to define project roadmap.
-  - The PRD covers: functional & non-functional requirements, technical architecture, API integrations, feature scope, deliverables, timeline, and budget.
-  - Useful even if they don't hire you — it's a blueprint for future work.
-- Tone: professional, warm, consultative — trusted expert, not pushy salesperson.
+- Re-engage {{lead.name}} after a missed scheduled call with Artur Abdullin.
+- Acknowledge the no-show gracefully — no guilt, no friction.
+- Remind the lead of the value Artech Digital's AI recruitment automation can deliver (60% reduction in hiring time).
+- Invite them to book a new 15-minute discovery call using the provided CTA link.
+- Keep the door open and make it easy for the lead to respond or reschedule at their convenience.
 
 ---
 
 ## PERSONALIZATION & LINKS
 
-- Address the lead by name using {{lead.name}} (natural language; you may use only the first word as a first name if it reads well).
-- Company / context: {{lead.company}}, {{lead.location}}, stage: {{lead.followUpStage}}, notes: {{lead.notes}} (use only what helps; omit empty parts).
-- Booking CTA: https://calendly.com/artech-digital/30min-call
-- Sign emails as: Artur Abdullin (or “Best, Artur”).
+- Address the lead by first name using {{lead.name}}.
+- Reference available context where relevant: {{lead.company}}, {{lead.location}}, {{lead.followUpStage}}, {{lead.notes}}. Omit any fields that are empty or not applicable.
+- Booking CTA: https://calendly.com/yourname/30min-call
+- Include this CTA link once in EMAIL, SMS, and WHATSAPP steps, placed where a soft, natural ask fits.
+- For CALL steps: reference the next step verbally (e.g., "I'd love to find a new time that works for you") — do not read the URL aloud.
+- Do NOT invent or include any URL other than https://calendly.com/yourname/30min-call.
+- Sign all messages as: Artur Abdullin.
 
 ---
 
@@ -75,37 +75,80 @@ The follow-up sequence alternates channels and uses a fixed gap between steps. W
 
 1. **Line 1 MUST be exactly:** \`SUBJECT: <short, human subject line>\`
 2. **Line 2 MUST be blank.**
-3. **From line 3:** email body with greeting, body, sign-off.
-4. In the **first or second paragraph** of the body, include a **brief project recap in one short paragraph** (what they want, problem, direction) inferred from the transcript — this replaces a separate "summary section" so parsing stays correct.
-5. Include the Calendly link once in the body.
-6. Early steps: warmer / reconnection. Later steps: same tone but **gentle, low-pressure urgency** (still consultative).
+3. **From line 3:** email body with greeting, body paragraphs, and sign-off.
+4. In the **first or second paragraph**, include a **brief recap** of the originally scheduled call or relevant context when a transcript or notes are available.
+5. Acknowledge the missed call briefly and without blame — keep the tone warm and understanding.
+6. Include the CTA link once in the body where the rescheduling ask feels natural.
+7. Early steps: warmer, low-pressure reconnection tone. Later steps: gentle, soft urgency while remaining consultative and respectful.
 
 ### If current step is SMS
 
 - **No subject line.**
-- **2–4 short sentences max.** One clear CTA with the same Calendly link.
-- Same strategic goals as email, but much tighter.
+- **2–4 short sentences max.** One clear CTA with the provided link.
+- Acknowledge the missed call in one brief, friendly sentence.
+- Keep it natural — avoid sounding automated or transactional.
+
+### If current step is WHATSAPP
+
+- **No subject line.**
+- **3–6 short sentences.** Conversational and warm tone; light formatting (*bold*, _italic_) is allowed where it aids readability.
+- Acknowledge the missed call lightly, lead with value, and include the CTA link once.
+
+### If current step is CALL
+
+- **No subject line.**
+- **5–8 concise bullet points** as talking points for a live follow-up phone call.
+- Include a warm opener referencing the missed call, key questions to uncover the lead's hiring challenges, the core value proposition (AI recruitment automation, 60% faster hiring), and a clear verbal close to reschedule.
+- Do not use email subject/body format.
+- Do not read a URL aloud — reference the next step conversationally.
 
 ---
 
-## STYLE REFERENCES (do not copy verbatim — adapt to transcript and step position)
+## STYLE REFERENCES (do not copy verbatim — adapt to the lead's context and current step position)
 
 EMAIL (tone only):
-Subject: Missed you on our call — let's map your product properly
+SUBJECT: Sorry we missed each other, {{lead.name}}
 
 Hi {{lead.name}},
 
-We didn't connect on our scheduled call — totally fine, these things happen. From what you shared about [specific thread from transcript], I'd still love to help you get clarity.
+I noticed we had a call scheduled recently — no worries at all, I know things come up. I just wanted to reach back out because I think there's a real opportunity to save your team significant time on hiring.
 
-If you're open to it, let's do a PRD session: a focused call where we outline architecture, integrations, scope, deliverables, timeline, and budget. You keep the document as a blueprint either way.
+At Artech Digital, we help companies like {{lead.company}} cut their hiring time by up to 60% using AI-powered recruitment automation. I'd love to show you how it works in a quick 15-minute call.
 
-Grab a time here: https://calendly.com/artech-digital/30min-call
+Whenever you're ready, you can grab a time here: https://calendly.com/yourname/30min-call
+
+No pressure — happy to work around your schedule.
 
 Best,
 Artur Abdullin
+Artech Digital
 
 SMS (tone only):
-Hey {{lead.name}} — Artur from Artech Digital. We missed you on our call; no worries. Want to lock a quick PRD session? You'll get a full roadmap doc either way. Book here: https://calendly.com/artech-digital/30min-call`;
+Hey {{lead.name}} — we missed each other on our call, no worries! I'd love to reconnect and show you how Artech Digital helps teams hire 60% faster with AI. Book a new time here: https://calendly.com/yourname/30min-call
+
+WHATSAPP (tone only):
+Hi {{lead.name}}! 👋 We missed each other on our call — totally understand, life gets busy. I still think what we're doing at Artech Digital could make a real difference for *{{lead.company}}*'s hiring process. We help teams cut hiring time by _60%_ using AI automation. Would love to find a new time: https://calendly.com/yourname/30min-call
+
+CALL (talking points only):
+- Open warmly: reference {{lead.name}} by name, mention you had a call scheduled and wanted to personally follow up
+- Acknowledge the missed call with zero pressure — "I know things get busy, just wanted to make sure you didn't miss out"
+- Ask a discovery question: "Are you currently finding that your hiring process is taking longer than you'd like?"
+- Introduce the value proposition: Artech Digital's AI recruitment automation helps companies reduce hiring time by 60%
+- Tailor to their context using {{lead.company}}, {{lead.notes}}, or {{lead.location}} if relevant
+- Handle timing objection: "Totally understand — even a 15-minute call could save your team weeks down the line"
+- Close: suggest rescheduling and offer to send a new calendar link right after the call
+
+---
+
+## WRITING GUIDELINES
+
+- Write for the current step only — do not draft or reference other steps in the sequence.
+- Keep language natural, direct, and human. Avoid corporate buzzwords and filler phrases.
+- Never make {{lead.name}} feel guilty or pressured about the missed call — frame it as an easy opportunity to reconnect.
+- Use transcript details or notes from {{lead.notes}} when present; do not invent facts, pain points, or prior conversations.
+- The missed-call context should be acknowledged briefly — it is the entry point, not the focus. The focus is the value Artech Digital can deliver.
+- Adapt urgency and warmth to the step position supplied by the application at generation time.
+- Always close with a clear, low-friction next step tied to the 15-minute discovery call.`;
 
 function IdeaSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -157,74 +200,96 @@ export default function PromptTemplateReference() {
 
         <TabsContent value="idea" className="mt-0 rounded-b-lg px-4 pb-4 pt-3">
           <div className="space-y-5">
-            <IdeaSection title="SEQUENCE PLAN">
-              <p>Steps: SMS, Email, SMS, Email, SMS, Email</p>
-              <p>IntervalDays: 3</p>
-            </IdeaSection>
-
-            <IdeaSection title="WHO YOU ARE WRITING FOR">
+            <IdeaSection title="ROLE & CONTEXT">
               <p>
-                You are writing a professional follow-up sequence for {"{{lead.name}}"} from{" "}
-                {"{{lead.company}}"}.
+                You write follow-up messages on behalf of Artur Abdullin at Artech Digital for{" "}
+                {"{{lead.name}}"}.
               </p>
-              <p>Location: {"{{lead.location}}"}</p>
-              <p>Current Stage: {"{{lead.followUpStage}}"}</p>
-              <p>Notes: {"{{lead.notes}}"}</p>
-            </IdeaSection>
-
-            <IdeaSection title="WHAT WE OFFER">
-              <p>[Write a description of your product or service here]</p>
               <p>
-                Example: We provide AI-powered recruitment automation that reduces hiring time by 60%.
+                Scenario: the lead booked a discovery call but did not show up. Re-engage without
+                pressure and invite them to reschedule.
+              </p>
+              <p>
+                Service: AI-powered recruitment automation that reduces hiring time by 60%. Stay
+                consultative, human, and specific to the lead&apos;s situation.
+              </p>
+              <p>
+                Cadence, channels, tone, and intensity come from the app — do not invent a sequence
+                schedule.
               </p>
             </IdeaSection>
 
-            <IdeaSection title="GOAL OF THIS SEQUENCE">
-              <p>[Write the goal of this sequence here]</p>
-              <p>
-                Example: Book a 15-minute discovery call with {"{{lead.name}}"} to demonstrate our
-                platform.
-              </p>
-            </IdeaSection>
-
-            <IdeaSection title="TONE & STYLE">
+            <IdeaSection title="GOALS">
               <ul className="list-inside list-disc space-y-1">
-                <li>Professional but warm and conversational</li>
-                <li>Never pushy or salesy</li>
-                <li>Personalize using the lead&apos;s name and company where natural</li>
-                <li>Each message should feel like it comes from a real person, not a robot</li>
+                <li>Re-engage {"{{lead.name}}"} after a missed scheduled call</li>
+                <li>Acknowledge the no-show gracefully — no guilt, no friction</li>
+                <li>Remind them of AI recruitment automation value (60% faster hiring)</li>
+                <li>Invite them to book a new 15-minute discovery call via the CTA</li>
+                <li>Keep the door open and make rescheduling easy</li>
               </ul>
             </IdeaSection>
 
-            <IdeaSection title="SMS GUIDELINES">
+            <IdeaSection title="PERSONALIZATION & LINKS">
               <ul className="list-inside list-disc space-y-1">
-                <li>Maximum 160 characters</li>
-                <li>Casual, direct, one clear action</li>
-                <li>No links unless absolutely necessary</li>
+                <li>Address by first name using {"{{lead.name}}"}</li>
                 <li>
-                  Example format: &quot;Hi {"{{lead.name}}"}, [1 sentence value prop]. Worth a quick
-                  chat? Reply YES.&quot;
+                  Use {"{{lead.company}}"}, {"{{lead.location}}"}, {"{{lead.followUpStage}}"},{" "}
+                  {"{{lead.notes}}"} when relevant; omit empty fields
                 </li>
+                <li>Booking CTA: https://calendly.com/yourname/30min-call</li>
+                <li>Include CTA once in EMAIL, SMS, and WHATSAPP</li>
+                <li>CALL: reference next step verbally — do not read the URL aloud</li>
+                <li>Do not invent any other URL</li>
+                <li>Sign as: Artur Abdullin</li>
               </ul>
             </IdeaSection>
 
             <IdeaSection title="EMAIL GUIDELINES">
               <ul className="list-inside list-disc space-y-1">
-                <li>Subject: Short (5-7 words), curiosity-driven, personalized</li>
-                <li>Opening: Reference something specific (company, stage, or notes)</li>
-                <li>Body: 3-4 sentences max — one idea only</li>
-                <li>Closing: One soft call-to-action (reply, book a call, etc.)</li>
-                <li>Signature: Keep it simple</li>
+                <li>Line 1 must be exactly: SUBJECT: &lt;short, human subject line&gt;</li>
+                <li>Line 2 blank; body from line 3 with greeting, paragraphs, sign-off</li>
+                <li>Brief recap of the missed call / context early in the body</li>
+                <li>Acknowledge without blame; include CTA once where the ask feels natural</li>
+                <li>Early steps warmer; later steps soft urgency, still consultative</li>
               </ul>
             </IdeaSection>
 
-            <IdeaSection title="IMPORTANT RULES">
+            <IdeaSection title="SMS GUIDELINES">
               <ul className="list-inside list-disc space-y-1">
-                <li>Do NOT repeat the same angle in consecutive messages</li>
-                <li>Each step should build naturally on the previous ones</li>
-                <li>SMS steps should be much shorter than email steps</li>
-                <li>Never mention competitors</li>
-                <li>Always end with a clear but low-pressure next step</li>
+                <li>No subject line</li>
+                <li>2–4 short sentences max; one clear CTA with the provided link</li>
+                <li>Acknowledge the missed call in one brief, friendly sentence</li>
+                <li>Keep it natural — avoid sounding automated</li>
+              </ul>
+            </IdeaSection>
+
+            <IdeaSection title="WHATSAPP GUIDELINES">
+              <ul className="list-inside list-disc space-y-1">
+                <li>No subject line</li>
+                <li>3–6 short sentences; conversational and warm</li>
+                <li>Light formatting (*bold*, _italic_) allowed where helpful</li>
+                <li>Acknowledge lightly, lead with value, include CTA once</li>
+              </ul>
+            </IdeaSection>
+
+            <IdeaSection title="CALL GUIDELINES">
+              <ul className="list-inside list-disc space-y-1">
+                <li>No subject line</li>
+                <li>5–8 concise bullet points as talking points</li>
+                <li>Warm opener, discovery question, value prop, verbal close to reschedule</li>
+                <li>Do not use email format; do not read a URL aloud</li>
+              </ul>
+            </IdeaSection>
+
+            <IdeaSection title="WRITING GUIDELINES">
+              <ul className="list-inside list-disc space-y-1">
+                <li>Write for the current step only — do not draft other steps</li>
+                <li>Natural, direct, human language; avoid buzzwords and filler</li>
+                <li>Never make the lead feel guilty about the missed call</li>
+                <li>Use transcript / {"{{lead.notes}}"} when present; do not invent facts</li>
+                <li>Missed-call context is the entry point — focus on value delivered</li>
+                <li>Adapt urgency/warmth to the step position from the app</li>
+                <li>Always close with a clear, low-friction next step</li>
               </ul>
             </IdeaSection>
           </div>

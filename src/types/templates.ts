@@ -1,5 +1,3 @@
-import type { StepType } from "@/constants/stepType";
-
 export interface PromptTemplateItem {
   id: string;
   name: string;
@@ -63,9 +61,6 @@ export interface GeneratePromptTextRequestBody {
   senderName: string;
   ctaLink?: string;
   companyName?: string;
-  stepTypesPattern: StepType[];
-  intervalDays: number;
-  toneStyle: string;
   additionalNotes?: string;
 }
 
