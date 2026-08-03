@@ -30,11 +30,11 @@ import {
   Clock,
   MoreVertical,
   PenLine,
-  Eye,
   Plus,
   Sparkles,
   Copy,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -68,6 +68,7 @@ export interface SequenceStep {
   stepOrder: number;
   type: string;
   time: string;
+  scheduledAt?: string | null;
   status: string;
   icon: any;
   iconColor: string;
@@ -303,6 +304,18 @@ const formatScheduledAt = (value: string | null | undefined) => {
   });
 };
 
+const toDateTimeLocalValue = (value: string | null | undefined) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  const hours = `${date.getHours()}`.padStart(2, "0");
+  const minutes = `${date.getMinutes()}`.padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 const mapApiStepToUiStep = (apiStep: SequenceStepItem, index: number): SequenceStep => {
   const isEmail = apiStep.stepType === STEP_TYPE.EMAIL;
   const isSms = apiStep.stepType === STEP_TYPE.SMS;
@@ -314,6 +327,7 @@ const mapApiStepToUiStep = (apiStep: SequenceStepItem, index: number): SequenceS
     stepOrder: apiStep.stepOrder ?? index + 1,
     type: isEmail ? "Email" : isSms ? "SMS" : isWhatsapp ? "WhatsApp" : isCall ? "AI Call" : "Unknown",
     time: formatScheduledAt(apiStep.scheduledAt),
+    scheduledAt: apiStep.scheduledAt ?? null,
     status: apiStep.status || "draft",
     icon: isEmail ? Mail : isSms ? MessageSquare : isWhatsapp ? MessageCircle : isCall ? Phone : Mail,
     iconColor: isEmail ? "text-blue-500" : isSms ? "text-purple-500" : isWhatsapp ? "text-green-500" : "text-amber-500",
@@ -335,7 +349,7 @@ export default function GeneratedSequenceList({
 }: GeneratedSequenceListProps) {
   const [steps, setSteps] = useState<SequenceStep[]>([]);
   
-  const [updateStep] = useUpdateSequenceStepMutation();
+  const [updateStep, { isLoading: isSavingStep }] = useUpdateSequenceStepMutation();
   const [deleteStep] = useDeleteSequenceStepMutation();
   const [regenerateSteps] = useRegenerateSequenceStepsMutation();
   
@@ -354,6 +368,7 @@ export default function GeneratedSequenceList({
   // Edit form states
   const [editSubject, setEditSubject] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [editScheduledAt, setEditScheduledAt] = useState("");
 
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
@@ -369,6 +384,7 @@ export default function GeneratedSequenceList({
     if (editStep) {
       setEditSubject(editStep.subject || "");
       setEditContent(editStep.content || "");
+      setEditScheduledAt(toDateTimeLocalValue(editStep.scheduledAt));
     }
   }, [editStep]);
 
@@ -472,7 +488,11 @@ export default function GeneratedSequenceList({
 
   const handleSaveEdit = async () => {
     if (!editStep) return;
-    
+
+    const scheduledAtIso = editScheduledAt.trim()
+      ? new Date(editScheduledAt).toISOString()
+      : undefined;
+
     if (sequenceId && typeof editStep.id === 'string') {
       const loadingToastId = showLoading("Saving changes...");
       try {
@@ -480,8 +500,9 @@ export default function GeneratedSequenceList({
           sequenceId,
           stepId: editStep.id,
           body: {
-            subject: editStep.type === "Email" ? editSubject : null,
+            ...(editStep.type === "Email" ? { subject: editSubject } : {}),
             content: editContent,
+            ...(scheduledAtIso ? { scheduledAt: scheduledAtIso } : {}),
           }
         }).unwrap();
         dismissToast(loadingToastId);
@@ -499,6 +520,8 @@ export default function GeneratedSequenceList({
           ...step,
           subject: editStep.type === "Email" ? editSubject : step.subject,
           content: editContent,
+          scheduledAt: scheduledAtIso ?? step.scheduledAt,
+          time: formatScheduledAt(scheduledAtIso ?? step.scheduledAt),
         };
       }
       return step;
@@ -664,26 +687,37 @@ export default function GeneratedSequenceList({
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editStep} onOpenChange={(open) => !open && setEditStep(null)}>
-        <DialogContent className="max-w-xl rounded-xl overflow-hidden p-0 gap-0">
-          <DialogHeader className="px-6 py-4 border-b">
+      <Dialog open={!!editStep} onOpenChange={(open) => !open && !isSavingStep && setEditStep(null)}>
+        <DialogContent className="flex max-h-[85vh] w-[calc(100vw-2rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl p-0">
+          <DialogHeader className="shrink-0 border-b px-6 py-4">
             <DialogTitle className="text-base font-semibold text-slate-900">
               {editStep?.type === "Email" ? "Edit Email message" : 
                editStep?.type === "SMS" ? "Edit SMS message" : 
                editStep?.type === "WhatsApp" ? "Edit WhatsApp message" : "Edit call script"}
             </DialogTitle>
           </DialogHeader>
-          <div className="p-6 flex flex-col gap-5">
+          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6">
             {editStep?.type === "Email" && (
               <div className="flex flex-col gap-2">
                 <Label className="font-normal text-slate-700">Subject</Label>
                 <Input 
                   value={editSubject}
                   onChange={(e) => setEditSubject(e.target.value)}
+                  disabled={isSavingStep}
                   className="h-10 text-sm"
                 />
               </div>
             )}
+            <div className="flex flex-col gap-2">
+              <Label className="font-normal text-slate-700">Scheduled at</Label>
+              <Input
+                type="datetime-local"
+                value={editScheduledAt}
+                onChange={(e) => setEditScheduledAt(e.target.value)}
+                disabled={isSavingStep}
+                className="h-10 text-sm"
+              />
+            </div>
             <div className="flex flex-col gap-2">
               <Label className="font-normal text-slate-700">
                 {editStep?.type === "AI Call" ? "Call script" : "Message"}
@@ -691,23 +725,33 @@ export default function GeneratedSequenceList({
               <Textarea 
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
+                disabled={isSavingStep}
                 className="min-h-[200px] resize-none text-sm p-3"
               />
             </div>
           </div>
-          <div className="flex justify-end gap-3 px-6 py-4 border-t bg-slate-50/50">
+          <div className="flex shrink-0 justify-end gap-3 border-t bg-slate-50/50 px-6 py-4">
             <Button 
               variant="ghost" 
               onClick={() => setEditStep(null)} 
+              disabled={isSavingStep}
               className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 h-9"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleSaveEdit} 
+              disabled={isSavingStep}
               className="bg-indigo-600 hover:bg-indigo-700 text-white h-9 px-5"
             >
-              Save changes
+              {isSavingStep ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save changes"
+              )}
             </Button>
           </div>
         </DialogContent>

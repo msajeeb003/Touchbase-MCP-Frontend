@@ -229,8 +229,8 @@ export interface RegenerateAllStepContentResponse {
 }
 
 export interface UpdateSequenceStepRequestBody {
-  subject?: string | null;
-  content?: string | null;
+  subject?: string;
+  content?: string;
   scheduledAt?: string;
 }
 
