@@ -14,6 +14,7 @@ import CreateSequencePage from "./pages/dashboardPages/CreateSequencePage";
 import TranscriptsPage from "./pages/dashboardPages/TranscriptsPage";
 import TemplatesPage from "./pages/dashboardPages/TemplatesPage";
 import CreateTemplatePage from "./pages/dashboardPages/CreateTemplatePage";
+import CreateTemplateDemoPage from "./pages/dashboardPages/CreateTemplateDemoPage";
 import EditTemplatePage from "./pages/dashboardPages/EditTemplatePage";
 import SettingsPage from "./pages/dashboardPages/SettingsPage";
 import HowToConfigurePage from "./pages/dashboardPages/HowToConfigurePage";
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="transcripts" element={<TranscriptsPage />} />
                 <Route path="templates" element={<TemplatesPage />} />
                 <Route path="templates/new" element={<CreateTemplatePage />} />
+                <Route path="templates/new-demo" element={<CreateTemplateDemoPage />} />
                 <Route path="templates/:id/edit" element={<EditTemplatePage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="how-to-configure" element={<HowToConfigurePage />} />
