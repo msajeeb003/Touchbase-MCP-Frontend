@@ -2,6 +2,16 @@ import type { StepType } from "@/constants/stepType";
 
 export type SequenceStatus = "draft" | "active" | "paused" | "completed" | "cancelled";
 
+export type SequenceStepStatus =
+  | "pending"
+  | "draft"
+  | "scheduled"
+  | "sending"
+  | "calling"
+  | "sent"
+  | "failed"
+  | "skipped";
+
 /** Retell call record attached to a sequence step when stepType is CALL. */
 export interface SequenceStepCallLog {
   id: string;
@@ -21,9 +31,9 @@ export interface SequenceStepCallLog {
 
 export interface SequenceLeadInfo {
   name: string;
-  email: string;
-  company: string;
-  followUpStage: string;
+  email: string | null;
+  company: string | null;
+  followUpStage: string | null;
 }
 
 export interface SequencePromptTemplateInfo {
@@ -48,21 +58,21 @@ export interface SequenceItem {
   id: string;
   userId: string;
   leadId: string;
-  promptTemplateId: string;
+  promptTemplateId: string | null;
   name: string;
   totalSteps: number;
-  status: SequenceStatus;
-  situationType?: string | null;
-  situationPrompt?: string | null;
-  goal?: string | null;
-  tone?: string | null;
-  intensity?: string | null;
-  cadence?: string | null;
-  channels?: string[] | null;
+  status: SequenceStatus | string;
+  situationType: string | null;
+  situationPrompt: string | null;
+  goal: string | null;
+  tone: string | null;
+  intensity: string | null;
+  cadence: string | null;
+  channels: string[] | null;
   createdAt: string;
   updatedAt: string;
   lead: SequenceLeadInfo;
-  promptTemplate: SequencePromptTemplateInfo;
+  promptTemplate: SequencePromptTemplateInfo | null;
   _count?: SequenceCountInfo;
 }
 
@@ -70,18 +80,23 @@ export interface SequenceStepItem {
   id: string;
   sequenceId: string;
   stepOrder: number;
-  stepType: StepType;
+  stepType: StepType | string;
   subject: string | null;
   content: string | null;
-  status: string;
+  status: SequenceStepStatus | string;
   scheduledAt: string;
   sentAt: string | null;
   sendLog: string | null;
   externalMessageId: string | null;
-  callLog: SequenceStepCallLog | null;
+  callLog?: SequenceStepCallLog | null;
   createdAt: string;
   updatedAt: string;
 }
+
+/** GET /sequences/:id `data` shape */
+export type SequenceDetail = SequenceItem & {
+  steps: SequenceStepItem[];
+};
 
 export interface GetSequencesResponse {
   success: boolean;
@@ -108,9 +123,7 @@ export interface GetSingleSequenceResponse {
   success: boolean;
   statusCode: number;
   message: string;
-  data: SequenceItem & {
-    steps: SequenceStepItem[];
-  };
+  data: SequenceDetail;
 }
 
 export interface UpdateSequenceRequestBody {
@@ -262,7 +275,7 @@ export interface SequenceLogItem {
   stepId?: string | null;
   eventType: string;
   actor: string;
-  meta: any;
+  meta: Record<string, unknown>;
   createdAt: string;
 }
 

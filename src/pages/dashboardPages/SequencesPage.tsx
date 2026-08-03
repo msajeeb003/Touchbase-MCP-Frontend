@@ -15,8 +15,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-
-import UpdateSequenceDialog from "@/components/sequences/UpdateSequenceDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,7 +53,7 @@ import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast
 
 const VALID_STATUSES: SequenceStatus[] = ["draft", "active", "paused", "completed", "cancelled"];
 
-const getStatusBadgeClass = (status: SequenceStatus) => {
+const getStatusBadgeClass = (status: SequenceStatus | string) => {
   if (status === "active") return "border-green-200 bg-green-100 text-green-700";
   if (status === "draft") return "border-amber-200 bg-amber-100 text-amber-700";
   if (status === "completed") return "border-emerald-200 bg-emerald-100 text-emerald-700";
@@ -64,7 +62,8 @@ const getStatusBadgeClass = (status: SequenceStatus) => {
   return "border-slate-200 bg-slate-100 text-slate-700";
 };
 
-const getStatusLabel = (status: SequenceStatus) => status.charAt(0).toUpperCase() + status.slice(1);
+const getStatusLabel = (status: SequenceStatus | string) =>
+  status.charAt(0).toUpperCase() + status.slice(1);
 
 const clampProgress = (value: number) => Math.max(0, Math.min(100, value));
 
@@ -375,7 +374,7 @@ export default function SequencesPage() {
                     </TableCell>
                     <TableCell className="text-center">
                       <Button asChild variant="ghost" className="gap-1 text-indigo-600 hover:text-indigo-700">
-                        <Link to={`/dashboard/sequences/${sequence.id}/steps`}>
+                        <Link to={`/dashboard/sequences/${sequence.id}/view`}>
                           View
                           <ChevronRight className="h-4 w-4" />
                         </Link>
@@ -451,15 +450,12 @@ export default function SequencesPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <UpdateSequenceDialog
-                        sequenceId={sequence.id}
-                        trigger={
-                          <Button variant="ghost" size="icon" className="text-indigo-600 hover:text-indigo-700">
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Update sequence</span>
-                          </Button>
-                        }
-                      />
+                      <Button asChild variant="ghost" size="icon" className="text-indigo-600 hover:text-indigo-700">
+                        <Link to={`/dashboard/sequences/${sequence.id}/steps`}>
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Update sequence</span>
+                        </Link>
+                      </Button>
                     </TableCell>
                     <TableCell className="text-center">
                       <AlertDialog>

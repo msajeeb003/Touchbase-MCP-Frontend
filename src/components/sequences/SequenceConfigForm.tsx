@@ -107,6 +107,8 @@ export default function SequenceConfigForm({
 }: SequenceConfigFormProps) {
   const navigate = useNavigate();
   const [isManageTemplatesOpen, setIsManageTemplatesOpen] = useState(false);
+  const [showAllSituations, setShowAllSituations] = useState(false);
+  const TEMPLATE_PREVIEW_COUNT = 6;
   const parsedCadence = parseCadence(cadence);
   const [isCustomCadence, setIsCustomCadence] = useState(!isCadencePreset(cadence));
   const [customSteps, setCustomSteps] = useState(parsedCadence?.steps ?? 5);
@@ -150,6 +152,10 @@ export default function SequenceConfigForm({
     },
   ];
 
+  const hasMoreSituations = situations.length > TEMPLATE_PREVIEW_COUNT;
+  const visibleSituations = showAllSituations
+    ? situations
+    : situations.slice(0, TEMPLATE_PREVIEW_COUNT);
   const goals = GOAL_TYPES.map((goalType) => ({
     id: goalType,
     label: goalType,
@@ -283,7 +289,7 @@ export default function SequenceConfigForm({
             {isTemplatesError && (
               <p className="text-sm text-red-500">Failed to load templates.</p>
             )}
-            {situations.map((item) => {
+            {visibleSituations.map((item) => {
               const isSelected = situation === item.id;
               return (
                 <div
@@ -315,6 +321,21 @@ export default function SequenceConfigForm({
             })}
           </div>
 
+          {hasMoreSituations && (
+            <div className="flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setShowAllSituations((prev) => !prev)}
+              >
+                {showAllSituations
+                  ? "Show less"
+                  : `More (${situations.length - TEMPLATE_PREVIEW_COUNT} more)`}
+              </Button>
+            </div>
+          )}
           {situation === "Custom" && (
             <div className="flex flex-col gap-4 rounded-xl border border-indigo-100 bg-slate-50/50 p-5 mt-2">
               <div className="flex items-center justify-between">

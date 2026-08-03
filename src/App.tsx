@@ -9,7 +9,7 @@ import DashboardPage from "./pages/dashboardPages/DashboardPage";
 import LeadsPage from "./pages/dashboardPages/LeadsPage";
 import LeadTranscriptsPage from "./pages/dashboardPages/LeadTranscriptsPage";
 import SequencesPage from "./pages/dashboardPages/SequencesPage";
-import SequenceStepsPage from "./pages/dashboardPages/SequenceStepsPage";
+import ViewSequenceStepsPage from "./pages/dashboardPages/ViewSequenceStepsPage";
 import CreateSequencePage from "./pages/dashboardPages/CreateSequencePage";
 import TranscriptsPage from "./pages/dashboardPages/TranscriptsPage";
 import TemplatesPage from "./pages/dashboardPages/TemplatesPage";
@@ -49,6 +49,7 @@ const App = () => (
                 <Route path="leads/:id/transcripts" element={<LeadTranscriptsPage />} />
                 <Route path="sequences" element={<SequencesPage />} />
                 <Route path="sequences/new" element={<CreateSequencePage />} />
+                <Route path="sequences/:id/view" element={<ViewSequenceStepsPage />} />
                 <Route path="sequences/:id/steps" element={<CreateSequencePage />} />
                 <Route path="transcripts" element={<TranscriptsPage />} />
                 <Route path="templates" element={<TemplatesPage />} />

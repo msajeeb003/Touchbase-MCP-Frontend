@@ -65,6 +65,7 @@ const breadcrumbLabelMap: Record<string, string> = {
   settings: "Settings",
   "how-to-configure": "How to configure",
   steps: "Steps",
+  view: "View Steps",
   new: "New Sequence",
   edit: "Edit Template",
 };
@@ -180,7 +181,7 @@ export default function Dashboard() {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <main className="min-w-0 overflow-x-hidden p-6">
+        <main className="min-w-0 p-6">
           
           <Outlet />
         </main>

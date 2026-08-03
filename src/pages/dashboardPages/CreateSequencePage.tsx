@@ -137,21 +137,19 @@ export default function CreateSequencePage() {
           )}
         </div>
 
-        {/* Right Sidebar */}
-        <div className="w-full lg:w-80 shrink-0 self-start">
-          <div className="lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
-            <SequenceSidebar 
-              situation={situation} 
-              goal={goal}
-              tone={tone}
-              intensity={intensity}
-              cadence={cadence}
-              channels={channels}
-              selectedLead={selectedLead}
-              setSelectedLead={setSelectedLead}
-            />
-          </div>
-        </div>
+        {/* Right Sidebar — sticky only on lg+; stacks below on smaller screens */}
+        <aside className="w-full lg:w-80 lg:shrink-0 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
+          <SequenceSidebar 
+            situation={situation} 
+            goal={goal}
+            tone={tone}
+            intensity={intensity}
+            cadence={cadence}
+            channels={channels}
+            selectedLead={selectedLead}
+            setSelectedLead={setSelectedLead}
+          />
+        </aside>
       </div>
     </div>
   );
