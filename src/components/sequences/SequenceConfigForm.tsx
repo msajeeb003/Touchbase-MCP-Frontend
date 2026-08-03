@@ -22,10 +22,7 @@ import { useGetPromptTemplatesQuery } from "@/store/features/templates/templates
 import { useGenerateSaveSequenceMutation } from "@/store/features/sequences/sequencesApi";
 import { GOAL_TYPES } from "@/constants/goalType";
 import {
-  CADENCE_CUSTOM,
-  CADENCE_PRESETS,
   formatCadence,
-  isCadencePreset,
   isValidCadence,
   parseCadence,
 } from "@/constants/cadence";
@@ -110,22 +107,16 @@ export default function SequenceConfigForm({
   const [showAllSituations, setShowAllSituations] = useState(false);
   const TEMPLATE_PREVIEW_COUNT = 6;
   const parsedCadence = parseCadence(cadence);
-  const [isCustomCadence, setIsCustomCadence] = useState(!isCadencePreset(cadence));
   const [customSteps, setCustomSteps] = useState(parsedCadence?.steps ?? 5);
   const [customDays, setCustomDays] = useState(parsedCadence?.days ?? 7);
   const isCadenceValid = isValidCadence(cadence);
 
   useEffect(() => {
     const parsed = parseCadence(cadence);
-    if (parsed) {
-      setCustomSteps(parsed.steps);
-      setCustomDays(parsed.days);
-    }
-    if (!isCadencePreset(cadence)) {
-      setIsCustomCadence(true);
-    }
+    if (!parsed) return;
+    setCustomSteps(parsed.steps);
+    setCustomDays(parsed.days);
   }, [cadence]);
-
   const {
     data: templatesResponse,
     isLoading: isLoadingTemplates,
@@ -177,26 +168,14 @@ export default function SequenceConfigForm({
     if (situation && currentStep === 1) setCurrentStep(2);
   };
 
-  const handleCadenceSelect = (value: string) => {
-    if (value === CADENCE_CUSTOM) {
-      setIsCustomCadence(true);
-      setCadence(formatCadence(customSteps, customDays));
-      return;
-    }
-    setIsCustomCadence(false);
-    setCadence(value);
-  };
-
   const handleCustomStepsChange = (raw: string) => {
     const steps = Math.max(1, Number(raw) || 1);
-    setIsCustomCadence(true);
     setCustomSteps(steps);
     setCadence(formatCadence(steps, customDays));
   };
 
   const handleCustomDaysChange = (raw: string) => {
     const days = Math.max(1, Number(raw) || 1);
-    setIsCustomCadence(true);
     setCustomDays(days);
     setCadence(formatCadence(customSteps, days));
   };
@@ -484,59 +463,40 @@ export default function SequenceConfigForm({
 
             <div className="flex flex-col gap-2">
               <Label className="text-slate-700">Cadence</Label>
-              <Select
-                value={isCustomCadence ? CADENCE_CUSTOM : cadence}
-                onValueChange={handleCadenceSelect}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CADENCE_PRESETS.map((preset) => (
-                    <SelectItem key={preset} value={preset}>
-                      {preset}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value={CADENCE_CUSTOM}>Custom</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {isCustomCadence && (
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="cadence-steps" className="text-xs font-normal text-slate-500">
-                      Steps
-                    </Label>
-                    <Input
-                      id="cadence-steps"
-                      type="number"
-                      min={1}
-                      value={customSteps}
-                      onChange={(e) => handleCustomStepsChange(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="cadence-days" className="text-xs font-normal text-slate-500">
-                      Days
-                    </Label>
-                    <Input
-                      id="cadence-days"
-                      type="number"
-                      min={1}
-                      value={customDays}
-                      onChange={(e) => handleCustomDaysChange(e.target.value)}
-                    />
-                  </div>
-                  <p className="col-span-2 text-xs text-slate-500">
-                    <span className="font-medium text-slate-700">{cadence}</span>
-                  </p>
-                  {!isCadenceValid && (
-                    <p className="col-span-2 text-xs text-red-500">
-                      Steps and days must be at least 1.
-                    </p>
-                  )}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="cadence-steps" className="text-xs font-normal text-slate-500">
+                    Steps
+                  </Label>
+                  <Input
+                    id="cadence-steps"
+                    type="number"
+                    min={1}
+                    value={customSteps}
+                    onChange={(e) => handleCustomStepsChange(e.target.value)}
+                  />
                 </div>
-              )}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="cadence-days" className="text-xs font-normal text-slate-500">
+                    Days
+                  </Label>
+                  <Input
+                    id="cadence-days"
+                    type="number"
+                    min={1}
+                    value={customDays}
+                    onChange={(e) => handleCustomDaysChange(e.target.value)}
+                  />
+                </div>
+                <p className="col-span-2 text-xs text-slate-500">
+                  <span className="font-medium text-slate-700">{cadence}</span>
+                </p>
+                {!isCadenceValid && (
+                  <p className="col-span-2 text-xs text-red-500">
+                    Steps and days must be at least 1.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col gap-2">
