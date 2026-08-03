@@ -1,113 +1,177 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
-  CalendarDays,
-  Clock3,
+  Clock,
   Loader2,
   Mail,
   MessageCircle,
   MessageSquare,
-  PhoneCall,
-  Send,
-  StickyNote,
+  Phone,
+  type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { SequenceStepCallLogSummary } from "@/components/sequences/steps/SequenceStepCallLogSummary";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   useGetSequenceStepsQuery,
   useGetSingleSequenceQuery,
 } from "@/store/features/sequences/sequencesApi";
 import type { SequenceStepItem } from "@/types/sequences";
+import { STEP_TYPE } from "@/constants/stepType";
 
 const formatDateTime = (value: string | null | undefined) => {
-  if (!value) return "N/A";
-  return new Date(value).toLocaleString();
+  if (!value) return "Not scheduled";
+  return new Date(value).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 };
 
 const getStepStatusBadgeClass = (status: string) => {
   const value = status.toLowerCase();
   if (value === "sent") return "border-emerald-200 bg-emerald-100 text-emerald-700";
   if (value === "pending") return "border-amber-200 bg-amber-100 text-amber-700";
-  if (value === "skipped") return "border-slate-200 bg-slate-100 text-slate-700";
+  if (value === "draft") return "border-slate-200 bg-slate-100 text-slate-700";
+  if (value === "scheduled") return "border-blue-200 bg-blue-100 text-blue-700";
+  if (value === "sending" || value === "calling") return "border-violet-200 bg-violet-100 text-violet-700";
+  if (value === "skipped") return "border-slate-200 bg-slate-100 text-slate-600";
   if (value === "failed") return "border-rose-200 bg-rose-100 text-rose-700";
-  return "border-blue-200 bg-blue-100 text-blue-700";
+  return "border-slate-200 bg-slate-100 text-slate-700";
 };
 
-const getStepTypeBadgeClass = (stepType: SequenceStepItem["stepType"]) => {
-  if (stepType === "EMAIL") return "border-indigo-200 bg-indigo-100 text-indigo-700";
-  if (stepType === "SMS") return "border-violet-200 bg-violet-100 text-violet-700";
-  if (stepType === "WHATSAPP") return "border-emerald-200 bg-emerald-100 text-emerald-700";
-  return "border-amber-200 bg-amber-100 text-amber-700";
+const formatStepStatus = (status: string) =>
+  status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown";
+
+type StepVisuals = {
+  label: string;
+  icon: LucideIcon;
+  iconColor: string;
+  iconBg: string;
+  hasPreview: boolean;
 };
 
-function StepTypeIcon({ stepType }: { stepType: SequenceStepItem["stepType"] }) {
-  if (stepType === "EMAIL") return <Mail className="h-4 w-4" />;
-  if (stepType === "SMS") return <MessageSquare className="h-4 w-4" />;
-  if (stepType === "WHATSAPP") return <MessageCircle className="h-4 w-4" />;
-  return <PhoneCall className="h-4 w-4" />;
-}
+const getStepVisuals = (stepType: SequenceStepItem["stepType"]): StepVisuals => {
+  if (stepType === STEP_TYPE.EMAIL) {
+    return {
+      label: "Email",
+      icon: Mail,
+      iconColor: "text-blue-500",
+      iconBg: "bg-blue-50",
+      hasPreview: true,
+    };
+  }
+  if (stepType === STEP_TYPE.SMS) {
+    return {
+      label: "SMS",
+      icon: MessageSquare,
+      iconColor: "text-purple-500",
+      iconBg: "bg-purple-50",
+      hasPreview: true,
+    };
+  }
+  if (stepType === STEP_TYPE.WHATSAPP) {
+    return {
+      label: "WhatsApp",
+      icon: MessageCircle,
+      iconColor: "text-green-500",
+      iconBg: "bg-green-50",
+      hasPreview: true,
+    };
+  }
+  return {
+    label: "AI Call",
+    icon: Phone,
+    iconColor: "text-amber-500",
+    iconBg: "bg-amber-50",
+    hasPreview: true,
+  };
+};
 
-function StepContentView({ step }: { step: SequenceStepItem }) {
+type PreviewStep = {
+  type: string;
+  time: string;
+  subject?: string;
+  content: string;
+};
+
+function ViewStepCard({
+  step,
+  onPreview,
+}: {
+  step: SequenceStepItem;
+  onPreview: (step: PreviewStep) => void;
+}) {
+  const visuals = getStepVisuals(step.stepType);
+  const Icon = visuals.icon;
+  const time = formatDateTime(step.scheduledAt);
+
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <div className="space-y-4 lg:col-span-2">
-        {step.stepType === "EMAIL" ? (
-          <div className="space-y-1.5">
-            <p className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <StickyNote className="h-4 w-4 text-slate-400" />
-              Subject
-            </p>
-            <p className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
-              {step.subject || "—"}
-            </p>
+    <div className="flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm transition-all hover:border-indigo-100 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+          {step.stepOrder}
+        </div>
+
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${visuals.iconBg}`}>
+          <Icon className={`h-5 w-5 ${visuals.iconColor}`} />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className={`text-sm font-semibold ${visuals.iconColor}`}>{visuals.label}</span>
+            <Badge variant="outline" className={getStepStatusBadgeClass(step.status)}>
+              {formatStepStatus(step.status)}
+            </Badge>
           </div>
-        ) : null}
 
-        <div className="space-y-1.5">
-          <p className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-            <StepTypeIcon stepType={step.stepType} />
-            Content
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
+            <span className="font-medium text-slate-600">Scheduled:</span>
+            <span>{time}</span>
           </p>
-          <p className="min-h-24 whitespace-pre-wrap rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed text-slate-800">
-            {step.content || "No content available."}
+
+          {step.subject && (
+            <p className="mt-1 truncate text-sm font-medium text-slate-900">
+              Subject: {step.subject}
+            </p>
+          )}
+          <p className={`truncate text-sm text-slate-500 ${step.subject ? "mt-0.5" : "mt-1"}`}>
+            {step.content}
           </p>
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <p className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-          <CalendarDays className="h-4 w-4 text-slate-400" />
-          Scheduled At
-        </p>
-        <p className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
-          {formatDateTime(step.scheduledAt)}
-        </p>
-      </div>
-
-      <div className="flex items-start gap-3">
-        <Send className="mt-0.5 h-4 w-4 text-slate-400" />
-        <div className="space-y-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Sent At</p>
-          <p className="text-sm text-slate-700">{formatDateTime(step.sentAt)}</p>
+      {visuals.hasPreview && (
+        <div className="flex items-center justify-end gap-2 pl-11 sm:pl-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              onPreview({
+                type: visuals.label,
+                time,
+                subject: step.subject || undefined,
+                content: step.content || "",
+              })
+            }
+            className="h-8 px-3 text-xs"
+          >
+            Preview
+          </Button>
         </div>
-      </div>
-
-      <div className="flex items-start gap-3 lg:col-span-2">
-        <Clock3 className="mt-0.5 h-4 w-4 text-slate-400" />
-        <div className="space-y-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Send log</p>
-          <p className="text-sm text-slate-700">{step.sendLog || "No send log available."}</p>
-        </div>
-      </div>
-
-      {step.callLog ? <SequenceStepCallLogSummary log={step.callLog} /> : null}
+      )}
     </div>
   );
 }
 
 export default function ViewSequenceStepsPage() {
   const { id } = useParams<{ id: string }>();
+  const [previewStep, setPreviewStep] = useState<PreviewStep | null>(null);
   const {
     data: sequenceData,
     isLoading: isSequenceLoading,
@@ -179,44 +243,56 @@ export default function ViewSequenceStepsPage() {
           </p>
         </div>
       ) : (
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <Accordion type="multiple" className="w-full">
-            {steps.map((step) => (
-              <AccordionItem key={step.id} value={step.id}>
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex w-full flex-col items-start gap-3 pr-4 text-left sm:flex-row sm:items-center sm:justify-between">
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-base font-semibold text-slate-900">
-                          Step {step.stepOrder}
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className={`flex items-center gap-1 ${getStepTypeBadgeClass(step.stepType)}`}
-                        >
-                          <StepTypeIcon stepType={step.stepType} />
-                          {step.stepType}
-                        </Badge>
-                        <Badge variant="outline" className={getStepStatusBadgeClass(step.status)}>
-                          {step.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-slate-500">
-                        Scheduled: {formatDateTime(step.scheduledAt)}
-                      </p>
-                    </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="rounded-xl bg-slate-50/70 p-4">
-                    <StepContentView step={step} />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+        <div className="flex flex-col gap-3 rounded-2xl border bg-slate-50/50 p-4 shadow-sm sm:p-6">
+          {steps.map((step) => (
+            <ViewStepCard key={step.id} step={step} onPreview={setPreviewStep} />
+          ))}
         </div>
       )}
+
+      <Dialog open={!!previewStep} onOpenChange={(open) => !open && setPreviewStep(null)}>
+        <DialogContent className="flex max-h-[85vh] w-[calc(100vw-2rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl p-0">
+          <DialogHeader className="shrink-0 border-b px-6 py-4">
+            <DialogTitle className="text-base font-semibold text-slate-900">
+              {previewStep?.type === "Email"
+                ? "Email preview"
+                : previewStep?.type === "SMS"
+                  ? "SMS preview"
+                  : previewStep?.type === "WhatsApp"
+                    ? "WhatsApp preview"
+                    : previewStep?.type === "AI Call"
+                      ? "AI Call preview"
+                      : "Preview"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <Clock className="h-3.5 w-3.5" />
+              {previewStep?.time}
+            </div>
+            <div className="flex flex-col gap-2">
+              {previewStep?.subject && (
+                <div className="text-sm font-semibold text-slate-900">
+                  Subject: {previewStep.subject}
+                </div>
+              )}
+              {previewStep?.type === "AI Call" && (
+                <div className="text-sm font-semibold text-slate-900">
+                  AI Call Script
+                </div>
+              )}
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                {previewStep?.content}
+              </div>
+            </div>
+          </div>
+          <div className="flex shrink-0 justify-end border-t bg-slate-50/50 px-6 py-4">
+            <Button variant="outline" onClick={() => setPreviewStep(null)} className="h-9">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
   Users,
   FileText,
   Share2,
+  Plus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +21,7 @@ import WizardProgress from "@/components/sequences/WizardProgress";
 import ManageTemplatesDialog from "@/components/sequences/ManageTemplatesDialog";
 import { useGetPromptTemplatesQuery } from "@/store/features/templates/templatesApi";
 import { useGenerateSaveSequenceMutation } from "@/store/features/sequences/sequencesApi";
-import { GOAL_TYPES } from "@/constants/goalType";
+import { GOAL_TYPES, type GoalType } from "@/constants/goalType";
 import {
   formatCadence,
   isValidCadence,
@@ -43,6 +44,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const isPresetGoal = (value: string | null | undefined): value is GoalType =>
+  Boolean(value && (GOAL_TYPES as readonly string[]).includes(value));
+
 const GOAL_ICONS = {
   "Book another call": Calendar,
   "Get a reply": MessageSquare,
@@ -56,7 +60,7 @@ interface SequenceConfigFormProps {
   setCurrentStep: (step: number) => void;
   situation: string | null;
   setSituation: (val: string) => void;
-  goal: string;
+  goal: string | null;
   setGoal: (val: string) => void;
   isGenerating: boolean;
   setIsGenerating: (val: boolean) => void;
@@ -110,6 +114,10 @@ export default function SequenceConfigForm({
   const [customSteps, setCustomSteps] = useState(parsedCadence?.steps ?? 5);
   const [customDays, setCustomDays] = useState(parsedCadence?.days ?? 7);
   const isCadenceValid = isValidCadence(cadence);
+  const [isCustomGoal, setIsCustomGoal] = useState(!isPresetGoal(goal) && Boolean(goal));
+  const [customGoalText, setCustomGoalText] = useState(
+    isPresetGoal(goal) || !goal ? "" : goal,
+  );
 
   useEffect(() => {
     const parsed = parseCadence(cadence);
@@ -117,6 +125,16 @@ export default function SequenceConfigForm({
     setCustomSteps(parsed.steps);
     setCustomDays(parsed.days);
   }, [cadence]);
+
+  useEffect(() => {
+    if (!goal) return;
+    if (isPresetGoal(goal)) {
+      setIsCustomGoal(false);
+      return;
+    }
+    setIsCustomGoal(true);
+    setCustomGoalText(goal);
+  }, [goal]);
   const {
     data: templatesResponse,
     isLoading: isLoadingTemplates,
@@ -164,8 +182,22 @@ export default function SequenceConfigForm({
   };
 
   const handleGoalSelect = (id: string) => {
+    setIsCustomGoal(false);
+    setCustomGoalText("");
     setGoal(id);
     if (situation && currentStep === 1) setCurrentStep(2);
+  };
+
+  const handleCustomGoalSelect = () => {
+    setIsCustomGoal(true);
+    setGoal(customGoalText.trim());
+    if (situation && customGoalText.trim() && currentStep === 1) setCurrentStep(2);
+  };
+
+  const handleCustomGoalChange = (value: string) => {
+    setCustomGoalText(value);
+    setGoal(value.trim());
+    if (situation && value.trim() && currentStep === 1) setCurrentStep(2);
   };
 
   const handleCustomStepsChange = (raw: string) => {
@@ -388,7 +420,7 @@ export default function SequenceConfigForm({
           </h2>
           <div className="flex flex-wrap gap-3">
             {goals.map((item) => {
-              const isSelected = goal === item.id;
+              const isSelected = !isCustomGoal && goal === item.id;
               return (
                 <Button
                   key={item.id}
@@ -407,7 +439,35 @@ export default function SequenceConfigForm({
                 </Button>
               );
             })}
+            <Button
+              type="button"
+              variant={isCustomGoal ? "default" : "outline"}
+              className={`gap-2 rounded-full ${isCustomGoal
+                ? "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 shadow-none"
+                : "text-slate-700"
+                }`}
+              onClick={handleCustomGoalSelect}
+            >
+              <Plus
+                className={`h-4 w-4 ${isCustomGoal ? "text-indigo-600" : "text-slate-400"}`}
+              />
+              Custom
+            </Button>
           </div>
+
+          {isCustomGoal && (
+            <div className="flex flex-col gap-1.5 max-w-md">
+              <Label htmlFor="custom-goal" className="text-xs font-normal text-slate-500">
+                Custom goal
+              </Label>
+              <Input
+                id="custom-goal"
+                value={customGoalText}
+                onChange={(e) => handleCustomGoalChange(e.target.value)}
+                placeholder="e.g. Schedule a product demo next week"
+              />
+            </div>
+          )}
         </div>
 
         {/* Section 3 */}

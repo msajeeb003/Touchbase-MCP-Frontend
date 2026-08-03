@@ -65,8 +65,10 @@ import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast
 
 export interface SequenceStep {
   id: string | number;
+  stepOrder: number;
   type: string;
   time: string;
+  status: string;
   icon: any;
   iconColor: string;
   iconBg: string;
@@ -76,11 +78,28 @@ export interface SequenceStep {
   editLabel?: string;
 }
 
+const getStepStatusBadgeClass = (status: string) => {
+  const value = status.toLowerCase();
+  if (value === "sent") return "border-emerald-200 bg-emerald-100 text-emerald-700";
+  if (value === "pending") return "border-amber-200 bg-amber-100 text-amber-700";
+  if (value === "draft") return "border-slate-200 bg-slate-100 text-slate-700";
+  if (value === "scheduled") return "border-blue-200 bg-blue-100 text-blue-700";
+  if (value === "sending" || value === "calling") return "border-violet-200 bg-violet-100 text-violet-700";
+  if (value === "skipped") return "border-slate-200 bg-slate-100 text-slate-600";
+  if (value === "failed") return "border-rose-200 bg-rose-100 text-rose-700";
+  return "border-slate-200 bg-slate-100 text-slate-700";
+};
+
+const formatStepStatus = (status: string) =>
+  status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown";
+
 const initialSteps: SequenceStep[] = [
   {
     id: 1,
+    stepOrder: 1,
     type: "Email",
     time: "Now",
+    status: "draft",
     icon: Mail,
     iconColor: "text-blue-500",
     iconBg: "bg-blue-50",
@@ -90,8 +109,10 @@ const initialSteps: SequenceStep[] = [
   },
   {
     id: 2,
+    stepOrder: 2,
     type: "SMS",
     time: "+2 days",
+    status: "draft",
     icon: MessageSquare,
     iconColor: "text-purple-500",
     iconBg: "bg-purple-50",
@@ -100,8 +121,10 @@ const initialSteps: SequenceStep[] = [
   },
   {
     id: 3,
+    stepOrder: 3,
     type: "WhatsApp",
     time: "+4 days",
+    status: "draft",
     icon: MessageCircle,
     iconColor: "text-green-500",
     iconBg: "bg-green-50",
@@ -110,19 +133,23 @@ const initialSteps: SequenceStep[] = [
   },
   {
     id: 4,
+    stepOrder: 4,
     type: "AI Call",
     time: "+6 days",
+    status: "draft",
     icon: Phone,
     iconColor: "text-amber-500",
     iconBg: "bg-amber-50",
     content: "AI will call and leave a personalized voicemail asking to reschedule a call.",
-    hasPreview: false,
+    hasPreview: true,
     editLabel: "Edit Script",
   },
   {
     id: 5,
+    stepOrder: 5,
     type: "Email",
     time: "+8 days",
+    status: "draft",
     icon: Mail,
     iconColor: "text-blue-500",
     iconBg: "bg-blue-50",
@@ -168,58 +195,68 @@ function SortableStep({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-4 rounded-xl border bg-white p-4 shadow-sm hover:border-indigo-100 ${
-        isDragging ? "opacity-60 shadow-lg ring-1 ring-indigo-500 scale-[1.02]" : ""
+      className={`flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm transition-all hover:border-indigo-100 sm:flex-row sm:items-center sm:gap-4 ${
+        isDragging ? "opacity-60 shadow-lg ring-1 ring-indigo-500 scale-[1.01]" : ""
       }`}
     >
-      {/* Drag Handle & Icon */}
-      <div className="flex items-center gap-3 w-40 shrink-0">
-        <div {...attributes} {...listeners} className="cursor-grab hover:bg-slate-50 p-1 -ml-1 rounded outline-none text-slate-300 hover:text-slate-500">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab rounded p-1 text-slate-300 outline-none hover:bg-slate-50 hover:text-slate-500"
+        >
           <GripVertical className="h-4 w-4" />
         </div>
-        <div className={`flex h-10 w-10 items-center justify-center rounded-md ${step.iconBg}`}>
+
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+          {step.stepOrder}
+        </div>
+
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${step.iconBg}`}>
           <step.icon className={`h-5 w-5 ${step.iconColor}`} />
         </div>
-        <div className="flex flex-col">
-          <span className={`text-sm font-semibold ${step.iconColor}`}>
-            {step.type}
-          </span>
-          <span className="flex items-center gap-1 text-[11px] text-slate-500">
-            <Clock className="h-3 w-3" />
-            {step.time}
-          </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className={`text-sm font-semibold ${step.iconColor}`}>{step.type}</span>
+            <Badge variant="outline" className={getStepStatusBadgeClass(step.status)}>
+              {formatStepStatus(step.status)}
+            </Badge>
+          </div>
+
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
+            <span className="font-medium text-slate-600">Scheduled:</span>
+            <span>{step.time}</span>
+          </p>
+
+          {step.subject && (
+            <p className="mt-1 truncate text-sm font-medium text-slate-900">
+              Subject: {step.subject}
+            </p>
+          )}
+          <p className={`truncate text-sm text-slate-500 ${step.subject ? "mt-0.5" : "mt-1"}`}>
+            {step.content}
+          </p>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col justify-center min-w-0 pr-4">
-        {step.subject && (
-          <span className="text-sm font-medium text-slate-900 truncate">
-            Subject: {step.subject}
-          </span>
-        )}
-        <span className={`text-sm text-slate-500 truncate ${!step.subject ? "mt-1" : ""}`}>
-          {step.content}
-        </span>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center justify-end gap-2 pl-11 sm:pl-0">
         {step.hasPreview && (
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setPreviewStep(step)}
-            className="h-8 text-xs px-3"
+            className="h-8 px-3 text-xs"
           >
             Preview
           </Button>
         )}
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setEditStep(step)}
-          className="h-8 text-xs px-3 gap-1.5"
+          className="h-8 gap-1.5 px-3 text-xs"
         >
           <PenLine className="h-3.5 w-3.5" />
           {step.editLabel || "Edit"}
@@ -235,7 +272,10 @@ function SortableStep({
               <Copy className="mr-2 h-4 w-4 text-slate-500" />
               Duplicate
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDeleteStep(step.id)} className="text-red-600 focus:bg-red-50 focus:text-red-600">
+            <DropdownMenuItem
+              onClick={() => handleDeleteStep(step.id)}
+              className="text-red-600 focus:bg-red-50 focus:text-red-600"
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>
@@ -255,6 +295,14 @@ interface GeneratedSequenceListProps {
   onRegenerated?: (steps: SequenceStepItem[]) => void;
 }
 
+const formatScheduledAt = (value: string | null | undefined) => {
+  if (!value) return "Not scheduled";
+  return new Date(value).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+};
+
 const mapApiStepToUiStep = (apiStep: SequenceStepItem, index: number): SequenceStep => {
   const isEmail = apiStep.stepType === STEP_TYPE.EMAIL;
   const isSms = apiStep.stepType === STEP_TYPE.SMS;
@@ -263,14 +311,16 @@ const mapApiStepToUiStep = (apiStep: SequenceStepItem, index: number): SequenceS
 
   return {
     id: apiStep.id || `temp-${index}`,
+    stepOrder: apiStep.stepOrder ?? index + 1,
     type: isEmail ? "Email" : isSms ? "SMS" : isWhatsapp ? "WhatsApp" : isCall ? "AI Call" : "Unknown",
-    time: `Step ${apiStep.stepOrder}`, // Simplify time mapping for now or calculate based on scheduledAt
+    time: formatScheduledAt(apiStep.scheduledAt),
+    status: apiStep.status || "draft",
     icon: isEmail ? Mail : isSms ? MessageSquare : isWhatsapp ? MessageCircle : isCall ? Phone : Mail,
     iconColor: isEmail ? "text-blue-500" : isSms ? "text-purple-500" : isWhatsapp ? "text-green-500" : "text-amber-500",
     iconBg: isEmail ? "bg-blue-50" : isSms ? "bg-purple-50" : isWhatsapp ? "bg-green-50" : "bg-amber-50",
     subject: apiStep.subject || undefined,
     content: apiStep.content || "",
-    hasPreview: !isCall,
+    hasPreview: true,
     editLabel: isCall ? "Edit Script" : "Edit",
   };
 };
@@ -322,11 +372,11 @@ export default function GeneratedSequenceList({
     }
   }, [editStep]);
 
-  // Recalculate times so they always stay chronological based on position
-  const recalculateTimes = (stepsArray: SequenceStep[]) => {
+  // Keep step numbers in sync with list position after drag/add/delete
+  const recalculateStepOrders = (stepsArray: SequenceStep[]) => {
     return stepsArray.map((step, index) => ({
       ...step,
-      time: index === 0 ? "Now" : `+${index * 2} days`
+      stepOrder: index + 1,
     }));
   };
 
@@ -337,7 +387,7 @@ export default function GeneratedSequenceList({
       setSteps((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
-        return recalculateTimes(arrayMove(items, oldIndex, newIndex));
+        return recalculateStepOrders(arrayMove(items, oldIndex, newIndex));
       });
     }
   };
@@ -347,7 +397,7 @@ export default function GeneratedSequenceList({
     const newStep = { ...stepToCopy, id: Date.now() };
     const newSteps = [...steps];
     newSteps.splice(index + 1, 0, newStep);
-    setSteps(recalculateTimes(newSteps));
+    setSteps(recalculateStepOrders(newSteps));
   };
 
   const handleDeleteStep = async (id: string | number) => {
@@ -364,24 +414,60 @@ export default function GeneratedSequenceList({
       }
     }
     
-    setSteps((prev) => recalculateTimes(prev.filter(step => step.id !== id)));
+    setSteps((prev) => recalculateStepOrders(prev.filter((step) => step.id !== id)));
   };
 
   const handleAddStep = (type: "Email" | "SMS" | "WhatsApp" | "AI Call") => {
     let newStep: SequenceStep;
-    const baseStep = { id: Date.now(), time: "", hasPreview: true }; // time will be recalculated
+    const baseStep = {
+      id: Date.now(),
+      stepOrder: steps.length + 1,
+      time: "Not scheduled",
+      status: "draft",
+      hasPreview: true,
+    };
 
     if (type === "Email") {
-      newStep = { ...baseStep, type, icon: Mail, iconColor: "text-blue-500", iconBg: "bg-blue-50", subject: "New Subject", content: "New Email Content..." };
+      newStep = {
+        ...baseStep,
+        type,
+        icon: Mail,
+        iconColor: "text-blue-500",
+        iconBg: "bg-blue-50",
+        subject: "New Subject",
+        content: "New Email Content...",
+      };
     } else if (type === "WhatsApp") {
-      newStep = { ...baseStep, type, icon: MessageCircle, iconColor: "text-green-500", iconBg: "bg-green-50", content: "New WhatsApp Message..." };
+      newStep = {
+        ...baseStep,
+        type,
+        icon: MessageCircle,
+        iconColor: "text-green-500",
+        iconBg: "bg-green-50",
+        content: "New WhatsApp Message...",
+      };
     } else if (type === "AI Call") {
-      newStep = { ...baseStep, type, icon: Phone, iconColor: "text-amber-500", iconBg: "bg-amber-50", content: "AI will call...", hasPreview: false, editLabel: "Edit Script" };
+      newStep = {
+        ...baseStep,
+        type,
+        icon: Phone,
+        iconColor: "text-amber-500",
+        iconBg: "bg-amber-50",
+        content: "AI will call...",
+        editLabel: "Edit Script",
+      };
     } else {
-      newStep = { ...baseStep, type: "SMS", icon: MessageSquare, iconColor: "text-purple-500", iconBg: "bg-purple-50", content: "New step — generate the sequence (or Edit) to add content." };
+      newStep = {
+        ...baseStep,
+        type: "SMS",
+        icon: MessageSquare,
+        iconColor: "text-purple-500",
+        iconBg: "bg-purple-50",
+        content: "New step — generate the sequence (or Edit) to add content.",
+      };
     }
-    
-    setSteps((prev) => recalculateTimes([...prev, newStep]));
+
+    setSteps((prev) => recalculateStepOrders([...prev, newStep]));
   };
 
   const handleSaveEdit = async () => {
@@ -539,31 +625,37 @@ export default function GeneratedSequenceList({
 
       {/* Preview Dialog */}
       <Dialog open={!!previewStep} onOpenChange={(open) => !open && setPreviewStep(null)}>
-        <DialogContent className="max-w-md rounded-xl overflow-hidden p-0 gap-0">
-          <DialogHeader className="px-6 py-4 border-b">
+        <DialogContent className="flex max-h-[85vh] w-[calc(100vw-2rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl p-0">
+          <DialogHeader className="shrink-0 border-b px-6 py-4">
             <DialogTitle className="text-base font-semibold text-slate-900">
               {previewStep?.type === "Email" ? "Email preview" : 
                previewStep?.type === "SMS" ? "SMS preview" : 
-               previewStep?.type === "WhatsApp" ? "WhatsApp preview" : "Preview"}
+               previewStep?.type === "WhatsApp" ? "WhatsApp preview" : 
+               previewStep?.type === "AI Call" ? "AI Call preview" : "Preview"}
             </DialogTitle>
           </DialogHeader>
-          <div className="p-6 flex flex-col gap-4">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
               <Clock className="h-3.5 w-3.5" />
               {previewStep?.time}
             </div>
             <div className="flex flex-col gap-2">
               {previewStep?.subject && (
-                <div className="font-semibold text-sm text-slate-900">
+                <div className="text-sm font-semibold text-slate-900">
                   Subject: {previewStep.subject}
                 </div>
               )}
-              <div className="text-sm text-slate-700 whitespace-pre-wrap">
+              {previewStep?.type === "AI Call" && (
+                <div className="text-sm font-semibold text-slate-900">
+                  AI Call Script
+                </div>
+              )}
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
                 {previewStep?.content}
               </div>
             </div>
           </div>
-          <div className="flex justify-end px-6 py-4 border-t bg-slate-50/50">
+          <div className="flex shrink-0 justify-end border-t bg-slate-50/50 px-6 py-4">
             <Button variant="outline" onClick={() => setPreviewStep(null)} className="h-9">
               Close
             </Button>
