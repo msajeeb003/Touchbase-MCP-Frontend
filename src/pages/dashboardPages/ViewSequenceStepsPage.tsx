@@ -111,60 +111,62 @@ function ViewStepCard({
   const time = formatDateTime(step.scheduledAt);
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm transition-all hover:border-indigo-100 sm:flex-row sm:items-center sm:gap-4">
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
-          {step.stepOrder}
-        </div>
+    <div className="flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm transition-all hover:border-indigo-100">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+            {step.stepOrder}
+          </div>
 
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${visuals.iconBg}`}>
-          <Icon className={`h-5 w-5 ${visuals.iconColor}`} />
-        </div>
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${visuals.iconBg}`}>
+            <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${visuals.iconColor}`} />
+          </div>
 
-        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className={`text-sm font-semibold ${visuals.iconColor}`}>{visuals.label}</span>
             <Badge variant="outline" className={getStepStatusBadgeClass(step.status)}>
               {formatStepStatus(step.status)}
             </Badge>
           </div>
-
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-            <Clock className="h-3.5 w-3.5 shrink-0" />
-            <span className="font-medium text-slate-600">Scheduled:</span>
-            <span>{time}</span>
-          </p>
-
-          {step.subject && (
-            <p className="mt-1 truncate text-sm font-medium text-slate-900">
-              Subject: {step.subject}
-            </p>
-          )}
-          <p className={`truncate text-sm text-slate-500 ${step.subject ? "mt-0.5" : "mt-1"}`}>
-            {step.content}
-          </p>
         </div>
+
+        {visuals.hasPreview && (
+          <div className="flex shrink-0 items-center justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                onPreview({
+                  type: visuals.label,
+                  time,
+                  subject: step.subject || undefined,
+                  content: step.content || "",
+                })
+              }
+              className="h-8 px-3 text-xs"
+            >
+              Preview
+            </Button>
+          </div>
+        )}
       </div>
 
-      {visuals.hasPreview && (
-        <div className="flex items-center justify-end gap-2 pl-11 sm:pl-0">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              onPreview({
-                type: visuals.label,
-                time,
-                subject: step.subject || undefined,
-                content: step.content || "",
-              })
-            }
-            className="h-8 px-3 text-xs"
-          >
-            Preview
-          </Button>
-        </div>
-      )}
+      <div className="min-w-0 space-y-1">
+        <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-slate-500">
+          <Clock className="h-3.5 w-3.5 shrink-0" />
+          <span className="font-medium text-slate-600">Scheduled:</span>
+          <span>{time}</span>
+        </p>
+
+        {step.subject && (
+          <p className="truncate text-sm font-medium text-slate-900">
+            Subject: {step.subject}
+          </p>
+        )}
+        <p className="line-clamp-2 text-sm text-slate-500 sm:truncate sm:line-clamp-none">
+          {step.content}
+        </p>
+      </div>
     </div>
   );
 }

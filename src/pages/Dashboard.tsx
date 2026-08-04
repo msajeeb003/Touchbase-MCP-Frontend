@@ -181,7 +181,7 @@ export default function Dashboard() {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <main className="min-w-0 p-6">
+        <main className="min-w-0 p-4 md:p-6">
           
           <Outlet />
         </main>

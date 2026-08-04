@@ -93,9 +93,9 @@ export default function CreateSequencePage() {
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col xl:flex-row gap-8">
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col gap-8 min-w-0">
+        <div className="order-2 flex-1 flex flex-col gap-8 min-w-0 xl:order-1">
           <SequenceConfigForm
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
@@ -137,8 +137,8 @@ export default function CreateSequencePage() {
           )}
         </div>
 
-        {/* Right Sidebar — sticky only on lg+; stacks below on smaller screens */}
-        <aside className="w-full lg:w-80 lg:shrink-0 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
+        {/* Right Sidebar — sticky on xl+; below xl it moves above the form so the lead can be picked first */}
+        <aside className="order-1 w-full xl:order-2 xl:w-80 xl:shrink-0 xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-3rem)] xl:overflow-y-auto">
           <SequenceSidebar 
             situation={situation} 
             goal={goal}

@@ -196,92 +196,94 @@ function SortableStep({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm transition-all hover:border-indigo-100 sm:flex-row sm:items-center sm:gap-4 ${
+      className={`flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm transition-all hover:border-indigo-100 ${
         isDragging ? "opacity-60 shadow-lg ring-1 ring-indigo-500 scale-[1.01]" : ""
       }`}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        <div
-          {...attributes}
-          {...listeners}
-          className="cursor-grab rounded p-1 text-slate-300 outline-none hover:bg-slate-50 hover:text-slate-500"
-        >
-          <GripVertical className="h-4 w-4" />
-        </div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab rounded p-1 text-slate-300 outline-none hover:bg-slate-50 hover:text-slate-500"
+          >
+            <GripVertical className="h-4 w-4" />
+          </div>
 
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
-          {step.stepOrder}
-        </div>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+            {step.stepOrder}
+          </div>
 
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${step.iconBg}`}>
-          <step.icon className={`h-5 w-5 ${step.iconColor}`} />
-        </div>
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${step.iconBg}`}>
+            <step.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${step.iconColor}`} />
+          </div>
 
-        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className={`text-sm font-semibold ${step.iconColor}`}>{step.type}</span>
             <Badge variant="outline" className={getStepStatusBadgeClass(step.status)}>
               {formatStepStatus(step.status)}
             </Badge>
           </div>
-
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-            <Clock className="h-3.5 w-3.5 shrink-0" />
-            <span className="font-medium text-slate-600">Scheduled:</span>
-            <span>{step.time}</span>
-          </p>
-
-          {step.subject && (
-            <p className="mt-1 truncate text-sm font-medium text-slate-900">
-              Subject: {step.subject}
-            </p>
-          )}
-          <p className={`truncate text-sm text-slate-500 ${step.subject ? "mt-0.5" : "mt-1"}`}>
-            {step.content}
-          </p>
         </div>
-      </div>
 
-      <div className="flex items-center justify-end gap-2 pl-11 sm:pl-0">
-        {step.hasPreview && (
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          {step.hasPreview && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPreviewStep(step)}
+              className="h-8 px-3 text-xs"
+            >
+              Preview
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPreviewStep(step)}
-            className="h-8 px-3 text-xs"
+            onClick={() => setEditStep(step)}
+            className="h-8 gap-1.5 px-3 text-xs"
           >
-            Preview
+            <PenLine className="h-3.5 w-3.5" />
+            {step.editLabel || "Edit"}
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleDuplicateStep(index)}>
+                <Copy className="mr-2 h-4 w-4 text-slate-500" />
+                Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleDeleteStep(step.id)}
+                className="text-red-600 focus:bg-red-50 focus:text-red-600"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <div className="min-w-0 space-y-1">
+        <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-slate-500">
+          <Clock className="h-3.5 w-3.5 shrink-0" />
+          <span className="font-medium text-slate-600">Scheduled:</span>
+          <span>{step.time}</span>
+        </p>
+
+        {step.subject && (
+          <p className="truncate text-sm font-medium text-slate-900">
+            Subject: {step.subject}
+          </p>
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setEditStep(step)}
-          className="h-8 gap-1.5 px-3 text-xs"
-        >
-          <PenLine className="h-3.5 w-3.5" />
-          {step.editLabel || "Edit"}
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleDuplicateStep(index)}>
-              <Copy className="mr-2 h-4 w-4 text-slate-500" />
-              Duplicate
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => handleDeleteStep(step.id)}
-              className="text-red-600 focus:bg-red-50 focus:text-red-600"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <p className="line-clamp-2 text-sm text-slate-500 sm:truncate sm:line-clamp-none">
+          {step.content}
+        </p>
       </div>
     </div>
   );
@@ -548,7 +550,7 @@ export default function GeneratedSequenceList({
   return (
     <>
       <Card className="border shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between border-b px-6 py-4">
+        <CardHeader className="flex flex-col gap-3 space-y-0 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-3">
             <h2 className="text-base font-semibold text-slate-900">
               Your Generated Sequence
@@ -560,7 +562,7 @@ export default function GeneratedSequenceList({
             )}
           </div>
           {isGenerated && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button onClick={handleRegenerate} variant="outline" size="sm" className="gap-2 text-slate-700 h-9">
                 <RefreshCw className="h-4 w-4" />
                 Regenerate
@@ -573,7 +575,7 @@ export default function GeneratedSequenceList({
             </div>
           )}
         </CardHeader>
-        <CardContent className={`flex flex-col gap-3 p-6 ${isGenerated ? "bg-slate-50/50" : ""}`}>
+        <CardContent className={`flex flex-col gap-3 p-4 sm:p-6 ${isGenerated ? "bg-slate-50/50" : ""}`}>
           {!isGenerated ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
               <div className="h-12 w-12 rounded-full bg-indigo-50 flex items-center justify-center mb-4">

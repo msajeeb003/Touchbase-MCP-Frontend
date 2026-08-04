@@ -265,7 +265,7 @@ export default function SequenceConfigForm({
 
   return (
     <Card className="border shadow-sm">
-      <CardContent className="flex flex-col gap-8 p-6">
+      <CardContent className="flex flex-col gap-8 p-4 sm:p-6">
         <WizardProgress
           currentStep={sequenceStatus === "active" ? 6 : currentStep}
         />
@@ -273,8 +273,8 @@ export default function SequenceConfigForm({
 
         {/* Section 1 */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
               <h2 className="text-base font-semibold text-slate-900">
                 1. What happened with this lead?
               </h2>
@@ -475,7 +475,7 @@ export default function SequenceConfigForm({
           <h2 className="text-base font-semibold text-slate-900">
             3. Preferences
           </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
             <div className="flex flex-col gap-2">
               <Label className="text-slate-700">Tone</Label>
               <Select value={tone} onValueChange={setTone}>
@@ -616,7 +616,7 @@ export default function SequenceConfigForm({
         </div>
 
         {/* Generate Button */}
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button
             onClick={handleGenerate}
             disabled={currentStep < 2 || isGenerating || !selectedLead || !isCadenceValid}
