@@ -12,3 +12,18 @@ export function isValidCadence(cadence: string) {
   const parsed = parseCadence(cadence);
   return Boolean(parsed && parsed.steps >= 1 && parsed.days >= 1);
 }
+
+/** Digits only, integer greater than 0. Empty / 0 / non-numeric → null. */
+export function parsePositiveIntInput(raw: string): number | null {
+  const value = raw.trim();
+  if (!/^\d+$/.test(value)) return null;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) return null;
+  return parsed;
+}
+
+export function getCadenceFieldError(raw: string): string | null {
+  if (raw.trim() === "") return "Enter a number greater than 0";
+  if (parsePositiveIntInput(raw) === null) return "Enter a number greater than 0";
+  return null;
+}

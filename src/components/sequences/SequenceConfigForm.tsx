@@ -24,8 +24,10 @@ import { useGenerateSaveSequenceMutation } from "@/store/features/sequences/sequ
 import { GOAL_TYPES, type GoalType } from "@/constants/goalType";
 import {
   formatCadence,
+  getCadenceFieldError,
   isValidCadence,
   parseCadence,
+  parsePositiveIntInput,
 } from "@/constants/cadence";
 import type { LeadItem } from "@/types/leads";
 import type { SequenceItem, SequenceStepItem } from "@/types/sequences";
@@ -111,9 +113,14 @@ export default function SequenceConfigForm({
   const [showAllSituations, setShowAllSituations] = useState(false);
   const TEMPLATE_PREVIEW_COUNT = 6;
   const parsedCadence = parseCadence(cadence);
-  const [customSteps, setCustomSteps] = useState(parsedCadence?.steps ?? 5);
-  const [customDays, setCustomDays] = useState(parsedCadence?.days ?? 7);
-  const isCadenceValid = isValidCadence(cadence);
+  const [stepsInput, setStepsInput] = useState(String(parsedCadence?.steps ?? 5));
+  const [daysInput, setDaysInput] = useState(String(parsedCadence?.days ?? 7));
+  const stepsError = getCadenceFieldError(stepsInput);
+  const daysError = getCadenceFieldError(daysInput);
+  const parsedSteps = parsePositiveIntInput(stepsInput);
+  const parsedDays = parsePositiveIntInput(daysInput);
+  const isCadenceValid =
+    parsedSteps !== null && parsedDays !== null && isValidCadence(cadence);
   const [isCustomGoal, setIsCustomGoal] = useState(!isPresetGoal(goal) && Boolean(goal));
   const [customGoalText, setCustomGoalText] = useState(
     isPresetGoal(goal) || !goal ? "" : goal,
@@ -122,8 +129,8 @@ export default function SequenceConfigForm({
   useEffect(() => {
     const parsed = parseCadence(cadence);
     if (!parsed) return;
-    setCustomSteps(parsed.steps);
-    setCustomDays(parsed.days);
+    setStepsInput(String(parsed.steps));
+    setDaysInput(String(parsed.days));
   }, [cadence]);
 
   useEffect(() => {
@@ -234,15 +241,23 @@ export default function SequenceConfigForm({
   };
 
   const handleCustomStepsChange = (raw: string) => {
-    const steps = Math.max(1, Number(raw) || 1);
-    setCustomSteps(steps);
-    setCadence(formatCadence(steps, customDays));
+    const next = raw.replace(/\D/g, "");
+    setStepsInput(next);
+    const steps = parsePositiveIntInput(next);
+    const days = parsePositiveIntInput(daysInput);
+    if (steps !== null && days !== null) {
+      setCadence(formatCadence(steps, days));
+    }
   };
 
   const handleCustomDaysChange = (raw: string) => {
-    const days = Math.max(1, Number(raw) || 1);
-    setCustomDays(days);
-    setCadence(formatCadence(customSteps, days));
+    const next = raw.replace(/\D/g, "");
+    setDaysInput(next);
+    const steps = parsePositiveIntInput(stepsInput);
+    const days = parsePositiveIntInput(next);
+    if (steps !== null && days !== null) {
+      setCadence(formatCadence(steps, days));
+    }
   };
 
   const toggleChannel = (channel: string) => {
@@ -537,11 +552,17 @@ export default function SequenceConfigForm({
                     </Label>
                     <Input
                       id="cadence-steps"
-                      type="number"
-                      min={1}
-                      value={customSteps}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete="off"
+                      value={stepsInput}
                       onChange={(e) => handleCustomStepsChange(e.target.value)}
+                      aria-invalid={Boolean(stepsError)}
                     />
+                    {stepsError && (
+                      <p className="text-xs text-red-500">{stepsError}</p>
+                    )}
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="cadence-days" className="text-xs font-normal text-slate-500">
@@ -549,20 +570,23 @@ export default function SequenceConfigForm({
                     </Label>
                     <Input
                       id="cadence-days"
-                      type="number"
-                      min={1}
-                      value={customDays}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete="off"
+                      value={daysInput}
                       onChange={(e) => handleCustomDaysChange(e.target.value)}
+                      aria-invalid={Boolean(daysError)}
                     />
+                    {daysError && (
+                      <p className="text-xs text-red-500">{daysError}</p>
+                    )}
                   </div>
                   <p className="col-span-2 text-xs text-slate-500">
-                    <span className="font-medium text-slate-700">{cadence}</span>
+                    <span className="font-medium text-slate-700">
+                      {isCadenceValid ? cadence : "—"}
+                    </span>
                   </p>
-                  {!isCadenceValid && (
-                    <p className="col-span-2 text-xs text-red-500">
-                      Steps and days must be at least 1.
-                    </p>
-                  )}
                 </div>
               </div>
 
