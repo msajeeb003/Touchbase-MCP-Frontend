@@ -26,6 +26,7 @@ export const baseApi = createApi({
         "LeadTranscripts",
         "MeetingTranscript",
         "Sequences",
+        "SequenceGoals",
         "Dashboard",
     ],
     // overrideExisting: false,

@@ -14,6 +14,10 @@ import {
   FileText,
   Share2,
   Plus,
+  MoreVertical,
+  PenLine,
+  Trash2,
+  Target,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +25,12 @@ import WizardProgress from "@/components/sequences/WizardProgress";
 import ManageTemplatesDialog from "@/components/sequences/ManageTemplatesDialog";
 import { useGetPromptTemplatesQuery } from "@/store/features/templates/templatesApi";
 import { useGenerateSaveSequenceMutation } from "@/store/features/sequences/sequencesApi";
-import { GOAL_TYPES, type GoalType } from "@/constants/goalType";
+import {
+  useCreateSequenceGoalMutation,
+  useDeleteSequenceGoalMutation,
+  useGetSequenceGoalsQuery,
+  useUpdateSequenceGoalMutation,
+} from "@/store/features/sequenceGoals/sequenceGoalsApi";
 import {
   formatCadence,
   getCadenceFieldError,
@@ -31,6 +40,7 @@ import {
 } from "@/constants/cadence";
 import type { LeadItem } from "@/types/leads";
 import type { SequenceItem, SequenceStepItem } from "@/types/sequences";
+import type { SequenceGoalItem } from "@/types/sequenceGoals";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,25 +55,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-const isPresetGoal = (value: string | null | undefined): value is GoalType =>
-  Boolean(value && (GOAL_TYPES as readonly string[]).includes(value));
-
-const GOAL_ICONS = {
+const GOAL_ICONS: Record<string, typeof Target> = {
   "Book another call": Calendar,
   "Get a reply": MessageSquare,
   "Build relationship": Users,
   "Close the deal": FileCheck,
   "Send proposal": FileText,
   "Share resources": Share2,
-} as const;
+};
+
+const getGoalIcon = (label: string) => GOAL_ICONS[label] ?? Target;
 interface SequenceConfigFormProps {
   currentStep: number;
   setCurrentStep: (step: number) => void;
   situation: string | null;
   setSituation: (val: string) => void;
   goal: string | null;
-  setGoal: (val: string) => void;
+  setGoal: (val: string | null) => void;
   isGenerating: boolean;
   setIsGenerating: (val: boolean) => void;
   setIsGenerated: (val: boolean) => void;
@@ -121,9 +146,12 @@ export default function SequenceConfigForm({
   const parsedDays = parsePositiveIntInput(daysInput);
   const isCadenceValid =
     parsedSteps !== null && parsedDays !== null && isValidCadence(cadence);
-  const [isCustomGoal, setIsCustomGoal] = useState(!isPresetGoal(goal) && Boolean(goal));
-  const [customGoalText, setCustomGoalText] = useState(
-    isPresetGoal(goal) || !goal ? "" : goal,
+  const [isAddingGoal, setIsAddingGoal] = useState(false);
+  const [newGoalLabel, setNewGoalLabel] = useState("");
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
+  const [editGoalLabel, setEditGoalLabel] = useState("");
+  const [goalPendingDelete, setGoalPendingDelete] = useState<SequenceGoalItem | null>(
+    null,
   );
 
   useEffect(() => {
@@ -133,15 +161,6 @@ export default function SequenceConfigForm({
     setDaysInput(String(parsed.days));
   }, [cadence]);
 
-  useEffect(() => {
-    if (!goal) return;
-    if (isPresetGoal(goal)) {
-      setIsCustomGoal(false);
-      return;
-    }
-    setIsCustomGoal(true);
-    setCustomGoalText(goal);
-  }, [goal]);
   const {
     data: templatesResponse,
     isLoading: isLoadingTemplates,
@@ -149,6 +168,16 @@ export default function SequenceConfigForm({
   } = useGetPromptTemplatesQuery();
   const templates = templatesResponse?.data || [];
 
+  const {
+    data: goalsResponse,
+    isLoading: isLoadingGoals,
+    isError: isGoalsError,
+  } = useGetSequenceGoalsQuery();
+  const goals = goalsResponse?.data ?? [];
+
+  const [createGoal, { isLoading: isCreatingGoal }] = useCreateSequenceGoalMutation();
+  const [updateGoal, { isLoading: isUpdatingGoal }] = useUpdateSequenceGoalMutation();
+  const [deleteGoal, { isLoading: isDeletingGoal }] = useDeleteSequenceGoalMutation();
   const [generateSave] = useGenerateSaveSequenceMutation();
 
   const customSituation = {
@@ -175,12 +204,6 @@ export default function SequenceConfigForm({
     : templateSituations.slice(0, previewTemplateCount);
   const visibleSituations = [...visibleTemplates, customSituation];
   const hiddenCount = Math.max(templateSituations.length - previewTemplateCount, 0);
-
-  const goals = GOAL_TYPES.map((goalType) => ({
-    id: goalType,
-    label: goalType,
-    icon: GOAL_ICONS[goalType],
-  }));
 
   const handleSituationSelect = (id: string, isCustom: boolean) => {
     if (isCustom) {
@@ -221,23 +244,90 @@ export default function SequenceConfigForm({
     );
   };
 
-  const handleGoalSelect = (id: string) => {
-    setIsCustomGoal(false);
-    setCustomGoalText("");
-    setGoal(id);
+  const handleGoalSelect = (label: string) => {
+    setIsAddingGoal(false);
+    setEditingGoalId(null);
+    setGoal(label);
     if (situation && currentStep === 1) setCurrentStep(2);
   };
 
-  const handleCustomGoalSelect = () => {
-    setIsCustomGoal(true);
-    setGoal(customGoalText.trim());
-    if (situation && customGoalText.trim() && currentStep === 1) setCurrentStep(2);
+  const handleStartAddGoal = () => {
+    setEditingGoalId(null);
+    setIsAddingGoal(true);
+    setNewGoalLabel("");
   };
 
-  const handleCustomGoalChange = (value: string) => {
-    setCustomGoalText(value);
-    setGoal(value.trim());
-    if (situation && value.trim() && currentStep === 1) setCurrentStep(2);
+  const handleCancelAddGoal = () => {
+    setIsAddingGoal(false);
+    setNewGoalLabel("");
+  };
+
+  const handleSaveNewGoal = async () => {
+    const label = newGoalLabel.trim();
+    if (!label) {
+      showError("Goal label is required");
+      return;
+    }
+    try {
+      const result = await createGoal({ label }).unwrap();
+      setIsAddingGoal(false);
+      setNewGoalLabel("");
+      setGoal(result.data.label);
+      if (situation && currentStep === 1) setCurrentStep(2);
+      showSuccess("Goal added");
+    } catch {
+      showError("Failed to add goal");
+    }
+  };
+
+  const handleStartEditGoal = (item: SequenceGoalItem) => {
+    setIsAddingGoal(false);
+    setEditingGoalId(item.id);
+    setEditGoalLabel(item.label);
+  };
+
+  const handleCancelEditGoal = () => {
+    setEditingGoalId(null);
+    setEditGoalLabel("");
+  };
+
+  const handleSaveEditGoal = async () => {
+    if (!editingGoalId) return;
+    const label = editGoalLabel.trim();
+    if (!label) {
+      showError("Goal label is required");
+      return;
+    }
+    const previousLabel = goals.find((g) => g.id === editingGoalId)?.label;
+    try {
+      const result = await updateGoal({
+        id: editingGoalId,
+        body: { label },
+      }).unwrap();
+      if (goal === previousLabel) {
+        setGoal(result.data.label);
+      }
+      setEditingGoalId(null);
+      setEditGoalLabel("");
+      showSuccess("Goal updated");
+    } catch {
+      showError("Failed to update goal");
+    }
+  };
+
+  const handleConfirmDeleteGoal = async () => {
+    if (!goalPendingDelete) return;
+    const deleted = goalPendingDelete;
+    try {
+      await deleteGoal(deleted.id).unwrap();
+      if (goal === deleted.label) {
+        setGoal(null);
+      }
+      setGoalPendingDelete(null);
+      showSuccess("Goal deleted");
+    } catch {
+      showError("Failed to delete goal");
+    }
   };
 
   const handleCustomStepsChange = (raw: string) => {
@@ -438,53 +528,176 @@ export default function SequenceConfigForm({
             2. What is your goal?
           </h2>
           <div className="flex flex-wrap gap-3">
+            {isLoadingGoals && (
+              <span className="flex items-center gap-2 py-1 text-sm text-slate-500">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading goals...
+              </span>
+            )}
+            {isGoalsError && !isLoadingGoals && (
+              <span className="py-1 text-sm text-red-600">
+                Failed to load goals. Please refresh.
+              </span>
+            )}
+            {!isLoadingGoals && !isGoalsError && goals.length === 0 && !isAddingGoal && (
+              <span className="py-1 text-sm text-slate-500">
+                No goals yet. Add one to get started.
+              </span>
+            )}
             {goals.map((item) => {
-              const isSelected = !isCustomGoal && goal === item.id;
+              const Icon = getGoalIcon(item.label);
+              const isSelected = goal === item.label;
+              const isEditing = editingGoalId === item.id;
+
+              if (isEditing) {
+                return (
+                  <div
+                    key={item.id}
+                    className="flex w-full max-w-md flex-wrap items-center gap-2"
+                  >
+                    <Input
+                      value={editGoalLabel}
+                      onChange={(e) => setEditGoalLabel(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void handleSaveEditGoal();
+                        }
+                        if (e.key === "Escape") handleCancelEditGoal();
+                      }}
+                      placeholder="Goal label"
+                      className="h-9 min-w-[180px] flex-1"
+                      autoFocus
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => void handleSaveEditGoal()}
+                      disabled={isUpdatingGoal || !editGoalLabel.trim()}
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      {isUpdatingGoal ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Save"
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelEditGoal}
+                      disabled={isUpdatingGoal}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                );
+              }
+
               return (
-                <Button
-                  key={item.id}
-                  variant={isSelected ? "default" : "outline"}
-                  className={`gap-2 rounded-full ${isSelected
-                    ? "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 shadow-none"
-                    : "text-slate-700"
+                <div key={item.id} className="group relative">
+                  <Button
+                    type="button"
+                    variant={isSelected ? "default" : "outline"}
+                    className={`gap-2 rounded-full pr-8 ${
+                      isSelected
+                        ? "border border-indigo-200 bg-indigo-50 text-indigo-700 shadow-none hover:bg-indigo-100"
+                        : "text-slate-700"
                     }`}
-                  onClick={() => handleGoalSelect(item.id)}
-                >
-                  <item.icon
-                    className={`h-4 w-4 ${isSelected ? "text-indigo-600" : "text-slate-400"
+                    onClick={() => handleGoalSelect(item.label)}
+                  >
+                    <Icon
+                      className={`h-4 w-4 ${
+                        isSelected ? "text-indigo-600" : "text-slate-400"
                       }`}
-                  />
-                  {item.label}
-                </Button>
+                    />
+                    {item.label}
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label={`Manage ${item.label}`}
+                        className={`absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full transition-opacity ${
+                          isSelected
+                            ? "text-indigo-600 opacity-100 hover:bg-indigo-100"
+                            : "text-slate-400 opacity-0 hover:bg-slate-100 group-hover:opacity-100 focus:opacity-100"
+                        }`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreVertical className="h-3.5 w-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleStartEditGoal(item)}>
+                        <PenLine className="mr-2 h-4 w-4 text-slate-500" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setGoalPendingDelete(item)}
+                        className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               );
             })}
-            <Button
-              type="button"
-              variant={isCustomGoal ? "default" : "outline"}
-              className={`gap-2 rounded-full ${isCustomGoal
-                ? "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 shadow-none"
-                : "text-slate-700"
-                }`}
-              onClick={handleCustomGoalSelect}
-            >
-              <Plus
-                className={`h-4 w-4 ${isCustomGoal ? "text-indigo-600" : "text-slate-400"}`}
-              />
-              Custom
-            </Button>
+            {!isAddingGoal && (
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2 rounded-full border-dashed text-slate-700"
+                onClick={handleStartAddGoal}
+              >
+                <Plus className="h-4 w-4 text-slate-400" />
+                Add goal
+              </Button>
+            )}
           </div>
 
-          {isCustomGoal && (
-            <div className="flex flex-col gap-1.5 max-w-md">
-              <Label htmlFor="custom-goal" className="text-xs font-normal text-slate-500">
-                Custom goal
-              </Label>
+          {isAddingGoal && (
+            <div className="flex w-full max-w-md flex-wrap items-center gap-2">
               <Input
-                id="custom-goal"
-                value={customGoalText}
-                onChange={(e) => handleCustomGoalChange(e.target.value)}
-                placeholder="e.g. Schedule a product demo next week"
+                id="new-goal"
+                value={newGoalLabel}
+                onChange={(e) => setNewGoalLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    void handleSaveNewGoal();
+                  }
+                  if (e.key === "Escape") handleCancelAddGoal();
+                }}
+                placeholder="e.g. Book another call, Get a reply, Close the deal"
+                className="h-9 min-w-[180px] flex-1"
+                autoFocus
               />
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => void handleSaveNewGoal()}
+                disabled={isCreatingGoal || !newGoalLabel.trim()}
+                className="bg-indigo-600 hover:bg-indigo-700"
+              >
+                {isCreatingGoal ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Save"
+                )}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleCancelAddGoal}
+                disabled={isCreatingGoal}
+              >
+                Cancel
+              </Button>
             </div>
           )}
         </div>
@@ -651,7 +864,7 @@ export default function SequenceConfigForm({
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button
             onClick={handleGenerate}
-            disabled={currentStep < 2 || isGenerating || !selectedLead || !isCadenceValid}
+            disabled={currentStep < 2 || !goal || isGenerating || !selectedLead || !isCadenceValid}
             className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-10 px-6 font-semibold"
           >
             {isGenerating ? (
@@ -672,6 +885,40 @@ export default function SequenceConfigForm({
           setCustomPrompt(text);
         }}
       />
+      <AlertDialog
+        open={Boolean(goalPendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) setGoalPendingDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete goal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {goalPendingDelete
+                ? `“${goalPendingDelete.label}” will be removed from your goals list. This can’t be undone.`
+                : "This goal will be removed from your list."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingGoal}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleConfirmDeleteGoal();
+              }}
+              disabled={isDeletingGoal}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeletingGoal ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
