@@ -59,7 +59,8 @@ import { STEP_TYPE } from "@/constants/stepType";
 import { 
   useUpdateSequenceStepMutation, 
   useDeleteSequenceStepMutation,
-  useRegenerateSequenceStepsMutation
+  useRegenerateSequenceStepsMutation,
+  useReorderSequenceStepsMutation,
 } from "@/store/features/sequences/sequencesApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
@@ -318,6 +319,12 @@ const toDateTimeLocalValue = (value: string | null | undefined) => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
+const BLOCKED_REORDER_STATUSES = new Set([
+  "sent",
+  "sending",
+  "calling",
+]);
+
 const mapApiStepToUiStep = (apiStep: SequenceStepItem, index: number): SequenceStep => {
   const isEmail = apiStep.stepType === STEP_TYPE.EMAIL;
   const isSms = apiStep.stepType === STEP_TYPE.SMS;
@@ -341,6 +348,24 @@ const mapApiStepToUiStep = (apiStep: SequenceStepItem, index: number): SequenceS
   };
 };
 
+/** Move steps, densify stepOrder 1..n, and reassign schedule slots by position. */
+const reorderStepsWithScheduleSlots = (
+  stepsArray: SequenceStep[],
+  oldIndex: number,
+  newIndex: number,
+): SequenceStep[] => {
+  const scheduleSlots = stepsArray.map((step) => step.scheduledAt);
+  return arrayMove(stepsArray, oldIndex, newIndex).map((step, index) => {
+    const scheduledAt = scheduleSlots[index] ?? step.scheduledAt;
+    return {
+      ...step,
+      stepOrder: index + 1,
+      scheduledAt,
+      time: formatScheduledAt(scheduledAt),
+    };
+  });
+};
+
 export default function GeneratedSequenceList({
   isGenerated,
   onActivate,
@@ -354,6 +379,8 @@ export default function GeneratedSequenceList({
   const [updateStep, { isLoading: isSavingStep }] = useUpdateSequenceStepMutation();
   const [deleteStep] = useDeleteSequenceStepMutation();
   const [regenerateSteps] = useRegenerateSequenceStepsMutation();
+  const [reorderSteps, { isLoading: isReordering }] = useReorderSequenceStepsMutation();
+  const [isPersistingReorder, setIsPersistingReorder] = useState(false);
   
   useEffect(() => {
     if (apiSteps && apiSteps.length > 0) {
@@ -390,7 +417,7 @@ export default function GeneratedSequenceList({
     }
   }, [editStep]);
 
-  // Keep step numbers in sync with list position after drag/add/delete
+  // Keep step numbers in sync with list position after add/delete (local-only)
   const recalculateStepOrders = (stepsArray: SequenceStep[]) => {
     return stepsArray.map((step, index) => ({
       ...step,
@@ -398,15 +425,67 @@ export default function GeneratedSequenceList({
     }));
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setSteps((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return recalculateStepOrders(arrayMove(items, oldIndex, newIndex));
-      });
+    if (!over || active.id === over.id) return;
+    if (isPersistingReorder || isReordering) return;
+
+    const oldIndex = steps.findIndex((item) => item.id === active.id);
+    const newIndex = steps.findIndex((item) => item.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const previousSteps = steps;
+    const nextSteps = reorderStepsWithScheduleSlots(steps, oldIndex, newIndex);
+
+    // Local-only demo steps (no sequence yet)
+    if (!sequenceId) {
+      setSteps(nextSteps);
+      return;
+    }
+
+    const orderedStepIds = nextSteps.map((step) => step.id);
+    if (orderedStepIds.some((id) => typeof id !== "string")) {
+      showError("Save steps before reordering");
+      return;
+    }
+
+    if (previousSteps.some((step) => BLOCKED_REORDER_STATUSES.has(step.status.toLowerCase()))) {
+      showError("Cannot reorder steps that are already sending or sent");
+      return;
+    }
+
+    setSteps(nextSteps);
+    setIsPersistingReorder(true);
+    const toastId = showLoading("Saving step order...");
+
+    try {
+      const response = await reorderSteps({
+        sequenceId,
+        body: { orderedStepIds: orderedStepIds as string[] },
+      }).unwrap();
+
+      // Response already includes synced stepOrder + scheduledAt — no extra refetch needed
+      const syncedSteps = response.data.map(mapApiStepToUiStep);
+      setSteps(syncedSteps);
+      onRegenerated?.(response.data);
+      dismissToast(toastId);
+      showSuccess("Step order updated");
+    } catch (err: unknown) {
+      setSteps(previousSteps);
+      dismissToast(toastId);
+      const errorMessage =
+        typeof err === "object" &&
+        err !== null &&
+        "data" in err &&
+        typeof err.data === "object" &&
+        err.data !== null &&
+        "message" in err.data &&
+        typeof err.data.message === "string"
+          ? err.data.message
+          : "Failed to reorder steps";
+      showError(errorMessage);
+    } finally {
+      setIsPersistingReorder(false);
     }
   };
 
@@ -592,7 +671,10 @@ export default function GeneratedSequenceList({
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-              <div ref={animationParent} className="flex flex-col gap-3">
+              <div
+                ref={animationParent}
+                className={`flex flex-col gap-3 ${isPersistingReorder || isReordering ? "pointer-events-none opacity-70" : ""}`}
+              >
                 <SortableContext 
                   items={steps.map(s => s.id)}
                   strategy={verticalListSortingStrategy}

@@ -241,6 +241,17 @@ export interface UpdateSequenceStepResponse {
   data: SequenceStepItem;
 }
 
+export interface ReorderSequenceStepsRequestBody {
+  orderedStepIds: string[];
+}
+
+export interface ReorderSequenceStepsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: SequenceStepItem[];
+}
+
 export interface GenerateSaveSequenceRequestBody {
   sequenceId?: string;
   leadId: string;

@@ -20,6 +20,8 @@ import type {
   GenerateSaveSequenceRequestBody,
   GenerateSaveSequenceResponse,
   GetSequenceLogsResponse,
+  ReorderSequenceStepsRequestBody,
+  ReorderSequenceStepsResponse,
 } from "@/types/sequences";
 
 export const sequencesApi = baseApi.injectEndpoints({
@@ -114,6 +116,17 @@ export const sequencesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Sequences"],
     }),
+    reorderSequenceSteps: builder.mutation<
+      ReorderSequenceStepsResponse,
+      { sequenceId: string; body: ReorderSequenceStepsRequestBody }
+    >({
+      query: ({ sequenceId, body }) => ({
+        url: `/sequences/${sequenceId}/steps/reorder`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Sequences"],
+    }),
     createSequence: builder.mutation<CreateSequenceResponse, CreateSequenceRequestBody>({
       query: (body) => ({
         url: "/sequences",
@@ -171,6 +184,7 @@ export const {
   useGenerateSequenceStepsMutation,
   useRegenerateAllStepContentMutation,
   useUpdateSequenceStepMutation,
+  useReorderSequenceStepsMutation,
   useCreateSequenceMutation,
   useUpdateSequenceMutation,
   useDeleteSequenceMutation,
