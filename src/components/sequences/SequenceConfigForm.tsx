@@ -144,27 +144,31 @@ export default function SequenceConfigForm({
 
   const [generateSave] = useGenerateSaveSequenceMutation();
 
-  const situations = [
-    ...templates.map((template) => ({
-      id: template.id,
-      title: template.name,
-      desc: template.promptText,
-      icon: BookOpen,
-      isCustom: false,
-    })),
-    {
-      id: "__custom__",
-      title: "Custom",
-      desc: "Create or manage your own template",
-      icon: Sparkles,
-      isCustom: true,
-    },
-  ];
+  const customSituation = {
+    id: "__custom__",
+    title: "Custom",
+    desc: "Create or manage your own template",
+    icon: Sparkles,
+    isCustom: true,
+  };
 
-  const hasMoreSituations = situations.length > TEMPLATE_PREVIEW_COUNT;
-  const visibleSituations = showAllSituations
-    ? situations
-    : situations.slice(0, TEMPLATE_PREVIEW_COUNT);
+  const templateSituations = templates.map((template) => ({
+    id: template.id,
+    title: template.name,
+    desc: template.promptText,
+    icon: BookOpen,
+    isCustom: false,
+  }));
+
+  // Keep Custom pinned as the last card in the grid.
+  const previewTemplateCount = Math.max(TEMPLATE_PREVIEW_COUNT - 1, 0);
+  const hasMoreSituations = templateSituations.length > previewTemplateCount;
+  const visibleTemplates = showAllSituations
+    ? templateSituations
+    : templateSituations.slice(0, previewTemplateCount);
+  const visibleSituations = [...visibleTemplates, customSituation];
+  const hiddenCount = Math.max(templateSituations.length - previewTemplateCount, 0);
+
   const goals = GOAL_TYPES.map((goalType) => ({
     id: goalType,
     label: goalType,
@@ -173,12 +177,41 @@ export default function SequenceConfigForm({
 
   const handleSituationSelect = (id: string, isCustom: boolean) => {
     if (isCustom) {
-      navigate("/dashboard/templates");
+      navigate("/dashboard/templates/new");
       return;
     }
 
     setSituation(id);
     if (goal && currentStep === 1) setCurrentStep(2);
+  };
+
+  const renderSituationCard = (item: (typeof visibleSituations)[number]) => {
+    const isSelected = situation === item.id;
+    return (
+      <div
+        key={item.id}
+        onClick={() => handleSituationSelect(item.id, item.isCustom)}
+        className={`cursor-pointer rounded-xl border p-4 transition-all ${
+          isSelected
+            ? "border-indigo-600 bg-indigo-50 shadow-sm"
+            : "border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50"
+        }`}
+      >
+        <item.icon
+          className={`mb-3 h-5 w-5 ${isSelected ? "text-indigo-600" : "text-slate-500"}`}
+        />
+        <h3
+          className={`text-sm font-semibold ${isSelected ? "text-indigo-900" : "text-slate-900"}`}
+        >
+          {item.title}
+        </h3>
+        <p
+          className={`mt-1 line-clamp-2 text-xs ${isSelected ? "text-indigo-700" : "text-slate-500"}`}
+        >
+          {item.desc}
+        </p>
+      </div>
+    );
   };
 
   const handleGoalSelect = (id: string) => {
@@ -282,7 +315,7 @@ export default function SequenceConfigForm({
                 This helps us choose the right follow-up strategy.
               </p>
             </div>
-            <Button
+            {/* <Button
               variant="outline"
               size="sm"
               className="gap-2"
@@ -290,7 +323,7 @@ export default function SequenceConfigForm({
             >
               <Settings className="h-4 w-4" />
               Manage templates
-            </Button>
+            </Button> */}
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -300,36 +333,7 @@ export default function SequenceConfigForm({
             {isTemplatesError && (
               <p className="text-sm text-red-500">Failed to load templates.</p>
             )}
-            {visibleSituations.map((item) => {
-              const isSelected = situation === item.id;
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => handleSituationSelect(item.id, item.isCustom)}
-                  className={`cursor-pointer rounded-xl border p-4 transition-all ${isSelected
-                    ? "border-indigo-600 bg-indigo-50 shadow-sm"
-                    : "border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50"
-                    }`}
-                >
-                  <item.icon
-                    className={`mb-3 h-5 w-5 ${isSelected ? "text-indigo-600" : "text-slate-500"
-                      }`}
-                  />
-                  <h3
-                    className={`text-sm font-semibold ${isSelected ? "text-indigo-900" : "text-slate-900"
-                      }`}
-                  >
-                    {item.title}
-                  </h3>
-                  <p
-                    className={`mt-1 line-clamp-2 text-xs ${isSelected ? "text-indigo-700" : "text-slate-500"
-                      }`}
-                  >
-                    {item.desc}
-                  </p>
-                </div>
-              );
-            })}
+            {!isLoadingTemplates && !isTemplatesError && visibleSituations.map(renderSituationCard)}
           </div>
 
           {hasMoreSituations && (
@@ -343,7 +347,7 @@ export default function SequenceConfigForm({
               >
                 {showAllSituations
                   ? "Show less"
-                  : `More (${situations.length - TEMPLATE_PREVIEW_COUNT} more)`}
+                  : `More (${hiddenCount} more)`}
               </Button>
             </div>
           )}
@@ -475,140 +479,144 @@ export default function SequenceConfigForm({
           <h2 className="text-base font-semibold text-slate-900">
             3. Preferences
           </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="flex flex-col gap-2">
-              <Label className="text-slate-700">Tone</Label>
-              <Select value={tone} onValueChange={setTone}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Friendly & Professional">
-                    <span className="flex items-center gap-2">
-                      <span>🙂</span> Friendly & Professional
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="Direct & Assertive">
-                    <span className="flex items-center gap-2">
-                      <span>💪</span> Direct & Assertive
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="Casual & Conversational">
-                    <span className="flex items-center gap-2">
-                      <span>😎</span> Casual & Conversational
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="Formal & Polished">
-                    <span className="flex items-center gap-2">
-                      <span>🎩</span> Formal & Polished
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label className="text-slate-700">Tone</Label>
+                <Select value={tone} onValueChange={setTone}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Friendly & Professional">
+                      <span className="flex items-center gap-2">
+                        <span>🙂</span> Friendly & Professional
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="Direct & Assertive">
+                      <span className="flex items-center gap-2">
+                        <span>💪</span> Direct & Assertive
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="Casual & Conversational">
+                      <span className="flex items-center gap-2">
+                        <span>😎</span> Casual & Conversational
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="Formal & Polished">
+                      <span className="flex items-center gap-2">
+                        <span>🎩</span> Formal & Polished
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-slate-700">Intensity</Label>
-              <Select value={intensity} onValueChange={setIntensity}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Standard">Standard</SelectItem>
-                  <SelectItem value="Light">Light</SelectItem>
-                  <SelectItem value="Aggressive">Aggressive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label className="text-slate-700">Cadence</Label>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="cadence-steps" className="text-xs font-normal text-slate-500">
-                    Steps
-                  </Label>
-                  <Input
-                    id="cadence-steps"
-                    type="number"
-                    min={1}
-                    value={customSteps}
-                    onChange={(e) => handleCustomStepsChange(e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="cadence-days" className="text-xs font-normal text-slate-500">
-                    Days
-                  </Label>
-                  <Input
-                    id="cadence-days"
-                    type="number"
-                    min={1}
-                    value={customDays}
-                    onChange={(e) => handleCustomDaysChange(e.target.value)}
-                  />
-                </div>
-                <p className="col-span-2 text-xs text-slate-500">
-                  <span className="font-medium text-slate-700">{cadence}</span>
-                </p>
-                {!isCadenceValid && (
-                  <p className="col-span-2 text-xs text-red-500">
-                    Steps and days must be at least 1.
-                  </p>
-                )}
+              <div className="flex flex-col gap-2">
+                <Label className="text-slate-700">Intensity</Label>
+                <Select value={intensity} onValueChange={setIntensity}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Standard">Standard</SelectItem>
+                    <SelectItem value="Light">Light</SelectItem>
+                    <SelectItem value="Aggressive">Aggressive</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-slate-700">Channels</Label>
-              <div className="grid grid-cols-2 gap-y-3 gap-x-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="ch-email"
-                    checked={channels.includes("email")}
-                    onCheckedChange={() => toggleChannel("email")}
-                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                  />
-                  <Label htmlFor="ch-email" className="flex items-center gap-1.5 font-normal text-slate-700">
-                    <Mail className="h-3.5 w-3.5 text-blue-500" />
-                    Email
-                  </Label>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label className="text-slate-700">Cadence</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="cadence-steps" className="text-xs font-normal text-slate-500">
+                      Steps
+                    </Label>
+                    <Input
+                      id="cadence-steps"
+                      type="number"
+                      min={1}
+                      value={customSteps}
+                      onChange={(e) => handleCustomStepsChange(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="cadence-days" className="text-xs font-normal text-slate-500">
+                      Days
+                    </Label>
+                    <Input
+                      id="cadence-days"
+                      type="number"
+                      min={1}
+                      value={customDays}
+                      onChange={(e) => handleCustomDaysChange(e.target.value)}
+                    />
+                  </div>
+                  <p className="col-span-2 text-xs text-slate-500">
+                    <span className="font-medium text-slate-700">{cadence}</span>
+                  </p>
+                  {!isCadenceValid && (
+                    <p className="col-span-2 text-xs text-red-500">
+                      Steps and days must be at least 1.
+                    </p>
+                  )}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="ch-sms"
-                    checked={channels.includes("sms")}
-                    onCheckedChange={() => toggleChannel("sms")}
-                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                  />
-                  <Label htmlFor="ch-sms" className="flex items-center gap-1.5 font-normal text-slate-700">
-                    <MessageSquare className="h-3.5 w-3.5 text-purple-500" />
-                    SMS
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="ch-whatsapp"
-                    checked={channels.includes("whatsapp")}
-                    onCheckedChange={() => toggleChannel("whatsapp")}
-                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                  />
-                  <Label htmlFor="ch-whatsapp" className="flex items-center gap-1.5 font-normal text-slate-700">
-                    <MessageCircle className="h-3.5 w-3.5 text-green-500" />
-                    WhatsApp
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="ch-aicall"
-                    checked={channels.includes("aicall")}
-                    onCheckedChange={() => toggleChannel("aicall")}
-                    className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                  />
-                  <Label htmlFor="ch-aicall" className="flex items-center gap-1.5 font-normal text-slate-700">
-                    <Phone className="h-3.5 w-3.5 text-amber-500" />
-                    AI Call
-                  </Label>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label className="text-slate-700">Channels</Label>
+                <div className="grid grid-cols-2 gap-y-3 gap-x-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="ch-email"
+                      checked={channels.includes("email")}
+                      onCheckedChange={() => toggleChannel("email")}
+                      className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                    />
+                    <Label htmlFor="ch-email" className="flex items-center gap-1.5 font-normal text-slate-700">
+                      <Mail className="h-3.5 w-3.5 text-blue-500" />
+                      Email
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="ch-sms"
+                      checked={channels.includes("sms")}
+                      onCheckedChange={() => toggleChannel("sms")}
+                      className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                    />
+                    <Label htmlFor="ch-sms" className="flex items-center gap-1.5 font-normal text-slate-700">
+                      <MessageSquare className="h-3.5 w-3.5 text-purple-500" />
+                      SMS
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="ch-whatsapp"
+                      checked={channels.includes("whatsapp")}
+                      onCheckedChange={() => toggleChannel("whatsapp")}
+                      className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                    />
+                    <Label htmlFor="ch-whatsapp" className="flex items-center gap-1.5 font-normal text-slate-700">
+                      <MessageCircle className="h-3.5 w-3.5 text-green-500" />
+                      WhatsApp
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="ch-aicall"
+                      checked={channels.includes("aicall")}
+                      onCheckedChange={() => toggleChannel("aicall")}
+                      className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                    />
+                    <Label htmlFor="ch-aicall" className="flex items-center gap-1.5 font-normal text-slate-700">
+                      <Phone className="h-3.5 w-3.5 text-amber-500" />
+                      AI Call
+                    </Label>
+                  </div>
                 </div>
               </div>
             </div>

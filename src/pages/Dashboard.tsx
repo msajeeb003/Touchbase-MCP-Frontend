@@ -66,8 +66,6 @@ const breadcrumbLabelMap: Record<string, string> = {
   "how-to-configure": "How to configure",
   steps: "Steps",
   view: "View Steps",
-  new: "New Sequence",
-  edit: "Edit Template",
 };
 
 export default function Dashboard() {
@@ -88,12 +86,21 @@ export default function Dashboard() {
       }
 
       const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
-      const label =
+      const parentSegment = pathSegments[index - 1];
+      let label =
         breadcrumbLabelMap[segment] ??
         segment
           .split("-")
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
           .join(" ");
+
+      if (segment === "new") {
+        label = parentSegment === "templates" ? "New Template" : "New Sequence";
+      } else if (segment === "edit") {
+        label = parentSegment === "templates" || pathSegments.includes("templates")
+          ? "Edit Template"
+          : "Edit";
+      }
 
       items.push({ href, label });
       return items;
