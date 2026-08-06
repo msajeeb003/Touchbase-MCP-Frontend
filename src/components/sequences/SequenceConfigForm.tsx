@@ -874,7 +874,7 @@ export default function SequenceConfigForm({
             )}
             {isGenerating ? "Generating..." : "Generate Follow-up Sequence"}
           </Button>
-          <span className="text-sm text-slate-400">Takes ~10 seconds</span>
+          <span className="text-sm text-slate-400">Usually takes 30–60 seconds</span>
         </div>
       </CardContent>
       <ManageTemplatesDialog

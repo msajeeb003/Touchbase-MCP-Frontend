@@ -23,6 +23,7 @@ import {
 } from "@/store/features/sequences/sequencesApi";
 import type { SequenceStepItem } from "@/types/sequences";
 import { STEP_TYPE } from "@/constants/stepType";
+import { getSendLogStatusClass } from "@/lib/sequences/stepStatusStyles";
 
 const formatDateTime = (value: string | null | undefined) => {
   if (!value) return "Not scheduled";
@@ -95,8 +96,10 @@ const getStepVisuals = (stepType: SequenceStepItem["stepType"]): StepVisuals => 
 type PreviewStep = {
   type: string;
   time: string;
+  status: string;
   subject?: string;
   content: string;
+  sendLog?: string | null;
 };
 
 function ViewStepCard({
@@ -139,8 +142,10 @@ function ViewStepCard({
                 onPreview({
                   type: visuals.label,
                   time,
+                  status: step.status,
                   subject: step.subject || undefined,
                   content: step.content || "",
+                  sendLog: step.sendLog,
                 })
               }
               className="h-8 px-3 text-xs"
@@ -191,6 +196,7 @@ export default function ViewSequenceStepsPage() {
 
   const sequence = sequenceData?.data;
   const steps = stepsData?.data ?? [];
+  const sendLogStyles = getSendLogStatusClass(previewStep?.status);
 
   if (isSequenceLoading || isStepsLoading) {
     return (
@@ -286,6 +292,18 @@ export default function ViewSequenceStepsPage() {
               <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
                 {previewStep?.content}
               </div>
+            </div>
+            <div className={`rounded-lg border px-4 py-3 ${sendLogStyles.box}`}>
+              <p
+                className={`text-xs font-medium uppercase tracking-wide ${sendLogStyles.label}`}
+              >
+                Send log
+              </p>
+              <p
+                className={`mt-1.5 whitespace-pre-wrap text-sm leading-relaxed ${sendLogStyles.text}`}
+              >
+                {previewStep?.sendLog || "No send log available."}
+              </p>
             </div>
           </div>
           <div className="flex shrink-0 justify-end border-t bg-slate-50/50 px-6 py-4">

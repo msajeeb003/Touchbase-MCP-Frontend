@@ -56,6 +56,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { SequenceStepItem } from "@/types/sequences";
 import { STEP_TYPE } from "@/constants/stepType";
+import { getSendLogStatusClass } from "@/lib/sequences/stepStatusStyles";
 import { 
   useUpdateSequenceStepMutation, 
   useDeleteSequenceStepMutation,
@@ -76,6 +77,7 @@ export interface SequenceStep {
   iconBg: string;
   subject?: string;
   content: string;
+  sendLog?: string | null;
   hasPreview: boolean;
   editLabel?: string;
 }
@@ -343,6 +345,7 @@ const mapApiStepToUiStep = (apiStep: SequenceStepItem, index: number): SequenceS
     iconBg: isEmail ? "bg-blue-50" : isSms ? "bg-purple-50" : isWhatsapp ? "bg-green-50" : "bg-amber-50",
     subject: apiStep.subject || undefined,
     content: apiStep.content || "",
+    sendLog: apiStep.sendLog ?? null,
     hasPreview: true,
     editLabel: isCall ? "Edit Script" : "Edit",
   };
@@ -626,6 +629,8 @@ export default function GeneratedSequenceList({
     }
   };
 
+  const previewSendLogStyles = getSendLogStatusClass(previewStep?.status);
+
   return (
     <>
       <Card className="border shadow-sm">
@@ -760,6 +765,18 @@ export default function GeneratedSequenceList({
               <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
                 {previewStep?.content}
               </div>
+            </div>
+            <div className={`rounded-lg border px-4 py-3 ${previewSendLogStyles.box}`}>
+              <p
+                className={`text-xs font-medium uppercase tracking-wide ${previewSendLogStyles.label}`}
+              >
+                Send log
+              </p>
+              <p
+                className={`mt-1.5 whitespace-pre-wrap text-sm leading-relaxed ${previewSendLogStyles.text}`}
+              >
+                {previewStep?.sendLog || "No send log available."}
+              </p>
             </div>
           </div>
           <div className="flex shrink-0 justify-end border-t bg-slate-50/50 px-6 py-4">
