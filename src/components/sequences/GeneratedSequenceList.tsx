@@ -94,7 +94,20 @@ const getStepStatusBadgeClass = (status: string) => {
   return "border-slate-200 bg-slate-100 text-slate-700";
 };
 
+const getSequenceStatusBadgeClass = (status: string) => {
+  const value = status.toLowerCase();
+  if (value === "active") return "border-green-200 bg-green-100 text-green-700";
+  if (value === "draft") return "border-amber-200 bg-amber-100 text-amber-700";
+  if (value === "completed") return "border-emerald-200 bg-emerald-100 text-emerald-700";
+  if (value === "cancelled") return "border-rose-200 bg-rose-100 text-rose-700";
+  if (value === "paused") return "border-blue-200 bg-blue-100 text-blue-700";
+  return "border-slate-200 bg-slate-100 text-slate-700";
+};
+
 const formatStepStatus = (status: string) =>
+  status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown";
+
+const formatSequenceStatus = (status: string) =>
   status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown";
 
 const initialSteps: SequenceStep[] = [
@@ -635,13 +648,21 @@ export default function GeneratedSequenceList({
     <>
       <Card className="border shadow-sm">
         <CardHeader className="flex flex-col gap-3 space-y-0 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <h2 className="text-base font-semibold text-slate-900">
               Your Generated Sequence
             </h2>
             {isGenerated && (
               <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-normal hover:bg-slate-100 rounded-md">
                 {steps.length} steps
+              </Badge>
+            )}
+            {isGenerated && sequenceStatus && (
+              <Badge
+                variant="outline"
+                className={`font-normal ${getSequenceStatusBadgeClass(sequenceStatus)}`}
+              >
+                {formatSequenceStatus(sequenceStatus)}
               </Badge>
             )}
           </div>

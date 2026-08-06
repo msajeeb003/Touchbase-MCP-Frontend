@@ -60,20 +60,22 @@ export default function CreateSequencePage() {
     const loadingToastId = showLoading(isCurrentlyActive ? "Pausing sequence..." : "Activating sequence...");
     
     try {
-      await updateSequence({
+      const response = await updateSequence({
         id: generatedSequence.id,
         body: { status: nextStatus },
       }).unwrap();
       
       dismissToast(loadingToastId);
       showSuccess(isCurrentlyActive ? "Sequence paused successfully" : "Sequence activated successfully");
+      setGeneratedSequence((prev) =>
+        prev
+          ? { ...prev, status: response.data.status ?? nextStatus }
+          : prev,
+      );
       
       if (!isCurrentlyActive) {
-        setCurrentStep(5); // Move to final visual state if activating
+        setCurrentStep(5);
       }
-      setTimeout(() => {
-        navigate("/dashboard/sequences"); // Redirect back to sequence list
-      }, 1500);
     } catch (error: any) {
       console.error("Failed to update sequence:", error);
       dismissToast(loadingToastId);
