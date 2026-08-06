@@ -55,15 +55,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { SequenceStepItem } from "@/types/sequences";
-import { STEP_TYPE } from "@/constants/stepType";
+import { STEP_TYPE, type StepType } from "@/constants/stepType";
 import { getSendLogStatusClass } from "@/lib/sequences/stepStatusStyles";
 import { 
   useUpdateSequenceStepMutation, 
   useDeleteSequenceStepMutation,
   useRegenerateSequenceStepsMutation,
   useReorderSequenceStepsMutation,
+  useCreateSequenceStepMutation,
 } from "@/store/features/sequences/sequencesApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
+
+type UiStepChannel = "Email" | "SMS" | "WhatsApp" | "AI Call";
+
+const UI_CHANNEL_TO_STEP_TYPE: Record<UiStepChannel, StepType> = {
+  Email: STEP_TYPE.EMAIL,
+  SMS: STEP_TYPE.SMS,
+  WhatsApp: STEP_TYPE.WHATSAPP,
+  "AI Call": STEP_TYPE.CALL,
+};
 
 export interface SequenceStep {
   id: string | number;
@@ -311,6 +321,7 @@ interface GeneratedSequenceListProps {
   sequenceId?: string;
   apiSteps?: SequenceStepItem[];
   sequenceStatus?: string;
+  totalSteps?: number;
   onRegenerated?: (steps: SequenceStepItem[]) => void;
 }
 
@@ -322,9 +333,9 @@ const formatScheduledAt = (value: string | null | undefined) => {
   });
 };
 
-const toDateTimeLocalValue = (value: string | null | undefined) => {
+const toDateTimeLocalValue = (value: string | Date | null | undefined) => {
   if (!value) return "";
-  const date = new Date(value);
+  const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
@@ -332,6 +343,26 @@ const toDateTimeLocalValue = (value: string | null | undefined) => {
   const hours = `${date.getHours()}`.padStart(2, "0");
   const minutes = `${date.getMinutes()}`.padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+const getNextStepOrder = (stepsArray: SequenceStep[]) => {
+  if (stepsArray.length === 0) return 1;
+  return Math.max(...stepsArray.map((step) => step.stepOrder || 0)) + 1;
+};
+
+/** Default schedule = latest step scheduledAt + 1 day, else now. */
+const getDefaultAddStepScheduledAt = (stepsArray: SequenceStep[]) => {
+  const timestamps = stepsArray
+    .map((step) => step.scheduledAt)
+    .filter((value): value is string => Boolean(value))
+    .map((value) => new Date(value).getTime())
+    .filter((value) => !Number.isNaN(value));
+
+  if (timestamps.length === 0) return new Date();
+
+  const next = new Date(Math.max(...timestamps));
+  next.setDate(next.getDate() + 1);
+  return next;
 };
 
 const BLOCKED_REORDER_STATUSES = new Set([
@@ -388,14 +419,18 @@ export default function GeneratedSequenceList({
   sequenceId,
   apiSteps,
   sequenceStatus,
+  totalSteps,
   onRegenerated,
 }: GeneratedSequenceListProps) {
   const [steps, setSteps] = useState<SequenceStep[]>([]);
+  const canAddStep =
+    typeof totalSteps !== "number" || steps.length < totalSteps;
   
   const [updateStep, { isLoading: isSavingStep }] = useUpdateSequenceStepMutation();
   const [deleteStep] = useDeleteSequenceStepMutation();
   const [regenerateSteps] = useRegenerateSequenceStepsMutation();
   const [reorderSteps, { isLoading: isReordering }] = useReorderSequenceStepsMutation();
+  const [createStep, { isLoading: isCreatingStep }] = useCreateSequenceStepMutation();
   const [isPersistingReorder, setIsPersistingReorder] = useState(false);
   
   useEffect(() => {
@@ -409,7 +444,10 @@ export default function GeneratedSequenceList({
   // Dialog states
   const [previewStep, setPreviewStep] = useState<SequenceStep | null>(null);
   const [editStep, setEditStep] = useState<SequenceStep | null>(null);
-  
+  const [addStepChannel, setAddStepChannel] = useState<UiStepChannel | null>(null);
+  const [addStepOrder, setAddStepOrder] = useState(1);
+  const [addScheduledAt, setAddScheduledAt] = useState("");
+
   // Edit form states
   const [editSubject, setEditSubject] = useState("");
   const [editContent, setEditContent] = useState("");
@@ -530,57 +568,83 @@ export default function GeneratedSequenceList({
     setSteps((prev) => recalculateStepOrders(prev.filter((step) => step.id !== id)));
   };
 
-  const handleAddStep = (type: "Email" | "SMS" | "WhatsApp" | "AI Call") => {
-    let newStep: SequenceStep;
-    const baseStep = {
-      id: Date.now(),
-      stepOrder: steps.length + 1,
-      time: "Not scheduled",
-      status: "draft",
-      hasPreview: true,
-    };
+  const handleAddStep = (type: UiStepChannel) => {
+    setAddStepChannel(type);
+    setAddStepOrder(getNextStepOrder(steps));
+    setAddScheduledAt(toDateTimeLocalValue(getDefaultAddStepScheduledAt(steps)));
+  };
 
-    if (type === "Email") {
-      newStep = {
-        ...baseStep,
-        type,
-        icon: Mail,
-        iconColor: "text-blue-500",
-        iconBg: "bg-blue-50",
-        subject: "New Subject",
-        content: "New Email Content...",
-      };
-    } else if (type === "WhatsApp") {
-      newStep = {
-        ...baseStep,
-        type,
-        icon: MessageCircle,
-        iconColor: "text-green-500",
-        iconBg: "bg-green-50",
-        content: "New WhatsApp Message...",
-      };
-    } else if (type === "AI Call") {
-      newStep = {
-        ...baseStep,
-        type,
-        icon: Phone,
-        iconColor: "text-amber-500",
-        iconBg: "bg-amber-50",
-        content: "AI will call...",
-        editLabel: "Edit Script",
-      };
-    } else {
-      newStep = {
-        ...baseStep,
-        type: "SMS",
-        icon: MessageSquare,
-        iconColor: "text-purple-500",
-        iconBg: "bg-purple-50",
-        content: "New step — generate the sequence (or Edit) to add content.",
-      };
+  const handleCloseAddStep = () => {
+    if (isCreatingStep) return;
+    setAddStepChannel(null);
+    setAddScheduledAt("");
+  };
+
+  const handleConfirmAddStep = async () => {
+    if (!addStepChannel) return;
+
+    if (!addScheduledAt.trim()) {
+      showError("Scheduled time is required");
+      return;
     }
 
-    setSteps((prev) => recalculateStepOrders([...prev, newStep]));
+    const scheduledAtIso = new Date(addScheduledAt).toISOString();
+    if (Number.isNaN(new Date(addScheduledAt).getTime())) {
+      showError("Enter a valid scheduled time");
+      return;
+    }
+
+    const stepType = UI_CHANNEL_TO_STEP_TYPE[addStepChannel];
+    const stepOrder = addStepOrder;
+
+    if (!sequenceId) {
+      showError("Save the sequence before adding steps");
+      return;
+    }
+
+    const loadingToastId = showLoading("Creating step...");
+    try {
+      const response = await createStep({
+        sequenceId,
+        body: {
+          stepOrder,
+          stepType,
+          scheduledAt: scheduledAtIso,
+        },
+      }).unwrap();
+
+      const created = response.data;
+      setSteps((prev) =>
+        [...prev, mapApiStepToUiStep(created, prev.length)].sort(
+          (a, b) => a.stepOrder - b.stepOrder,
+        ),
+      );
+      onRegenerated?.(
+        [
+          ...(apiSteps ?? []).filter((step) =>
+            steps.some((local) => local.id === step.id),
+          ),
+          created,
+        ].sort((a, b) => a.stepOrder - b.stepOrder),
+      );
+      dismissToast(loadingToastId);
+      showSuccess(response.message || "Step added successfully");
+      setAddStepChannel(null);
+      setAddScheduledAt("");
+    } catch (err: unknown) {
+      dismissToast(loadingToastId);
+      const errorMessage =
+        typeof err === "object" &&
+        err !== null &&
+        "data" in err &&
+        typeof err.data === "object" &&
+        err.data !== null &&
+        "message" in err.data &&
+        typeof err.data.message === "string"
+          ? err.data.message
+          : "Failed to create step";
+      showError(errorMessage);
+    }
   };
 
   const handleSaveEdit = async () => {
@@ -718,6 +782,7 @@ export default function GeneratedSequenceList({
                   ))}
                 </SortableContext>
                 
+                {canAddStep && (
                 <div className="flex justify-center mt-2">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -750,6 +815,7 @@ export default function GeneratedSequenceList({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
+                )}
               </div>
             </DndContext>
           )}
@@ -873,6 +939,80 @@ export default function GeneratedSequenceList({
                 </>
               ) : (
                 "Save changes"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Step Dialog */}
+      <Dialog
+        open={Boolean(addStepChannel)}
+        onOpenChange={(open) => {
+          if (!open) handleCloseAddStep();
+        }}
+      >
+        <DialogContent className="flex max-h-[85vh] w-[calc(100vw-2rem)] max-w-md flex-col gap-0 overflow-hidden rounded-xl p-0">
+          <DialogHeader className="shrink-0 border-b px-6 py-4">
+            <DialogTitle className="text-base font-semibold text-slate-900">
+              Add {addStepChannel ?? "Step"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6">
+            <div className="flex flex-col gap-2">
+              <Label className="font-normal text-slate-700">Step order</Label>
+              <Input
+                value={String(addStepOrder)}
+                disabled
+                className="h-10 bg-slate-50 text-sm"
+              />
+              <p className="text-xs text-slate-500">
+                Automatically set to the next available order.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="font-normal text-slate-700">Channel</Label>
+              <Input
+                value={addStepChannel ?? ""}
+                disabled
+                className="h-10 bg-slate-50 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="font-normal text-slate-700">Scheduled at</Label>
+              <Input
+                type="datetime-local"
+                value={addScheduledAt}
+                onChange={(e) => setAddScheduledAt(e.target.value)}
+                disabled={isCreatingStep}
+                className="h-10 text-sm"
+              />
+              {/* <p className="text-xs text-slate-500">
+                Default is the latest step time plus one day.
+              </p> */}
+            </div>
+          </div>
+          <div className="flex shrink-0 justify-end gap-3 border-t bg-slate-50/50 px-6 py-4">
+            <Button
+              variant="ghost"
+              onClick={handleCloseAddStep}
+              disabled={isCreatingStep}
+              className="h-9 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => void handleConfirmAddStep()}
+              disabled={isCreatingStep || !addScheduledAt.trim()}
+              className="h-9 bg-indigo-600 px-5 text-white hover:bg-indigo-700"
+            >
+              {isCreatingStep ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Add step"
               )}
             </Button>
           </div>

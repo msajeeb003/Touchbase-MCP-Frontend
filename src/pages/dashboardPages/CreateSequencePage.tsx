@@ -139,6 +139,7 @@ export default function CreateSequencePage() {
             sequenceId={generatedSequence?.id}
             apiSteps={generatedSteps}
             sequenceStatus={generatedSequence?.status}
+            totalSteps={generatedSequence?.totalSteps}
             onRegenerated={(newSteps) => setGeneratedSteps(newSteps)}
           />
           {id && (
