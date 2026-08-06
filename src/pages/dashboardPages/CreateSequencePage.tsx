@@ -82,14 +82,18 @@ export default function CreateSequencePage() {
     }
   };
 
+  const isEditMode = Boolean(id);
+
   return (
     <div className="flex flex-col space-y-6 pb-10">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Create Follow-up Sequence
+          {isEditMode ? "Edit Follow-up Sequence" : "Create Follow-up Sequence"}
         </h1>
         <p className="text-sm text-slate-500">
-          Generate a multi-channel follow-up in seconds.
+          {isEditMode
+            ? "Update preferences, regenerate steps, or refine your follow-up sequence."
+            : "Generate a multi-channel follow-up in seconds."}
         </p>
       </div>
 
@@ -110,6 +114,9 @@ export default function CreateSequencePage() {
             onSequenceGenerated={(sequence, steps) => {
               setGeneratedSequence(sequence);
               setGeneratedSteps(steps);
+              if (!id && sequence.id) {
+                navigate(`/dashboard/sequences/${sequence.id}/steps`, { replace: true });
+              }
             }}
             tone={tone}
             setTone={setTone}
