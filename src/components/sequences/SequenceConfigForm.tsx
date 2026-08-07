@@ -872,7 +872,13 @@ export default function SequenceConfigForm({
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
-            {isGenerating ? "Generating..." : "Generate Follow-up Sequence"}
+            {isGenerating
+              ? sequenceId
+                ? "Updating..."
+                : "Generating..."
+              : sequenceId
+                ? "Update & Regenerate Sequence"
+                : "Generate Follow-up Sequence"}
           </Button>
           <span className="text-sm text-slate-400">Usually takes 30–60 seconds</span>
         </div>

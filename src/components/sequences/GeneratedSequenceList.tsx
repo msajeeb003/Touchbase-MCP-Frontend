@@ -428,7 +428,7 @@ export default function GeneratedSequenceList({
   
   const [updateStep, { isLoading: isSavingStep }] = useUpdateSequenceStepMutation();
   const [deleteStep] = useDeleteSequenceStepMutation();
-  const [regenerateSteps] = useRegenerateSequenceStepsMutation();
+  const [regenerateSteps, { isLoading: isRegenerating }] = useRegenerateSequenceStepsMutation();
   const [reorderSteps, { isLoading: isReordering }] = useReorderSequenceStepsMutation();
   const [createStep, { isLoading: isCreatingStep }] = useCreateSequenceStepMutation();
   const [isPersistingReorder, setIsPersistingReorder] = useState(false);
@@ -691,7 +691,7 @@ export default function GeneratedSequenceList({
   };
 
   const handleRegenerate = async () => {
-    if (!sequenceId) return;
+    if (!sequenceId || isRegenerating) return;
     const toastId = showLoading("Regenerating all steps...");
     try {
       const response = await regenerateSteps(sequenceId).unwrap();
@@ -732,9 +732,19 @@ export default function GeneratedSequenceList({
           </div>
           {isGenerated && (
             <div className="flex flex-wrap items-center gap-2">
-              <Button onClick={handleRegenerate} variant="outline" size="sm" className="gap-2 text-slate-700 h-9">
-                <RefreshCw className="h-4 w-4" />
-                Regenerate
+              <Button
+                onClick={handleRegenerate}
+                variant="outline"
+                size="sm"
+                disabled={isRegenerating}
+                className="gap-2 text-slate-700 h-9"
+              >
+                {isRegenerating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                {isRegenerating ? "Regenerating..." : "Regenerate"}
               </Button>
 
               <Button onClick={onActivate} size="sm" className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white h-9 px-4">
