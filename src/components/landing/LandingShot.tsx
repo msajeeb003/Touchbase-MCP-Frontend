@@ -5,12 +5,13 @@ type LandingShotProps = {
   alt: string;
   caption: string;
   src: string;
+  /** Lighter caption text for dark page sections. */
   dark?: boolean;
   wide?: boolean;
   className?: string;
 };
 
-/** Editor/browser chrome around a screenshot. Image is always required. */
+/** Editor chrome around a screenshot. Tab bar is always #23274C. */
 export function LandingShot({
   url,
   alt,
@@ -31,48 +32,17 @@ export function LandingShot({
     >
       <div
         className={cn(
-          "w-full overflow-hidden rounded-[14px] border shadow-[0_18px_50px_rgba(20,20,36,0.08)]",
-          dark
-            ? "border-white/[0.12] bg-[#16161f] shadow-[0_22px_60px_rgba(0,0,0,0.35)]"
-            : "border-landing-line bg-white",
+          "w-full overflow-hidden rounded-[14px] border border-white/[0.12] bg-white shadow-[0_18px_50px_rgba(20,20,36,0.12)]",
+          dark && "shadow-[0_22px_60px_rgba(0,0,0,0.35)]",
         )}
       >
-        <div
-          className={cn(
-            "flex items-center gap-3 border-b px-3.5 py-2.5",
-            dark
-              ? "border-white/[0.1] bg-[#23274C]"
-              : "border-landing-line bg-[#ebebf0]",
-          )}
-        >
+        <div className="flex items-center gap-3 border-b border-white/[0.1] bg-[#23274C] px-3.5 py-2.5">
           <div className="flex shrink-0 items-center gap-[7px]" aria-hidden>
-            <span
-              className={cn(
-                "h-[9px] w-[9px] rounded-full",
-                dark ? "bg-[#6b6f8a]" : "bg-[#c5c7d4]",
-              )}
-            />
-            <span
-              className={cn(
-                "h-[9px] w-[9px] rounded-full",
-                dark ? "bg-[#6b6f8a]" : "bg-[#c5c7d4]",
-              )}
-            />
-            <span
-              className={cn(
-                "h-[9px] w-[9px] rounded-full",
-                dark ? "bg-[#6b6f8a]" : "bg-[#c5c7d4]",
-              )}
-            />
+            <span className="h-[9px] w-[9px] rounded-full bg-[#6b6f8a]" />
+            <span className="h-[9px] w-[9px] rounded-full bg-[#6b6f8a]" />
+            <span className="h-[9px] w-[9px] rounded-full bg-[#6b6f8a]" />
           </div>
-          <div
-            className={cn(
-              "min-w-0 max-w-[min(100%,520px)] truncate rounded-md border px-3 py-1.5 font-landing-sans text-[12px] leading-none",
-              dark
-                ? "border-white/[0.1] bg-[#252841] text-white/65"
-                : "border-black/[0.08] bg-white text-landing-muted",
-            )}
-          >
+          <div className="min-w-0 max-w-[min(100%,520px)] truncate rounded-md border border-white/[0.1] bg-[#252841] px-3 py-1.5 font-landing-sans text-[12px] leading-none text-white/65">
             {url}
           </div>
         </div>
@@ -88,7 +58,7 @@ export function LandingShot({
 
       <figcaption
         className={cn(
-          "mt-3 w-full font-landing-sans text-[13.5px] leading-[1.5]",
+          "mt-3 w-full font-landing-mono text-[13px] leading-[1.5]",
           dark ? "text-[rgba(196,196,210,0.72)]" : "text-landing-muted",
         )}
       >

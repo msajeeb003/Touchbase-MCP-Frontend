@@ -3,7 +3,14 @@ import LandingNav from "@/components/landing/LandingNav";
 import LandingHero from "@/components/landing/LandingHero";
 import LandingGap from "@/components/landing/LandingGap";
 import { LandingApproach } from "@/components/landing/LandingApproach";
+import { LandingChannels } from "@/components/landing/LandingChannels";
+import { LandingCta } from "@/components/landing/LandingCta";
+import { LandingFaq } from "@/components/landing/LandingFaq";
 import { LandingHowItWorks } from "@/components/landing/LandingHowItWorks";
+import { LandingOrigin } from "@/components/landing/LandingOrigin";
+import { LandingPilot } from "@/components/landing/LandingPilot";
+import { LandingPositioning } from "@/components/landing/LandingPositioning";
+import { LandingScenarios } from "@/components/landing/LandingScenarios";
 import LandingFooter from "@/components/landing/LandingFooter";
 import { useLandingReveal } from "@/components/landing/useLandingReveal";
 
@@ -73,6 +80,13 @@ export default function LandingPage() {
         <LandingGap />
         <LandingApproach />
         <LandingHowItWorks />
+        <LandingChannels />
+        <LandingScenarios />
+        <LandingPositioning />
+        <LandingOrigin />
+        <LandingPilot />
+        <LandingFaq />
+        <LandingCta />
       </main>
       <LandingFooter />
     </div>

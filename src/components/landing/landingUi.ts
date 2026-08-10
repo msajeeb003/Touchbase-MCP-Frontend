@@ -4,6 +4,8 @@ export const wrap = "mx-auto w-full max-w-[1160px] px-[clamp(20px,5vw,44px)]";
 
 export const band = "py-[clamp(64px,8vw,116px)]";
 
+export const bandTight = "py-[clamp(48px,6vw,78px)]";
+
 export const bandDark =
   "bg-landing-ink text-white/[0.74] [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white";
 
