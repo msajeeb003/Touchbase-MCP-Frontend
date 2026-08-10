@@ -21,6 +21,7 @@ const EVENT_UI: Record<string, { icon: LucideIcon; color: string; bgColor: strin
   sequence_regenerated: { icon: RefreshCw, color: "text-purple-600", bgColor: "bg-purple-100" },
   sequence_status_changed: { icon: ArrowRight, color: "text-orange-600", bgColor: "bg-orange-100" },
   sequence_edited: { icon: Pencil, color: "text-slate-600", bgColor: "bg-slate-100" },
+  step_generated: { icon: Sparkles, color: "text-purple-600", bgColor: "bg-purple-100" },
   step_scheduled: { icon: Clock, color: "text-blue-600", bgColor: "bg-blue-100" },
   step_sent: { icon: CheckCircle, color: "text-green-600", bgColor: "bg-green-100" },
   step_sending: { icon: Loader, color: "text-yellow-600", bgColor: "bg-yellow-100" },
@@ -43,6 +44,8 @@ const renderLogMessage = (log: SequenceLogItem): string => {
       return `Status changed from ${meta.from} to ${meta.to}.`;
     case "sequence_edited":
       return `Sequence settings edited: updated ${meta.fields?.join(", ") || "fields"}.`;
+    case "step_generated":
+      return `Step ${meta.stepOrder} (${meta.stepType}) content generated with AI.`;
     case "step_scheduled":
       return `Step ${meta.stepOrder} (${meta.stepType}) scheduled for delivery.`;
     case "step_sent":

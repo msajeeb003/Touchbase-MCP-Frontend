@@ -63,6 +63,7 @@ import {
   useRegenerateSequenceStepsMutation,
   useReorderSequenceStepsMutation,
   useCreateSequenceStepMutation,
+  useGenerateSequenceStepContentMutation,
 } from "@/store/features/sequences/sequencesApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
@@ -193,6 +194,9 @@ interface SortableStepProps {
   setEditStep: (step: SequenceStep) => void;
   handleDuplicateStep: (index: number) => void;
   handleDeleteStep: (id: string | number) => void;
+  onGenerateContent: (stepId: string) => void;
+  isGeneratingContent: boolean;
+  canGenerateContent: boolean;
 }
 
 function SortableStep({
@@ -202,6 +206,9 @@ function SortableStep({
   setEditStep,
   handleDuplicateStep,
   handleDeleteStep,
+  onGenerateContent,
+  isGeneratingContent,
+  canGenerateContent,
 }: SortableStepProps) {
   const {
     attributes,
@@ -253,6 +260,22 @@ function SortableStep({
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          {canGenerateContent && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onGenerateContent(String(step.id))}
+              disabled={isGeneratingContent}
+              className="h-8 gap-1.5 px-3 text-xs"
+            >
+              {isGeneratingContent ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5" />
+              )}
+              {isGeneratingContent ? "Generating..." : "Generate"}
+            </Button>
+          )}
           {step.hasPreview && (
             <Button
               variant="outline"
@@ -431,7 +454,9 @@ export default function GeneratedSequenceList({
   const [regenerateSteps, { isLoading: isRegenerating }] = useRegenerateSequenceStepsMutation();
   const [reorderSteps, { isLoading: isReordering }] = useReorderSequenceStepsMutation();
   const [createStep, { isLoading: isCreatingStep }] = useCreateSequenceStepMutation();
+  const [generateStepContent] = useGenerateSequenceStepContentMutation();
   const [isPersistingReorder, setIsPersistingReorder] = useState(false);
+  const [generatingStepId, setGeneratingStepId] = useState<string | null>(null);
   
   useEffect(() => {
     if (apiSteps && apiSteps.length > 0) {
@@ -706,6 +731,64 @@ export default function GeneratedSequenceList({
     }
   };
 
+  const handleGenerateStepContent = async (stepId: string) => {
+    if (!sequenceId || generatingStepId) return;
+
+    setGeneratingStepId(stepId);
+    const toastId = showLoading("Generating content...");
+
+    try {
+      const response = await generateStepContent({ sequenceId, stepId }).unwrap();
+      const updatedStep = response.data;
+
+      setSteps((prev) =>
+        prev.map((step) =>
+          step.id === updatedStep.id ? mapApiStepToUiStep(updatedStep, step.stepOrder - 1) : step,
+        ),
+      );
+
+      onRegenerated?.(
+        (apiSteps ?? []).some((step) => step.id === updatedStep.id)
+          ? (apiSteps ?? []).map((step) =>
+              step.id === updatedStep.id ? updatedStep : step,
+            )
+          : [...(apiSteps ?? []), updatedStep].sort(
+              (a, b) => a.stepOrder - b.stepOrder,
+            ),
+      );
+
+      // Keep open dialogs in sync if they show this step
+      setPreviewStep((prev) =>
+        prev && prev.id === updatedStep.id
+          ? mapApiStepToUiStep(updatedStep, updatedStep.stepOrder - 1)
+          : prev,
+      );
+      setEditStep((prev) =>
+        prev && prev.id === updatedStep.id
+          ? mapApiStepToUiStep(updatedStep, updatedStep.stepOrder - 1)
+          : prev,
+      );
+
+      dismissToast(toastId);
+      showSuccess(response.message || "Content generated successfully");
+    } catch (err: unknown) {
+      dismissToast(toastId);
+      const errorMessage =
+        typeof err === "object" &&
+        err !== null &&
+        "data" in err &&
+        typeof err.data === "object" &&
+        err.data !== null &&
+        "message" in err.data &&
+        typeof err.data.message === "string"
+          ? err.data.message
+          : "Failed to generate content";
+      showError(errorMessage);
+    } finally {
+      setGeneratingStepId(null);
+    }
+  };
+
   const previewSendLogStyles = getSendLogStatusClass(previewStep?.status);
 
   return (
@@ -744,7 +827,7 @@ export default function GeneratedSequenceList({
                 ) : (
                   <RefreshCw className="h-4 w-4" />
                 )}
-                {isRegenerating ? "Regenerating..." : "Regenerate"}
+                {isRegenerating ? "Regenerating..." : "Regenerate All"}
               </Button>
 
               <Button onClick={onActivate} size="sm" className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white h-9 px-4">
@@ -788,6 +871,9 @@ export default function GeneratedSequenceList({
                       setEditStep={setEditStep}
                       handleDuplicateStep={handleDuplicateStep}
                       handleDeleteStep={handleDeleteStep}
+                      onGenerateContent={handleGenerateStepContent}
+                      isGeneratingContent={generatingStepId === String(step.id)}
+                      canGenerateContent={Boolean(sequenceId) && typeof step.id === "string"}
                     />
                   ))}
                 </SortableContext>
