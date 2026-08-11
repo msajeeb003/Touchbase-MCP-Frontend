@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import configureShot from "@/assets/landingPageImages/configure.png";
+import { WaitlistButton } from "@/components/landing/waitlist";
 import { LandingShot } from "./LandingShot";
 import { cn } from "@/lib/utils";
 import {
@@ -70,9 +70,9 @@ export function LandingApproach() {
         />
 
         <div className={cn(ctaRow, "mt-7")}>
-          <Link className={cn(btn, btnPrimary)} to="/auth/signup">
+          <WaitlistButton className={cn(btn, btnPrimary)}>
             Apply for Pilot Access
-          </Link>
+          </WaitlistButton>
         </div>
       </div>
     </section>

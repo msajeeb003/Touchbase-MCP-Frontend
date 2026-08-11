@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type KeyboardEvent } from "react";
-import { Link } from "react-router-dom";
+import { WaitlistButton } from "@/components/landing/waitlist";
 import { cn } from "@/lib/utils";
 import {
   btn,
@@ -210,9 +210,9 @@ export default function LandingHero() {
             </p>
           </div>
           <div className={cn(ctaRow, "mt-0")}>
-            <Link className={cn(btn, btnPrimary)} to="/auth/signup">
+            <WaitlistButton className={cn(btn, btnPrimary)}>
               Join the Pilot
-            </Link>
+            </WaitlistButton>
             <a className={cn(btn, btnGhost)} href="#how">
               See How It Works
             </a>

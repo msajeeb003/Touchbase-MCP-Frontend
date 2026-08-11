@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import BrandMark from "@/components/landing/BrandMark";
+import { WaitlistButton } from "@/components/landing/waitlist";
 import { brand, btn, btnGhost, btnPrimary, btnSm, wrap } from "./landingUi";
 import { cn } from "@/lib/utils";
 
@@ -44,9 +45,9 @@ export default function LandingNav() {
           <Link className={cn(btn, btnGhost, btnSm)} to="/auth/signin">
             Login
           </Link>
-          <Link className={cn(btn, btnPrimary, btnSm)} to="/auth/signup">
-            Register
-          </Link>
+          <WaitlistButton className={cn(btn, btnPrimary, btnSm)}>
+            Join the waitlist
+          </WaitlistButton>
         </div>
       </div>
     </header>

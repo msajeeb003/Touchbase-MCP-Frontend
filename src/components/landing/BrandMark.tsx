@@ -11,7 +11,7 @@ export default function BrandMark({ className }: BrandMarkProps) {
       src={logo}
       alt=""
       aria-hidden="true"
-      className={cn("h-6 w-6 flex-none object-contain", className)}
+      className={cn("h-9 w-9 flex-none object-contain", className)}
     />
   );
 }

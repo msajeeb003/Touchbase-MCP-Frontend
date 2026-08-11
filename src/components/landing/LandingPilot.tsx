@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { WaitlistButton } from "@/components/landing/waitlist";
 import { cn } from "@/lib/utils";
 import {
   band,
@@ -52,12 +52,12 @@ export function LandingPilot() {
         </ul>
 
         <div className={ctaRow}>
-          <Link className={cn(btn, btnPrimary)} to="/auth/signup">
+          <WaitlistButton className={cn(btn, btnPrimary)}>
             Apply to Join the Pilot
-          </Link>
-          <Link className={cn(btn, btnGhost)} to="/auth/signin">
-            Login
-          </Link>
+          </WaitlistButton>
+          <a className={cn(btn, btnGhost)} href="#faq">
+            Read the FAQ
+          </a>
         </div>
 
         <p className="mt-4 max-w-[46ch] pt-[18px] font-landing-mono text-xs leading-[1.75] text-white/[0.42]">

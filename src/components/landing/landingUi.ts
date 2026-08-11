@@ -50,7 +50,7 @@ export const ctaRow = "mt-8 flex flex-wrap gap-3";
 
 export const brand = cn(
   "flex items-center gap-2.5 font-landing-display text-lg font-bold tracking-[-0.02em] text-white no-underline",
-  "[&_img]:h-6 [&_img]:w-6 [&_img]:flex-none [&_img]:block",
+  "[&_img]:h-9 [&_img]:w-9 [&_img]:flex-none [&_img]:block",
 );
 
 export const revealPendingClasses = ["opacity-0", "translate-y-[14px]"] as const;

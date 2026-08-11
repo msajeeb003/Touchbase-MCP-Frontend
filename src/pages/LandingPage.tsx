@@ -12,6 +12,10 @@ import { LandingPilot } from "@/components/landing/LandingPilot";
 import { LandingPositioning } from "@/components/landing/LandingPositioning";
 import { LandingScenarios } from "@/components/landing/LandingScenarios";
 import LandingFooter from "@/components/landing/LandingFooter";
+import {
+  WaitlistModal,
+  WaitlistProvider,
+} from "@/components/landing/waitlist";
 import { useLandingReveal } from "@/components/landing/useLandingReveal";
 
 const FONT_HREF =
@@ -70,25 +74,28 @@ export default function LandingPage() {
   useLandingReveal();
 
   return (
-    <div
-      className="landing-page min-h-screen bg-landing-paper font-landing-sans text-[17px] leading-[1.62] text-landing-body antialiased [&_img]:block [&_img]:max-w-full [&_svg]:block [&_svg]:max-w-full"
-      id="top"
-    >
-      <LandingNav />
-      <main>
-        <LandingHero />
-        <LandingGap />
-        <LandingApproach />
-        <LandingHowItWorks />
-        <LandingChannels />
-        <LandingScenarios />
-        <LandingPositioning />
-        <LandingOrigin />
-        <LandingPilot />
-        <LandingFaq />
-        <LandingCta />
-      </main>
-      <LandingFooter />
-    </div>
+    <WaitlistProvider>
+      <div
+        className="landing-page min-h-screen bg-landing-paper font-landing-sans text-[17px] leading-[1.62] text-landing-body antialiased [&_img]:block [&_img]:max-w-full [&_svg]:block [&_svg]:max-w-full"
+        id="top"
+      >
+        <LandingNav />
+        <main>
+          <LandingHero />
+          <LandingGap />
+          <LandingApproach />
+          <LandingHowItWorks />
+          <LandingChannels />
+          <LandingScenarios />
+          <LandingPositioning />
+          <LandingOrigin />
+          <LandingPilot />
+          <LandingFaq />
+          <LandingCta />
+        </main>
+        <LandingFooter />
+        <WaitlistModal />
+      </div>
+    </WaitlistProvider>
   );
 }

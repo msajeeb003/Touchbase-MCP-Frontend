@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { WaitlistButton } from "@/components/landing/waitlist";
 import { cn } from "@/lib/utils";
 import {
   bandTight,
@@ -26,12 +26,12 @@ export function LandingCta() {
               waiting for the next follow-up.
             </p>
             <div className={cn(ctaRow, "mt-7 justify-center")}>
-              <Link className={cn(btn, btnPrimary)} to="/auth/signup">
+              <WaitlistButton className={cn(btn, btnPrimary)}>
                 Join the Pilot
-              </Link>
-              <Link className={cn(btn, btnGhost)} to="/auth/signin">
-                Login
-              </Link>
+              </WaitlistButton>
+              <a className={cn(btn, btnGhost)} href="#how">
+                See How It Works
+              </a>
             </div>
           </div>
         </div>
