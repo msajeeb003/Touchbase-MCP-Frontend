@@ -1,4 +1,5 @@
-import dashboard1Shot from "@/assets/landingPageImages/dashboard1.png";
+import createSequenceShot from "@/assets/landingPageImages/create sequence.png";
+import configureShot from "@/assets/landingPageImages/configure.png";
 import dashboard2Shot from "@/assets/landingPageImages/dashboard2.png";
 import leadShot from "@/assets/landingPageImages/lead.png";
 import sequencesShot from "@/assets/landingPageImages/sequences.png";
@@ -111,16 +112,24 @@ export function LandingHowItWorks() {
             <p className="mb-3.5 max-w-[54ch] text-base leading-[1.65] text-landing-ink-2">
               Choose what happened, and the follow-up path follows from there.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="mb-[22px] flex flex-wrap gap-2">
               {OUTCOME_PILLS.map((label) => (
                 <span
                   key={label}
-                  className="rounded-full border border-landing-line bg-[#eef0f6] px-3.5 py-1.5 text-[13px] font-medium text-landing-ink"
+                  className="rounded-md border border-landing-line bg-[#eef0f6] px-2.5 py-1 font-landing-mono text-[12px] text-landing-muted"
                 >
                   {label}
                 </span>
               ))}
             </div>
+            <LandingShot
+              wide
+              className="mt-0"
+              url="followupaitool.com/dashboard/sequences/new"
+              src={createSequenceShot}
+              alt="Pick the situation and the goal, then set tone, intensity, cadence and channels — the summary on the right updates as you go."
+              caption="Pick the situation and the goal, then set tone, intensity, cadence and channels — the summary on the right updates as you go."
+            />
           </Step>
 
           <Step n={4}>
@@ -154,10 +163,10 @@ export function LandingHowItWorks() {
             <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-2">
               <LandingShot
                 className="mt-0 max-w-none"
-                url="followupaitool.com/dashboard"
-                src={dashboard1Shot}
-                alt="Leads, sends and active sequences at a glance."
-                caption="Leads, sends and active sequences at a glance."
+                url="followupaitool.com/dashboard/how-to-configure"
+                  src={configureShot}
+                  alt="Review or regenerate any step, then pause and resume it any time."
+                caption="Review or regenerate any step, then pause and resume it any time."
               />
               <LandingShot
                 className="mt-0 max-w-none"

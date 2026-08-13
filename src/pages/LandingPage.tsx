@@ -11,6 +11,7 @@ import { LandingOrigin } from "@/components/landing/LandingOrigin";
 import { LandingPilot } from "@/components/landing/LandingPilot";
 import { LandingPositioning } from "@/components/landing/LandingPositioning";
 import { LandingScenarios } from "@/components/landing/LandingScenarios";
+import { LandingWatchItWork } from "@/components/landing/LandingWatchItWork";
 import LandingFooter from "@/components/landing/LandingFooter";
 import {
   WaitlistModal,
@@ -84,6 +85,7 @@ export default function LandingPage() {
           <LandingHero />
           <LandingGap />
           <LandingApproach />
+          <LandingWatchItWork />
           <LandingHowItWorks />
           <LandingChannels />
           <LandingScenarios />

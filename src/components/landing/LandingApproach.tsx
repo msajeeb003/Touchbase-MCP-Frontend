@@ -1,4 +1,4 @@
-import configureShot from "@/assets/landingPageImages/configure.png";
+import configureShot from "@/assets/landingPageImages/dashboard1.png";
 import { WaitlistButton } from "@/components/landing/waitlist";
 import { LandingShot } from "./LandingShot";
 import { cn } from "@/lib/utils";
@@ -63,10 +63,10 @@ export function LandingApproach() {
         <LandingShot
           dark
           wide
-          url="followupaitool.com/dashboard/how-to-configure"
+          url="followupaitool.com/dashboard"
           src={configureShot}
           alt="How to configure: templates, leads, and generate sequence with AI"
-          caption="Review every generated step and its timing before anything goes out — edit them by hand, regenerate the content, or activate the sequence as it stands."
+          caption="One place to see it working — leads by stage, sequences by status, and everything that has gone out across each channel."
         />
 
         <div className={cn(ctaRow, "mt-7")}>

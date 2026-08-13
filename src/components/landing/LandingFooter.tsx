@@ -1,6 +1,14 @@
 import BrandMark from "@/components/landing/BrandMark";
 import { brand, wrap } from "./landingUi";
+import { scrollToSection } from "./scrollToSection";
 import { cn } from "@/lib/utils";
+
+const FOOTER_LINKS = [
+  { id: "how", label: "How it works" },
+  { id: "channels", label: "Channels" },
+  { id: "pilot", label: "Pilot" },
+  { id: "faq", label: "FAQ" },
+] as const;
 
 export default function LandingFooter() {
   return (
@@ -11,26 +19,31 @@ export default function LandingFooter() {
           "flex flex-col gap-5 text-[13.5px] text-landing-muted sm:flex-row sm:flex-wrap sm:items-center sm:gap-[18px]",
         )}
       >
-        <a className={cn(brand, "text-landing-ink")} href="#top">
+        <button
+          type="button"
+          className={cn(
+            brand,
+            "cursor-pointer border-0 bg-transparent p-0 text-landing-ink",
+          )}
+          onClick={() => scrollToSection("top")}
+        >
           <BrandMark />
           Follow-Up AI
-        </a>
+        </button>
         <nav
           aria-label="Footer"
           className="flex flex-wrap gap-x-5 gap-y-2.5 sm:ml-auto sm:gap-[22px]"
         >
-          <a href="#how" className="no-underline hover:text-landing-ink">
-            How it works
-          </a>
-          <a href="#channels" className="no-underline hover:text-landing-ink">
-            Channels
-          </a>
-          <a href="#pilot" className="no-underline hover:text-landing-ink">
-            Pilot
-          </a>
-          <a href="#faq" className="no-underline hover:text-landing-ink">
-            FAQ
-          </a>
+          {FOOTER_LINKS.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              className="cursor-pointer border-0 bg-transparent p-0 font-inherit text-inherit hover:text-landing-ink"
+              onClick={() => scrollToSection(id)}
+            >
+              {label}
+            </button>
+          ))}
         </nav>
       </div>
     </footer>
