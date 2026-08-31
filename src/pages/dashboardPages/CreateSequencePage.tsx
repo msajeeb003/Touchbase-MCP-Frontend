@@ -6,6 +6,7 @@ import SequenceSidebar from "@/components/sequences/SequenceSidebar";
 import SequenceActivityLog from "@/components/sequences/SequenceActivityLog";
 import type { LeadItem } from "@/types/leads";
 import type { SequenceItem, SequenceStepItem } from "@/types/sequences";
+import { useGetSingleLeadQuery } from "@/store/features/leads/leadsApi";
 import { useUpdateSequenceMutation, useGetSingleSequenceQuery } from "@/store/features/sequences/sequencesApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { useParams } from "react-router-dom";
@@ -30,7 +31,11 @@ export default function CreateSequencePage() {
   const [generatedSteps, setGeneratedSteps] = useState<SequenceStepItem[]>([]);
   
   const { data: sequenceData } = useGetSingleSequenceQuery(id ?? "", { skip: !id });
-  
+  const leadId = sequenceData?.data?.leadId;
+  const { data: leadData } = useGetSingleLeadQuery(leadId ?? "", {
+    skip: !leadId,
+  });
+
   // Initialize form from existing sequence data
   useEffect(() => {
     if (sequenceData?.data) {
@@ -41,14 +46,18 @@ export default function CreateSequencePage() {
       setIntensity(seq.intensity || "Standard");
       setCadence(seq.cadence || "5 steps over 7 days");
       setChannels(seq.channels || ["email", "sms", "whatsapp", "aicall"]);
-      
-      setSelectedLead({ ...seq.lead, id: seq.leadId } as unknown as LeadItem);
       setGeneratedSequence(seq);
       setGeneratedSteps(seq.steps || []);
       setIsGenerated(true);
       setCurrentStep(4);
     }
   }, [sequenceData]);
+
+  useEffect(() => {
+    if (leadData?.data) {
+      setSelectedLead(leadData.data);
+    }
+  }, [leadData]);
   
   const [updateSequence] = useUpdateSequenceMutation();
 
@@ -158,6 +167,7 @@ export default function CreateSequencePage() {
             channels={channels}
             selectedLead={selectedLead}
             setSelectedLead={setSelectedLead}
+            autoSelectLead={!isEditMode}
           />
         </aside>
       </div>

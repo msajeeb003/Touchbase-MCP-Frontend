@@ -29,6 +29,7 @@ interface SequenceSidebarProps {
   channels: string[];
   selectedLead: LeadItem | null;
   setSelectedLead: (lead: LeadItem | null) => void;
+  autoSelectLead?: boolean;
 }
 
 export default function SequenceSidebar({
@@ -40,20 +41,23 @@ export default function SequenceSidebar({
   channels,
   selectedLead,
   setSelectedLead,
+  autoSelectLead = true,
 }: SequenceSidebarProps) {
   const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { data: leadsResponse } = useGetLeadsQuery({ limit: 1 });
   const { data: templatesResponse } = useGetPromptTemplatesQuery();
+  
 
   const selectedPromptName =
     templatesResponse?.data?.find((template) => template.id === situation)?.name ?? null;
 
   useEffect(() => {
-    if (!selectedLead && leadsResponse?.data?.items?.length) {
-      setSelectedLead(leadsResponse.data.items[0]);
+    if (!autoSelectLead || selectedLead || !leadsResponse?.data?.items?.length) {
+      return;
     }
-  }, [leadsResponse, selectedLead, setSelectedLead]);
+    setSelectedLead(leadsResponse.data.items[0]);
+  }, [autoSelectLead, leadsResponse, selectedLead, setSelectedLead]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
