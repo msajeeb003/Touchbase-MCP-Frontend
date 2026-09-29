@@ -352,9 +352,13 @@ export default function LeadsPage() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={getStageBadgeClass(lead.followUpStage)}>
-                          {lead.followUpStage}
-                        </Badge>
+                        {lead.followUpStage ? (
+                          <Badge variant="outline" className={getStageBadgeClass(lead.followUpStage)}>
+                            {lead.followUpStage}
+                          </Badge>
+                        ) : (
+                          <span className="text-sm text-slate-400">---</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getStatusBadgeClass(lead.status)}>

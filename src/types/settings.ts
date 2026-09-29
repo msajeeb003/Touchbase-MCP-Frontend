@@ -14,6 +14,7 @@ export interface SettingsItem {
   aiApiKey: string | null;
   aiModel: string | null;
   fathomApiKey: string | null;
+  autoDraftEnabled: boolean;
   smtpHost: string | null;
   smtpPort: number | null;
   smtpUsername: string | null;
@@ -45,6 +46,7 @@ export interface UpdateSettingsRequestBody {
   aiApiKey?: string | null;
   aiModel?: string | null;
   fathomApiKey?: string | null;
+  autoDraftEnabled?: boolean;
   smtpHost?: string | null;
   smtpPort?: number | null;
   smtpUsername?: string | null;

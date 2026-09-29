@@ -28,6 +28,7 @@ export const updateSettingsSchema = z.object({
     aiModel: optionalAiModel,
 
     fathomApiKey: optionalText,
+    autoDraftEnabled: z.boolean().optional(),
 
     smtpHost: optionalText,
     smtpPort: optionalPort,

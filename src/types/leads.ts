@@ -7,7 +7,7 @@ export interface LeadItem {
   company?: string;
   location?: string;
   status: string;
-  followUpStage: string;
+  followUpStage: string | null;
   notes?: string;
   createdAt: string;
   updatedAt: string;

@@ -14,6 +14,9 @@ export const baseApi = createApi({
             if (token) {
                 headers.set("Authorization", `Bearer ${token}`);
             }
+            if (BASE_URL.includes("ngrok")) {
+                headers.set("ngrok-skip-browser-warning", "true");
+            }
             return headers;
         },
     }),

@@ -1,5 +1,5 @@
-export const getStatusBadgeClass = (status: string) => {
-  const value = status.trim().toLowerCase().replace(/\s+/g, " ");
+export const getStatusBadgeClass = (status: string | null | undefined) => {
+  const value = (status ?? "").trim().toLowerCase().replace(/\s+/g, " ");
   if (value === "active") {
     return "bg-emerald-100 text-emerald-800 border-emerald-200";
   }
@@ -9,8 +9,9 @@ export const getStatusBadgeClass = (status: string) => {
   return "bg-slate-100 text-slate-700 border-slate-200";
 };
 
-export const getStageBadgeClass = (stage: string) => {
-  const value = stage.toLowerCase();
+export const getStageBadgeClass = (stage: string | null | undefined) => {
+  const value = (stage ?? "").toLowerCase();
+  if (!value) return "bg-slate-100 text-slate-500 border-slate-200";
   if (value.includes("no")) return "bg-indigo-100 text-indigo-700 border-indigo-200";
   if (value.includes("after")) return "bg-purple-100 text-purple-700 border-purple-200";
   if (value.includes("prd")) return "bg-violet-100 text-violet-700 border-violet-200";

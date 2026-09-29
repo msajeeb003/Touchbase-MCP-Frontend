@@ -15,11 +15,13 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
 import {
   settingsFormSchema,
   type SettingsFormValues,
@@ -37,6 +39,7 @@ const generalSettingsKeys = [
   "aiApiKey",
   "aiModel",
   "fathomApiKey",
+  "autoDraftEnabled",
   "smtpHost",
   "smtpPort",
   "smtpUsername",
@@ -84,6 +87,7 @@ const toInitialValues = (data?: SettingsItem): SettingsFormValues => {
     aiApiKey: data?.aiApiKey ?? "",
     aiModel: data?.aiModel ?? "",
     fathomApiKey: data?.fathomApiKey ?? "",
+    autoDraftEnabled: data?.autoDraftEnabled ?? false,
     smtpHost: data?.smtpHost ?? "",
     smtpPort: data?.smtpPort ?? undefined,
     smtpUsername: data?.smtpUsername ?? "",
@@ -122,6 +126,11 @@ const assignPayloadField = (
 
   if (key === "smsProvider") {
     payload.smsProvider = value === "textmagic" || value === "twilio" ? value : null;
+    return;
+  }
+
+  if (key === "autoDraftEnabled") {
+    payload.autoDraftEnabled = Boolean(value);
     return;
   }
 
@@ -345,7 +354,7 @@ export default function SettingsPage() {
                 Fathom help and official docs
               </Link>
             </div>
-            <div className="p-4">
+            <div className="space-y-5 p-4">
               <FormField
                 control={form.control}
                 name="fathomApiKey"
@@ -356,6 +365,31 @@ export default function SettingsPage() {
                       <Input placeholder="fathom_api_..." {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="autoDraftEnabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between gap-4 rounded-lg border bg-slate-50/60 px-4 py-3">
+                    <div className="space-y-1">
+                      <FormLabel className="text-sm font-medium text-slate-900">
+                        Auto draft
+                      </FormLabel>
+                      <FormDescription className="text-xs text-slate-500">
+                        Automatically draft follow-up sequences from new Fathom call transcripts.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        className="data-[state=checked]:bg-indigo-600 data-[state=unchecked]:bg-slate-300"
+                        checked={Boolean(field.value)}
+                        onCheckedChange={field.onChange}
+                        aria-label="Toggle auto draft"
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />
