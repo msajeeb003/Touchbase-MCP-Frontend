@@ -11,6 +11,12 @@ import { useUpdateSequenceMutation, useGetSingleSequenceQuery } from "@/store/fe
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { useParams } from "react-router-dom";
 
+function readSequenceGoal(goal: SequenceItem["goal"] | { id?: string; label?: string } | null) {
+  if (!goal) return null;
+  if (typeof goal === "string") return goal;
+  return goal.label || goal.id || null;
+}
+
 export default function CreateSequencePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -41,7 +47,7 @@ export default function CreateSequencePage() {
     if (sequenceData?.data) {
       const seq = sequenceData.data;
       setSituation(seq.promptTemplateId || null);
-      setGoal(seq.goal || null);
+      setGoal(readSequenceGoal(seq.goal));
       setTone(seq.tone || "Friendly & Professional");
       setIntensity(seq.intensity || "Standard");
       setCadence(seq.cadence || "5 steps over 7 days");

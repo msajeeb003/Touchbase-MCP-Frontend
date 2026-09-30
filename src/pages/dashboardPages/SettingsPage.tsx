@@ -373,7 +373,7 @@ export default function SettingsPage() {
                 control={form.control}
                 name="autoDraftEnabled"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between gap-4 rounded-lg border bg-slate-50/60 px-4 py-3">
+                  <FormItem className="flex flex-col items-start gap-3 rounded-lg border bg-slate-50/60 px-4 py-3">
                     <div className="space-y-1">
                       <FormLabel className="text-sm font-medium text-slate-900">
                         Auto draft

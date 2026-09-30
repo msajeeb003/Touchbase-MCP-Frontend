@@ -175,6 +175,19 @@ export default function SequenceConfigForm({
   } = useGetSequenceGoalsQuery();
   const goals = goalsResponse?.data ?? [];
 
+  useEffect(() => {
+    if (!goal || goals.length === 0) return;
+
+    const saved = goal.trim().toLowerCase();
+    const match = goals.find(
+      (item) =>
+        item.id === goal || item.label.trim().toLowerCase() === saved,
+    );
+    if (match && match.label !== goal) {
+      setGoal(match.label);
+    }
+  }, [goal, goals, setGoal]);
+
   const [createGoal, { isLoading: isCreatingGoal }] = useCreateSequenceGoalMutation();
   const [updateGoal, { isLoading: isUpdatingGoal }] = useUpdateSequenceGoalMutation();
   const [deleteGoal, { isLoading: isDeletingGoal }] = useDeleteSequenceGoalMutation();
@@ -546,7 +559,9 @@ export default function SequenceConfigForm({
             )}
             {goals.map((item) => {
               const Icon = getGoalIcon(item.label);
-              const isSelected = goal === item.label;
+              const isSelected =
+                goal === item.id ||
+                goal?.trim().toLowerCase() === item.label.trim().toLowerCase();
               const isEditing = editingGoalId === item.id;
 
               if (isEditing) {
