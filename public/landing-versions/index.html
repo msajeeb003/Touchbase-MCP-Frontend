@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Follow-Up AI — landing page versions</title>
+  <link rel="icon" href="./assets/logo.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased">
+  <main class="mx-auto max-w-4xl px-6 py-16">
+    <div class="flex items-center gap-3">
+      <img src="./assets/logo.png" alt="" class="h-10 w-10 object-contain" />
+      <h1 class="text-2xl font-bold tracking-tight">Landing page versions</h1>
+    </div>
+    <p class="mt-2 text-slate-500">Same content, three directions. Plain HTML + Tailwind CDN, no build step. Open any file directly.</p>
+
+    <div class="mt-10 grid gap-5 sm:grid-cols-3">
+      <a href="./v1-editorial.html" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-400">
+        <div class="flex gap-1.5"><i class="h-5 w-5 rounded-md bg-[#F7F5EF] ring-1 ring-slate-200"></i><i class="h-5 w-5 rounded-md bg-[#16182B]"></i><i class="h-5 w-5 rounded-md bg-[#5B4DF5]"></i><i class="h-5 w-5 rounded-md bg-[#E0553B]"></i></div>
+        <h2 class="mt-4 text-lg font-bold">V1 · Editorial</h2>
+        <p class="mt-1 text-sm text-slate-500">Warm paper background, serif display type (Fraunces), numbered section rail, outcome picker as a ledger table.</p>
+        <span class="mt-4 inline-block text-sm font-semibold text-indigo-600 group-hover:underline">Open →</span>
+      </a>
+      <a href="./v2-midnight.html" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-400">
+        <div class="flex gap-1.5"><i class="h-5 w-5 rounded-md bg-[#0A0D1A]"></i><i class="h-5 w-5 rounded-md bg-[#6C5CE7]"></i><i class="h-5 w-5 rounded-md bg-[#22D3EE]"></i><i class="h-5 w-5 rounded-md bg-[#F5F6FA] ring-1 ring-slate-200"></i></div>
+        <h2 class="mt-4 text-lg font-bold">V2 · Midnight</h2>
+        <p class="mt-1 text-sm text-slate-500">Dark base with light bands, centered product-first hero, sequence track, bento grid for the five steps (Space Grotesk).</p>
+        <span class="mt-4 inline-block text-sm font-semibold text-indigo-600 group-hover:underline">Open →</span>
+      </a>
+      <a href="./v3-clean-saas.html" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-400">
+        <div class="flex gap-1.5"><i class="h-5 w-5 rounded-md bg-white ring-1 ring-slate-200"></i><i class="h-5 w-5 rounded-md bg-[#5B4DF5]"></i><i class="h-5 w-5 rounded-md bg-[#17A673]"></i><i class="h-5 w-5 rounded-md bg-[#F2603C]"></i></div>
+        <h2 class="mt-4 text-lg font-bold">V3 · Clean SaaS</h2>
+        <p class="mt-1 text-sm text-slate-500">White and slate, split hero with screenshot and floating outcome card, zig-zag feature rows, card-style FAQ (Manrope).</p>
+        <span class="mt-4 inline-block text-sm font-semibold text-indigo-600 group-hover:underline">Open →</span>
+      </a>
+    </div>
+
+    <p class="mt-10 text-xs text-slate-400">Waitlist form: set <code>WAITLIST_SCRIPT_URL</code> at the bottom of each page to your Google Apps Script URL. Empty means the form simulates success.</p>
+  </main>
+</body>
+</html>
