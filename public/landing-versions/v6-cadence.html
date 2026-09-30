@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Follow-Up AI — turn every sales call into a consistent follow-up sequence</title>
+  <meta name="description" content="Import your leads, connect Fathom, select what happened on the call, and launch coordinated outreach across email, WhatsApp, SMS, and AI voice." />
+  <link rel="icon" href="./assets/logo.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: { DEFAULT: "#0E3B2E", 2: "#12473A", 3: "#175748" },
+            mint: { DEFAULT: "#9FE1CB", deep: "#5FC9A3", soft: "#E6F6EF" },
+            paper: { DEFAULT: "#FAFCFB", 2: "#F0F5F2" },
+            ink: { DEFAULT: "#10231C", 2: "#2E4A40" },
+            muted: "#5C6E67",
+            line: { DEFAULT: "#DCE6E1", dark: "rgba(255,255,255,0.12)" },
+            ch: { email: "#4E7BE8", wa: "#2CB67D", sms: "#E7A13B", voice: "#F0833A" },
+          },
+          fontFamily: {
+            display: ['"Outfit"', "system-ui", "sans-serif"],
+            sans: ['"Inter"', "system-ui", "sans-serif"],
+            mono: ['"DM Mono"', "ui-monospace", "monospace"],
+          },
+          maxWidth: { wrap: "1160px" },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    [data-reveal] { opacity: 0; transform: translateY(14px); transition: opacity .55s ease, transform .55s ease; }
+    [data-reveal].is-in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { [data-reveal] { opacity: 1; transform: none; transition: none; } }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details[open] .faq-icon { transform: rotate(45deg); }
+    details[open] .sc-icon { transform: rotate(180deg); }
+    dialog::backdrop { background: rgba(14, 59, 46, 0.6); }
+    .shot img { display: block; width: 100%; height: auto; }
+    .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+    @media (min-width: 1024px) { .cal { grid-template-columns: repeat(14, minmax(0, 1fr)); } }
+    .cal-cell { min-height: 74px; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .chip { font-size: 10.5px; line-height: 1.25; font-weight: 600; border-radius: 6px; padding: 4px 6px; }
+  </style>
+</head>
+
+<body class="bg-paper font-sans text-[17px] leading-[1.6] text-ink-2 antialiased" id="top">
+
+  <!-- ============ NAV ============ -->
+  <header class="sticky top-0 z-50 border-b border-line bg-paper/90 backdrop-blur-md">
+    <div class="mx-auto flex h-[68px] max-w-wrap items-center gap-4 px-5 sm:px-6">
+      <a href="#top" class="flex items-center gap-2.5 font-display text-[19px] font-bold tracking-tight text-forest">
+        <img src="./assets/logo.png" alt="" class="h-9 w-9 object-contain" />
+        Follow-Up AI
+      </a>
+      <nav class="ml-auto hidden items-center gap-7 text-[14.5px] font-medium text-muted md:flex" aria-label="Sections">
+        <a href="#watch" class="hover:text-forest">Video</a>
+        <a href="#how" class="hover:text-forest">How it works</a>
+        <a href="#channels" class="hover:text-forest">Channels</a>
+        <a href="#pilot" class="hover:text-forest">Pilot</a>
+        <a href="#faq" class="hover:text-forest">FAQ</a>
+      </nav>
+      <div class="ml-auto flex items-center gap-2 md:ml-7">
+        <a href="/auth/signin" class="hidden h-10 items-center rounded-lg px-3.5 text-[14px] font-semibold text-forest hover:bg-paper-2 sm:inline-flex">Login</a>
+        <button type="button" data-open-waitlist class="inline-flex h-10 items-center rounded-lg bg-forest px-4 text-[14px] font-semibold text-white transition hover:bg-forest-3">Join the waitlist</button>
+        <button type="button" data-nav-toggle class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line text-forest md:hidden" aria-label="Open menu" aria-expanded="false">
+          <svg viewBox="0 0 20 20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav data-nav-mobile class="hidden border-t border-line bg-paper px-5 py-3 md:hidden" aria-label="Sections (mobile)">
+      <div class="flex flex-col gap-1 text-[15px] font-medium">
+        <a href="#watch" class="rounded-md px-2 py-2 hover:bg-paper-2">Video</a>
+        <a href="#how" class="rounded-md px-2 py-2 hover:bg-paper-2">How it works</a>
+        <a href="#channels" class="rounded-md px-2 py-2 hover:bg-paper-2">Channels</a>
+        <a href="#pilot" class="rounded-md px-2 py-2 hover:bg-paper-2">Pilot</a>
+        <a href="#faq" class="rounded-md px-2 py-2 hover:bg-paper-2">FAQ</a>
+        <a href="/auth/signin" class="rounded-md px-2 py-2 hover:bg-paper-2">Login</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ HERO (forest) + CALENDAR STRIP ============ -->
+    <section class="bg-forest pb-10 pt-16 text-white lg:pt-24">
+      <div class="mx-auto max-w-wrap px-5 sm:px-6">
+        <div class="mx-auto max-w-[800px] text-center">
+          <p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-mint">Post-call follow-up</p>
+          <h1 class="mt-6 font-display text-[clamp(38px,5.8vw,68px)] font-bold leading-[1.02] tracking-[-0.03em] text-white">
+            Turn every sales call into a <span class="text-mint">consistent follow-up sequence.</span>
+          </h1>
+          <p class="mx-auto mt-6 max-w-[58ch] text-[clamp(17px,1.4vw,19px)] text-white/65">Import your leads, connect Fathom, select what happened on the call, and launch coordinated outreach across email, WhatsApp, SMS, and AI voice. Stay in front of every opportunity, without manually chasing every lead.</p>
+          <div class="mt-8 flex flex-wrap justify-center gap-3">
+            <button type="button" data-open-waitlist class="inline-flex h-12 items-center rounded-lg bg-mint px-6 text-[15px] font-bold text-forest transition hover:bg-mint-deep">Join the Pilot</button>
+            <a href="#how" class="inline-flex h-12 items-center rounded-lg border border-white/25 px-6 text-[15px] font-semibold text-white transition hover:border-white/60">See How It Works</a>
+          </div>
+          <p class="mx-auto mt-6 max-w-[52ch] font-mono text-[12px] text-white/40">Built for agencies, consultancies, and service businesses that sell through discovery calls, demos, and proposals.</p>
+        </div>
+
+        <!-- Calendar strip -->
+        <div data-reveal class="mt-14 rounded-2xl border border-line-dark bg-forest-2 p-4 sm:p-6" id="picker">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/45">Select the call outcome</p>
+              <p class="mt-1 text-[14px] text-white/60" data-caption>Checks whether they are still interested, and gives them a clear way to reschedule.</p>
+            </div>
+            <div class="flex gap-1 rounded-lg border border-line-dark bg-forest p-1" role="tablist" aria-label="Call outcome">
+              <button type="button" role="tab" data-tab="noshow" aria-selected="true" data-active="true" class="rounded-md px-3 py-1.5 text-[13px] font-semibold text-white transition data-[active=true]:bg-mint data-[active=true]:text-forest data-[active=false]:text-white/60 data-[active=false]:hover:text-white">No-show</button>
+              <button type="button" role="tab" data-tab="second" aria-selected="false" data-active="false" class="rounded-md px-3 py-1.5 text-[13px] font-semibold text-white transition data-[active=true]:bg-mint data-[active=true]:text-forest data-[active=false]:text-white/60 data-[active=false]:hover:text-white">Second meeting</button>
+              <button type="button" role="tab" data-tab="proposal" aria-selected="false" data-active="false" class="rounded-md px-3 py-1.5 text-[13px] font-semibold text-white transition data-[active=true]:bg-mint data-[active=true]:text-forest data-[active=false]:text-white/60 data-[active=false]:hover:text-white">Proposal sent</button>
+            </div>
+          </div>
+
+          <div role="tabpanel" data-panel="noshow" data-caption-text="Checks whether they are still interested, and gives them a clear way to reschedule." class="cal mt-5">
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 0</span><span class="chip bg-ch-email text-white">Email · Sorry we missed you</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 1</span><span class="chip bg-ch-wa text-white">WhatsApp · Reminder</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 2</span><span class="chip bg-ch-sms text-forest">SMS · Rescheduling link</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 3</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 4</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 5</span><span class="chip bg-ch-email text-white">Email · Final check-in</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 6</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 7</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 8</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 9</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 10</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 11</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 12</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 13</span></div>
+          </div>
+
+          <div role="tabpanel" data-panel="second" data-caption-text="Runs until the lead schedules the next conversation to review the PRD, plan, or proposed solution." class="cal mt-5" hidden>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 0</span><span class="chip bg-ch-email text-white">Email · Next step, summarised</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 1</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 2</span><span class="chip bg-ch-wa text-white">WhatsApp · Reminder</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 3</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 4</span><span class="chip bg-ch-sms text-forest">SMS · Short follow-up</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 5</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 6</span><span class="chip bg-ch-voice text-white">AI voice · Call if still no response</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 7</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 8</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 9</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 10</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 11</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 12</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 13</span></div>
+          </div>
+
+          <div role="tabpanel" data-panel="proposal" data-caption-text="Stays present after the proposal without relying on someone remembering every follow-up." class="cal mt-5" hidden>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 0</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 1</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 2</span><span class="chip bg-ch-email text-white">Email · Proposal follow-up</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 3</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 4</span><span class="chip bg-ch-wa text-white">WhatsApp · Short check-in</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 5</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 6</span><span class="chip bg-ch-sms text-forest">SMS · Reminder</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 7</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 8</span><span class="chip bg-ch-voice text-white">AI voice · Request an update</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 9</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 10</span></div>
+            <div class="cal-cell bg-forest ring-1 ring-mint/40"><span class="font-mono text-[10px] text-white/45">Day 11</span><span class="chip bg-ch-email text-white">Email · Decision and next step</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 12</span></div>
+            <div class="cal-cell bg-forest/50"><span class="font-mono text-[10px] text-white/30">Day 13</span></div>
+          </div>
+
+          <div class="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line-dark pt-4 font-mono text-[11px] text-white/45">
+            <span class="inline-flex items-center gap-1.5"><i class="h-2 w-2 rounded-sm bg-ch-email"></i>Email</span>
+            <span class="inline-flex items-center gap-1.5"><i class="h-2 w-2 rounded-sm bg-ch-wa"></i>WhatsApp</span>
+            <span class="inline-flex items-center gap-1.5"><i class="h-2 w-2 rounded-sm bg-ch-sms"></i>SMS</span>
+            <span class="inline-flex items-center gap-1.5"><i class="h-2 w-2 rounded-sm bg-ch-voice"></i>AI voice</span>
+            <span class="sm:ml-auto">You define the strategy once. The system executes it consistently for every lead.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ THE GAP: horizontal timeline ============ -->
+    <section class="py-20 lg:py-28">
+      <div class="mx-auto max-w-wrap px-5 sm:px-6">
+        <div class="mx-auto max-w-[720px] text-center">
+          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-ch-voice">The gap</p>
+          <h2 class="mt-3 font-display text-[clamp(30px,4vw,46px)] font-bold leading-[1.08] tracking-[-0.03em] text-ink">The call went well. Then the lead went quiet.</h2>
+          <p class="mt-4 text-[clamp(17px,1.4vw,19px)] text-muted">Most opportunities are not lost during the sales call. They are lost in the days that follow.</p>
+        </div>
+
+        <ol data-reveal class="relative mt-14 grid grid-cols-1 gap-8 md:grid-cols-5 md:gap-5">
+          <span aria-hidden="true" class="absolute left-0 right-0 top-[9px] hidden border-t-2 border-dashed border-line md:block"></span>
+          <li class="relative md:pt-8"><span class="absolute left-0 top-0 hidden h-5 w-5 rounded-full border-4 border-paper bg-ch-voice md:block"></span><p class="text-[15px] font-medium text-ink">A promising lead says they will get back to you.</p></li>
+          <li class="relative md:pt-8"><span class="absolute left-0 top-0 hidden h-5 w-5 rounded-full border-4 border-paper bg-ch-voice md:block"></span><p class="text-[15px] font-medium text-ink">A second meeting needs to be scheduled.</p></li>
+          <li class="relative md:pt-8"><span class="absolute left-0 top-0 hidden h-5 w-5 rounded-full border-4 border-paper bg-ch-voice md:block"></span><p class="text-[15px] font-medium text-ink">A proposal is sent, but nobody follows up consistently.</p></li>
+          <li class="relative md:pt-8"><span class="absolute left-0 top-0 hidden h-5 w-5 rounded-full border-4 border-paper bg-ch-voice md:block"></span><p class="text-[15px] font-medium text-ink">A no-show stays buried in a spreadsheet.</p></li>
+          <li class="relative md:pt-8"><span class="absolute left-0 top-0 hidden h-5 w-5 rounded-full border-4 border-paper bg-ch-voice md:block"></span><p class="text-[15px] font-medium text-ink">Your team gets busy, and the conversation loses momentum.</p></li>
+        </ol>
+
+        <div class="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-16">
+          <div data-reveal class="grid grid-cols-1 divide-y divide-line rounded-2xl border border-line bg-white sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <div class="px-5 py-5"><p class="font-display text-[16px] font-bold text-ink">Calendar reminders</p><p class="mt-1 text-[14px] text-muted">Tell you to follow up.</p></div>
+            <div class="px-5 py-5"><p class="font-display text-[16px] font-bold text-ink">Spreadsheets</p><p class="mt-1 text-[14px] text-muted">Tell you who the lead is.</p></div>
+            <div class="px-5 py-5"><p class="font-display text-[16px] font-bold text-ink">Generic email sequences</p><p class="mt-1 text-[14px] text-muted">Send messages.</p></div>
+          </div>
+          <p data-reveal class="border-l-[3px] border-mint-deep pl-5 font-display text-[clamp(20px,2.2vw,26px)] font-semibold leading-[1.3] tracking-[-0.02em] text-ink">But none of them connects what happened during the call with what should happen next.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ APPROACH ============ -->
+    <section class="bg-white py-20 lg:py-28">
+      <div class="mx-auto max-w-wrap px-5 sm:px-6">
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
+          <div>
+            <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-forest">The approach</p>
+            <h2 class="mt-3 max-w-[20ch] font-display text-[clamp(30px,4vw,46px)] font-bold leading-[1.08] tracking-[-0.03em] text-ink">Follow-up automation built around your sales conversations.</h2>
+            <p class="mt-4 max-w-[52ch] text-[clamp(17px,1.4vw,19px)] text-muted">Follow-Up AI turns each stage of your sales process into a reusable, multi-channel sequence. After a call, simply select the outcome.</p>
+            <p class="mt-4 max-w-[52ch] text-[16px] text-muted">Follow-Up AI then schedules the appropriate touchpoints across the channels you choose. Your team defines the strategy once. The system helps execute it consistently for every lead.</p>
+            <button type="button" data-open-waitlist class="mt-7 inline-flex h-12 items-center rounded-lg bg-forest px-6 text-[15px] font-bold text-white transition hover:bg-forest-3">Apply for Pilot Access</button>
+          </div>
+          <ul data-reveal class="divide-y divide-line rounded-2xl border border-line">
+            <li class="flex items-center gap-4 px-5 py-4 text-[15px] text-ink"><span class="font-mono text-[11px] text-muted">01</span>The lead did not attend.<span class="ml-auto font-mono text-[11px] text-mint-deep">→ sequence</span></li>
+            <li class="flex items-center gap-4 px-5 py-4 text-[15px] text-ink"><span class="font-mono text-[11px] text-muted">02</span>A second call needs to be scheduled.<span class="ml-auto font-mono text-[11px] text-mint-deep">→ sequence</span></li>
+            <li class="flex items-center gap-4 px-5 py-4 text-[15px] text-ink"><span class="font-mono text-[11px] text-muted">03</span>A PRD or project plan needs review.<span class="ml-auto font-mono text-[11px] text-mint-deep">→ sequence</span></li>
+            <li class="flex items-center gap-4 px-5 py-4 text-[15px] text-ink"><span class="font-mono text-[11px] text-muted">04</span>A proposal was presented.<span class="ml-auto font-mono text-[11px] text-mint-deep">→ sequence</span></li>
+            <li class="flex items-center gap-4 px-5 py-4 text-[15px] text-ink"><span class="font-mono text-[11px] text-muted">05</span>The lead needs more time to decide.<span class="ml-auto font-mono text-[11px] text-mint-deep">→ sequence</span></li>
+            <li class="flex items-center gap-4 px-5 py-4 text-[15px] text-ink"><span class="font-mono text-[11px] text-muted">06</span>A custom next step is required.<span class="ml-auto font-mono text-[11px] text-mint-deep">→ sequence</span></li>
+          </ul>
+        </div>
+
+        <figure data-reveal class="shot mt-12">
+          <div class="overflow-hidden rounded-2xl border border-line shadow-[0_28px_70px_-30px_rgba(14,59,46,0.35)]"><img src="./assets/shots/dashboard1.png" alt="Dashboard overview" loading="lazy" /></div>
+          <figcaption class="mt-3 text-[13px] text-muted">One place to see it working: leads by stage, sequences by status, and everything that has gone out across each channel.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ WATCH (forest) ============ -->
+    <section class="bg-forest py-20 text-white lg:py-24" id="watch">
+      <div class="mx-auto max-w-wrap px-5 sm:px-6">
+        <div class="mx-auto max-w-[700px] text-center">
+          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-mint">Watch it work</p>
+          <h2 class="mt-3 font-display text-[clamp(30px,4vw,46px)] font-bold leading-[1.08] tracking-[-0.03em] text-white">See the whole flow in one run.</h2>
+        </div>
+        <figure data-reveal class="mx-auto mt-10 max-w-[940px]">
+          <div class="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-forest-2 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.6)]">
+            <video data-video class="absolute inset-0 h-full w-full object-cover" src="./assets/landing-video.mp4" playsinline preload="metadata" controls></video>
+            <button type="button" data-video-play class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-forest/55" aria-label="Play product walkthrough">
+              <span class="flex h-16 w-16 items-center justify-center rounded-full bg-mint text-forest"><svg viewBox="0 0 24 24" class="ml-0.5 h-7 w-7 fill-current"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="text-[15px] font-semibold text-white">Play walkthrough</span>
+            </button>
+          </div>
+          <figcaption class="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-mono text-[12px] text-white/45">
+            <span>Dashboard</span><span class="text-white/25">·</span><span>Leads</span><span class="text-white/25">·</span><span>Transcripts</span><span class="text-white/25">·</span><span>Generate</span><span class="text-white/25">·</span><span>Activate</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS: staggered two columns ============ -->
+    <section class="py-20 lg:py-28" id="how">
+      <div class="mx-auto max-w-wrap px-5 sm:px-6">
+        <div class="max-w-[720px]">
+          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-forest">How it works</p>
+          <h2 class="mt-3 font-display text-[clamp(30px,4vw,46px)] font-bold leading-[1.08] tracking-[-0.03em] text-ink">Five steps from spreadsheet to running sequence.</h2>
+        </div>
+
+        <div class="mt-12 grid grid-cols-1 gap-x-10 gap-y-14 lg:grid-cols-2">
+          <div class="space-y-14 lg:space-y-20">
+            <article data-reveal>
+              <div class="flex items-baseline gap-3"><span class="font-display text-[44px] font-bold leading-none text-mint-deep">1</span><h3 class="font-display text-[clamp(22px,2.2vw,28px)] font-bold tracking-[-0.025em] text-ink">Import your leads</h3></div>
+              <p class="mt-3 max-w-[50ch] text-[16px] text-muted">Upload a spreadsheet containing each lead's details. No complicated migration is required to get started.</p>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">First and last name</span>
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">Email address</span>
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">Phone number</span>
+              </div>
+              <figure class="shot mt-6">
+                <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_-28px_rgba(14,59,46,0.3)]"><img src="./assets/shots/lead.png" alt="Leads table" loading="lazy" /></div>
+                <figcaption class="mt-3 text-[13px] text-muted">Every imported lead in one table: searchable, filterable, with follow-up stage and status editable inline.</figcaption>
+              </figure>
+            </article>
+
+            <article data-reveal>
+              <div class="flex items-baseline gap-3"><span class="font-display text-[44px] font-bold leading-none text-mint-deep">3</span><h3 class="font-display text-[clamp(22px,2.2vw,28px)] font-bold tracking-[-0.025em] text-ink">Select the call outcome</h3></div>
+              <p class="mt-3 max-w-[50ch] text-[16px] text-muted">Choose what happened, and the follow-up path follows from there.</p>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">No-show</span>
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">Discovery completed</span>
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">Second meeting required</span>
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">PRD presented</span>
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">Proposal sent</span>
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">Waiting for a decision</span>
+                <span class="rounded-md bg-paper-2 px-2.5 py-1 font-mono text-[12px] text-muted">Custom scenario</span>
+              </div>
+              <figure class="shot mt-6">
+                <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_-28px_rgba(14,59,46,0.3)]"><img src="./assets/shots/create-sequence.png" alt="Create sequence" loading="lazy" /></div>
+                <figcaption class="mt-3 text-[13px] text-muted">Pick the situation and the goal, then set tone, intensity, cadence and channels. The summary on the right updates as you go.</figcaption>
+              </figure>
+            </article>
+
+            <article data-reveal>
+              <div class="flex items-baseline gap-3"><span class="font-display text-[44px] font-bold leading-none text-mint-deep">5</span><h3 class="font-display text-[clamp(22px,2.2vw,28px)] font-bold tracking-[-0.025em] text-ink">Keep the conversation moving</h3></div>
+              <p class="mt-3 max-w-[50ch] text-[16px] text-muted">Follow-Up AI executes the scheduled sequence so leads continue hearing from you across multiple channels, not just through another email sitting in their inbox.</p>
+              <figure class="shot mt-6">
+                <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_-28px_rgba(14,59,46,0.3)]"><img src="./assets/shots/configure.png" alt="Review or regenerate any step" loading="lazy" /></div>
+                <figcaption class="mt-3 text-[13px] text-muted">Review or regenerate any step, then pause and resume it any time.</figcaption>
+              </figure>
+            </article>
+          </div>
+
+          <div class="space-y-14 lg:mt-28 lg:space-y-20">
+            <article data-reveal>
+              <div class="flex items-baseline gap-3"><span class="font-display text-[44px] font-bold leading-none text-mint-deep">2</span><h3 class="font-display text-[clamp(22px,2.2vw,28px)] font-bold tracking-[-0.025em] text-ink">Connect Fathom</h3></div>
+              <p class="mt-3 max-w-[50ch] text-[16px] text-muted">Connect your Fathom account so your follow-up workflow can use the notes and context captured during the conversation.</p>
+              <figure class="shot mt-6">
+                <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_-28px_rgba(14,59,46,0.3)]"><img src="./assets/shots/transcripts.png" alt="Fathom meetings and transcripts" loading="lazy" /></div>
+                <figcaption class="mt-3 text-[13px] text-muted">Meetings pulled straight from Fathom. Open the full transcript, or attach it to the lead it belongs to.</figcaption>
+              </figure>
+            </article>
+
+            <article data-reveal>
+              <div class="flex items-baseline gap-3"><span class="font-display text-[44px] font-bold leading-none text-mint-deep">4</span><h3 class="font-display text-[clamp(22px,2.2vw,28px)] font-bold tracking-[-0.025em] text-ink">Launch the right sequence</h3></div>
+              <p class="mt-3 max-w-[50ch] text-[16px] text-muted">Choose a predefined sequence or create your own: which channels to use, what messages to send, when each touchpoint should happen, and how long the follow-up should continue.</p>
+              <figure class="shot mt-6">
+                <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_-28px_rgba(14,59,46,0.3)]"><img src="./assets/shots/sequences.png" alt="Sequences list" loading="lazy" /></div>
+                <figcaption class="mt-3 text-[13px] text-muted">Each sequence shows its lead, template, step count and per-channel progress, and a toggle to start or pause it.</figcaption>
+              </figure>
+            </article>
+
+            <figure data-reveal class="shot">
+              <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_-28px_rgba(14,59,46,0.3)]"><img src="./assets/shots/dashboard2.png" alt="Volume over time and sent vs failed by channel" loading="lazy" /></div>
+              <figcaption class="mt-3 text-[13px] text-muted">Volume over time, and sent vs failed by channel.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CHANNELS ============ -->
+    <section class="bg-white py-20 lg:py-28" id="channels">
+      <div class="mx-auto max-w-wrap px-5 sm:px-6">
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+          <div>
+            <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-forest">Channels</p>
+            <h2 class="mt-3 font-display text-[clamp(30px,4vw,46px)] font-bold leading-[1.08] tracking-[-0.03em] text-ink">One sequence. Multiple ways to reach the lead.</h2>
+            <p class="mt-4 text-[clamp(17px,1.4vw,19px)] text-muted">Use one channel, or coordinate several within the same sequence.</p>
+          </div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div data-reveal class="border-l-4 border-ch-email pl-5">
+              <div class="flex items-center gap-2.5 text-ch-email"><svg viewBox="0 0 20 20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="m3 6 7 5 7-5"/></svg><h3 class="font-display text-[18px] font-bold text-ink">Email</h3></div>
+              <p class="mt-2 text-[14.5px] text-muted">Detailed follow-ups, meeting recaps, proposal reminders, and next-step requests.</p>
+            </div>
+            <div data-reveal class="border-l-4 border-ch-wa pl-5">
+              <div class="flex items-center gap-2.5 text-ch-wa"><svg viewBox="0 0 20 20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 2.8a7.2 7.2 0 0 0-6.2 10.9L2.8 17.2l3.6-1a7.2 7.2 0 1 0 3.6-13.4z"/></svg><h3 class="font-display text-[18px] font-bold text-ink">WhatsApp</h3></div>
+              <p class="mt-2 text-[14.5px] text-muted">Continue the conversation through a channel that feels direct and personal.</p>
+            </div>
+            <div data-reveal class="border-l-4 border-ch-sms pl-5">
+              <div class="flex items-center gap-2.5 text-ch-sms"><svg viewBox="0 0 20 20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5.5A2 2 0 0 1 5 3.5h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8l-5 3.5z"/></svg><h3 class="font-display text-[18px] font-bold text-ink">SMS</h3></div>
+              <p class="mt-2 text-[14.5px] text-muted">Short reminders and simple calls to action that are easy to respond to.</p>
+            </div>
+            <div data-reveal class="border-l-4 border-ch-voice pl-5">
+              <div class="flex items-center gap-2.5 text-ch-voice"><svg viewBox="0 0 20 20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.2 3.5h3l1.4 3.4-2 1.4a9 9 0 0 0 4.6 4.6l1.4-2 3.4 1.4v3a1.5 1.5 0 0 1-1.7 1.5C8.6 16.2 3.8 11.4 2.7 5.2A1.5 1.5 0 0 1 4.2 3.5z"/></svg><h3 class="font-display text-[18px] font-bold text-ink">AI Voice</h3></div>
+              <p class="mt-2 text-[14.5px] text-muted">An AI-powered follow-up call with a recording and transcript for future reference.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCENARIOS: accordion with mini calendars ============ -->
+    <section class="py-20 lg:py-28" id="scenarios">
+      <div class="mx-auto max-w-wrap px-5 sm:px-6">
+        <div class="max-w-[720px]">
+          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-forest">Scenarios</p>
+          <h2 class="mt-3 font-display text-[clamp(30px,4vw,46px)] font-bold leading-[1.08] tracking-[-0.03em] text-ink">Built for the moments where deals usually stall.</h2>
+          <p class="mt-4 text-[clamp(17px,1.4vw,19px)] text-muted">Each of these has a sequence behind it. Open one to see the touchpoints on the calendar.</p>
+        </div>
+
+        <div data-reveal class="mt-10 divide-y divide-line rounded-2xl border border-line bg-white">
+          <details open class="px-6">
+            <summary class="flex cursor-pointer items-center gap-4 py-5">
+              <span class="hidden w-[150px] font-mono text-[11px] uppercase tracking-[0.14em] text-muted sm:block">No-show</span>
+              <span class="font-display text-[19px] font-bold text-ink">When a lead misses the call</span>
+              <svg class="sc-icon ml-auto h-5 w-5 flex-none text-forest transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 8 5 5 5-5"/></svg>
+            </summary>
+            <div class="pb-6 sm:pl-[166px]">
+              <p class="max-w-[60ch] text-[15px] text-muted">Automatically begin a sequence that checks whether they are still interested and gives them a clear way to reschedule.</p>
+              <div class="mt-4 grid grid-cols-7 gap-1.5">
+                <span class="rounded-md bg-ch-email px-1.5 py-2 text-center text-[10px] font-semibold text-white">D0<br/>Email</span>
+                <span class="rounded-md bg-ch-wa px-1.5 py-2 text-center text-[10px] font-semibold text-white">D1<br/>WhatsApp</span>
+                <span class="rounded-md bg-ch-sms px-1.5 py-2 text-center text-[10px] font-semibold text-forest">D2<br/>SMS</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D3</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D4</span>
+                <span class="rounded-md bg-ch-email px-1.5 py-2 text-center text-[10px] font-semibold text-white">D5<br/>Email</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D6</span>
+              </div>
+            </div>
+          </details>
+          <details class="px-6">
+            <summary class="flex cursor-pointer items-center gap-4 py-5">
+              <span class="hidden w-[150px] font-mono text-[11px] uppercase tracking-[0.14em] text-muted sm:block">Second meeting</span>
+              <span class="font-display text-[19px] font-bold text-ink">When the next meeting needs scheduling</span>
+              <svg class="sc-icon ml-auto h-5 w-5 flex-none text-forest transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 8 5 5 5-5"/></svg>
+            </summary>
+            <div class="pb-6 sm:pl-[166px]">
+              <p class="max-w-[60ch] text-[15px] text-muted">Follow up after the discovery call until the lead schedules the next conversation to review the PRD, plan, or proposed solution.</p>
+              <div class="mt-4 grid grid-cols-7 gap-1.5">
+                <span class="rounded-md bg-ch-email px-1.5 py-2 text-center text-[10px] font-semibold text-white">D0<br/>Email</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D1</span>
+                <span class="rounded-md bg-ch-wa px-1.5 py-2 text-center text-[10px] font-semibold text-white">D2<br/>WhatsApp</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D3</span>
+                <span class="rounded-md bg-ch-sms px-1.5 py-2 text-center text-[10px] font-semibold text-forest">D4<br/>SMS</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D5</span>
+                <span class="rounded-md bg-ch-voice px-1.5 py-2 text-center text-[10px] font-semibold text-white">D6<br/>AI voice</span>
+              </div>
+            </div>
+          </details>
+          <details class="px-6">
+            <summary class="flex cursor-pointer items-center gap-4 py-5">
+              <span class="hidden w-[150px] font-mono text-[11px] uppercase tracking-[0.14em] text-muted sm:block">Awaiting decision</span>
+              <span class="font-display text-[19px] font-bold text-ink">When a proposal is awaiting a decision</span>
+              <svg class="sc-icon ml-auto h-5 w-5 flex-none text-forest transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 8 5 5 5-5"/></svg>
+            </summary>
+            <div class="pb-6 sm:pl-[166px]">
+              <p class="max-w-[60ch] text-[15px] text-muted">Stay present after presenting the proposal without relying on someone from your team to remember every follow-up.</p>
+              <div class="mt-4 grid grid-cols-6 gap-1.5 sm:grid-cols-12">
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D0</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D1</span>
+                <span class="rounded-md bg-ch-email px-1.5 py-2 text-center text-[10px] font-semibold text-white">D2<br/>Email</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D3</span>
+                <span class="rounded-md bg-ch-wa px-1.5 py-2 text-center text-[10px] font-semibold text-white">D4<br/>WhatsApp</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D5</span>
+                <span class="rounded-md bg-ch-sms px-1.5 py-2 text-center text-[10px] font-semibold text-forest">D6<br/>SMS</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D7</span>
+                <span class="rounded-md bg-ch-voice px-1.5 py-2 text-center text-[10px] font-semibold text-white">D8<br/>AI voice</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D9</span>
+                <span class="rounded-md bg-paper-2 px-1.5 py-2 text-center font-mono text-[10px] text-muted">D10</span>
+                <span class="rounded-md bg-ch-email px-1.5 py-2 text-center text-[10px] font-semibold text-white">D11<br/>Email</span>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ POSITIONING ============ -->
+    <section class="bg-white py-20 lg:py-24" id="positioning">
+      <div class="mx-auto max-w-wrap px-5 sm:px-6">
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-forest">Positioning</p>
+            <h2 class="mt-3 max-w-[20ch] font-display text-[clamp(28px,3.6vw,42px)] font-bold leading-[1.1] tracking-[-0.03em] text-ink">Not another CRM. Not another generic email sequencer.</h2>
+            <p class="mt-4 max-w-[50ch] text-[17px] text-muted">CRMs help you store lead information. Email tools help you send emails. Follow-Up AI is designed for what happens <strong class="font-bold text-ink">between sales conversations</strong>. It combines:</p>
+          </div>
+          <div>
+            <ul data-reveal class="space-y-2.5 text-[15.5px] text-ink-2">
+              <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-mint text-forest"><svg viewBox="0 0 20 20" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 10.5 8 14.5 16 6"/></svg></span>Lead information from your spreadsheet</li>
+              <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-mint text-forest"><svg viewBox="0 0 20 20" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 10.5 8 14.5 16 6"/></svg></span>Conversation context from Fathom</li>
+              <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-mint text-forest"><svg viewBox="0 0 20 20" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 10.5 8 14.5 16 6"/></svg></span>Your sales process and follow-up scenarios</li>
+              <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-mint text-forest"><svg viewBox="0 0 20 20" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 10.5 8 14.5 16 6"/></svg></span>Multi-channel outreach</li>
+              <li class="flex items-start gap-3"><span class="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-mint text-forest"><svg viewBox="0 0 20 20" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 10.5 8 14.5 16 6"/></svg></span>Scheduling across multiple days or weeks</li>
+            </ul>
+            <p data-reveal class="mt-7 max-w-[34ch] border-l-[3px] border-mint-deep pl-5 font-display text-[clamp(19px,2vw,24px)] font-semibold leading-[1.3] tracking-[-0.02em] text-ink">So your follow-up reflects where the lead actually is in the sales process.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ORIGIN (forest) ============ -->
+    <section class="bg-forest py-20 text-white lg:py-24" id="origin">
+      <div class="mx-auto max-w-[880px] px-5 sm:px-6">
+        <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-mint">Origin</p>
+        <h2 class="mt-3 max-w-[18ch] font-display text-[clamp(26px,3.4vw,38px)] font-bold leading-[1.1] tracking-[-0.03em] text-white">Built from a workflow we needed ourselves.</h2>
+        <div data-reveal class="mt-6 space-y-4 text-[17px] text-white/70">
+          <p>We originally created Follow-Up AI for our own agency.</p>
+          <p>We were managing leads in spreadsheets, holding discovery calls, preparing PRDs, presenting proposals, and manually reminding prospects to take the next step.</p>
+          <p>The problem was not knowing that we needed to follow up. The problem was doing it consistently, through the right channel, with the right context, for every opportunity.</p>
+          <p class="font-semibold text-white">Follow-Up AI turns that manual process into a repeatable system.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PILOT ============ -->
+    <section class="py-20 lg:py-28" id="pilot">
+      <div class="mx-auto max-w-wrap px-5 sm:px-6">
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
+          <div>
+            <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-forest">Pilot programme</p>
+            <h2 class="mt-3 font-display text-[clamp(30px,4vw,46px)] font-bold leading-[1.08] tracking-[-0.03em] text-ink">Join the Follow-Up AI Pilot.</h2>
+            <p class="mt-4 text-[clamp(17px,1.4vw,19px)] text-muted">We are inviting a limited number of agencies and service businesses to test Follow-Up AI using their real sales workflows. During the pilot, we will help you:</p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <button type="button" data-open-waitlist class="inline-flex h-12 items-center rounded-lg bg-forest px-6 text-[15px] font-bold text-white transition hover:bg-forest-3">Apply to Join the Pilot</button>
+              <a href="#faq" class="inline-flex h-12 items-center rounded-lg border border-line bg-white px-6 text-[15px] font-semibold text-forest transition hover:border-forest/40">Read the FAQ</a>
+            </div>
+            <p class="mt-5 max-w-[42ch] text-[13px] text-muted">No complicated migration. Start with the leads and sales process you already have.</p>
+          </div>
+          <ol class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <li data-reveal class="flex gap-3 rounded-xl bg-white p-4 text-[14.5px] text-ink ring-1 ring-line"><span class="flex h-6 w-6 flex-none items-center justify-center rounded-md bg-mint font-mono text-[11px] font-bold text-forest">1</span>Import your existing lead list</li>
+            <li data-reveal class="flex gap-3 rounded-xl bg-white p-4 text-[14.5px] text-ink ring-1 ring-line"><span class="flex h-6 w-6 flex-none items-center justify-center rounded-md bg-mint font-mono text-[11px] font-bold text-forest">2</span>Connect your Fathom account</li>
+            <li data-reveal class="flex gap-3 rounded-xl bg-white p-4 text-[14.5px] text-ink ring-1 ring-line"><span class="flex h-6 w-6 flex-none items-center justify-center rounded-md bg-mint font-mono text-[11px] font-bold text-forest">3</span>Map your most common post-call scenarios</li>
+            <li data-reveal class="flex gap-3 rounded-xl bg-white p-4 text-[14.5px] text-ink ring-1 ring-line"><span class="flex h-6 w-6 flex-none items-center justify-center rounded-md bg-mint font-mono text-[11px] font-bold text-forest">4</span>Create your initial follow-up sequences</li>
+            <li data-reveal class="flex gap-3 rounded-xl bg-white p-4 text-[14.5px] text-ink ring-1 ring-line"><span class="flex h-6 w-6 flex-none items-center justify-center rounded-md bg-mint font-mono text-[11px] font-bold text-forest">5</span>Configure email, WhatsApp, SMS, and AI voice touchpoints</li>
+            <li data-reveal class="flex gap-3 rounded-xl bg-white p-4 text-[14.5px] text-ink ring-1 ring-line"><span class="flex h-6 w-6 flex-none items-center justify-center rounded-md bg-mint font-mono text-[11px] font-bold text-forest">6</span>Test the system with real opportunities</li>
+            <li data-reveal class="flex gap-3 rounded-xl bg-white p-4 text-[14.5px] text-ink ring-1 ring-line sm:col-span-2"><span class="flex h-6 w-6 flex-none items-center justify-center rounded-md bg-mint font-mono text-[11px] font-bold text-forest">7</span>Share feedback that helps shape the product</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="bg-white py-20 lg:py-28" id="faq">
+      <div class="mx-auto max-w-[840px] px-5 sm:px-6">
+        <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-forest">FAQ</p>
+        <h2 class="mt-3 font-display text-[clamp(30px,4vw,46px)] font-bold leading-[1.08] tracking-[-0.03em] text-ink">Frequently asked questions</h2>
+        <div class="mt-9 divide-y divide-line border-t border-line">
+          <details open><summary class="flex cursor-pointer items-center justify-between gap-6 py-5 font-display text-[18px] font-bold text-ink">Is Follow-Up AI a CRM?<span class="faq-icon flex h-7 w-7 flex-none items-center justify-center rounded-full bg-mint-soft text-forest transition-transform"><svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg></span></summary><p class="max-w-[60ch] pb-5 text-[15.5px] text-muted">No. It is a post-call follow-up automation platform. It can work with lead information imported from your existing spreadsheet without requiring you to replace your current sales system.</p></details>
+          <details><summary class="flex cursor-pointer items-center justify-between gap-6 py-5 font-display text-[18px] font-bold text-ink">Do I need to use every communication channel?<span class="faq-icon flex h-7 w-7 flex-none items-center justify-center rounded-full bg-mint-soft text-forest transition-transform"><svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg></span></summary><p class="max-w-[60ch] pb-5 text-[15.5px] text-muted">No. You decide which channels belong in each sequence. A sequence can use one channel or combine email, WhatsApp, SMS, and AI voice.</p></details>
+          <details><summary class="flex cursor-pointer items-center justify-between gap-6 py-5 font-display text-[18px] font-bold text-ink">Can I create different sequences for different call outcomes?<span class="faq-icon flex h-7 w-7 flex-none items-center justify-center rounded-full bg-mint-soft text-forest transition-transform"><svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg></span></summary><p class="max-w-[60ch] pb-5 text-[15.5px] text-muted">Yes. You can create separate sequences for no-shows, second-meeting scheduling, proposal follow-up, decision follow-up, and other stages of your sales process.</p></details>
+          <details><summary class="flex cursor-pointer items-center justify-between gap-6 py-5 font-display text-[18px] font-bold text-ink">How does the Fathom integration work?<span class="faq-icon flex h-7 w-7 flex-none items-center justify-center rounded-full bg-mint-soft text-forest transition-transform"><svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg></span></summary><p class="max-w-[60ch] pb-5 text-[15.5px] text-muted">Fathom provides notes and context from the sales conversation, helping keep the follow-up connected to what was discussed during the call.</p></details>
+          <details><summary class="flex cursor-pointer items-center justify-between gap-6 py-5 font-display text-[18px] font-bold text-ink">Can I control the timing of each message?<span class="faq-icon flex h-7 w-7 flex-none items-center justify-center rounded-full bg-mint-soft text-forest transition-transform"><svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg></span></summary><p class="max-w-[60ch] pb-5 text-[15.5px] text-muted">Yes. You decide when every touchpoint is scheduled and how long each sequence should continue.</p></details>
+          <details><summary class="flex cursor-pointer items-center justify-between gap-6 py-5 font-display text-[18px] font-bold text-ink">What happens during an AI call?<span class="faq-icon flex h-7 w-7 flex-none items-center justify-center rounded-full bg-mint-soft text-forest transition-transform"><svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg></span></summary><p class="max-w-[60ch] pb-5 text-[15.5px] text-muted">The system can place an AI-powered follow-up call and provide a recording and transcript for reference.</p></details>
+          <details><summary class="flex cursor-pointer items-center justify-between gap-6 py-5 font-display text-[18px] font-bold text-ink">Who is the pilot designed for?<span class="faq-icon flex h-7 w-7 flex-none items-center justify-center rounded-full bg-mint-soft text-forest transition-transform"><svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg></span></summary><p class="max-w-[60ch] pb-5 text-[15.5px] text-muted">The pilot is best suited for agencies, consultancies, and service businesses that generate leads, hold sales calls, send proposals, and need to follow up several times before receiving a decision.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CTA (mint) ============ -->
+    <section class="bg-mint py-16 text-forest lg:py-20">
+      <div class="mx-auto flex max-w-wrap flex-col items-start gap-8 px-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-[44ch]">
+          <h2 class="font-display text-[clamp(26px,3.4vw,40px)] font-bold leading-[1.08] tracking-[-0.03em] text-forest">Your next client may already be in your spreadsheet.</h2>
+          <p class="mt-3 text-[17px] text-forest/75">The opportunity has not necessarily disappeared. It may simply be waiting for the next follow-up.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button type="button" data-open-waitlist class="inline-flex h-12 items-center rounded-lg bg-forest px-6 text-[15px] font-bold text-white transition hover:bg-forest-3">Join the Pilot</button>
+          <a href="#how" class="inline-flex h-12 items-center rounded-lg border border-forest/30 px-6 text-[15px] font-semibold text-forest transition hover:border-forest">See How It Works</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-line py-10">
+    <div class="mx-auto flex max-w-wrap flex-col gap-5 px-5 text-[13.5px] text-muted sm:flex-row sm:items-center sm:px-6">
+      <a href="#top" class="flex items-center gap-2.5 font-display text-[18px] font-bold text-forest"><img src="./assets/logo.png" alt="" class="h-8 w-8 object-contain" />Follow-Up AI</a>
+      <nav class="flex flex-wrap gap-x-5 gap-y-2 font-medium sm:ml-auto" aria-label="Footer">
+        <a href="#how" class="hover:text-forest">How it works</a>
+        <a href="#channels" class="hover:text-forest">Channels</a>
+        <a href="#pilot" class="hover:text-forest">Pilot</a>
+        <a href="#faq" class="hover:text-forest">FAQ</a>
+      </nav>
+    </div>
+  </footer>
+
+  <dialog data-waitlist class="w-[calc(100%-2rem)] max-w-[440px] rounded-2xl border border-line bg-white p-0 text-ink shadow-[0_24px_80px_rgba(14,59,46,0.3)]">
+    <form method="dialog" class="relative px-6 pb-6 pt-7 sm:px-7" data-waitlist-form>
+      <button type="button" data-close-waitlist class="absolute right-4 top-4 rounded-md bg-paper-2 p-1.5 text-forest hover:bg-line" aria-label="Close"><svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+      <h2 class="font-display text-[26px] font-bold tracking-[-0.025em]">Join the waitlist</h2>
+      <p class="mt-2 text-[15px] text-muted">Tell us a little about you and we will be in touch about a pilot place.</p>
+      <div class="mt-6 space-y-4">
+        <label class="block"><span class="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Name</span><input name="name" required autocomplete="name" placeholder="Your full name" class="h-11 w-full rounded-lg border border-line bg-white px-3.5 text-[15px] outline-none focus:border-forest focus:ring-2 focus:ring-mint" /></label>
+        <label class="block"><span class="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Email</span><input name="email" type="email" required autocomplete="email" placeholder="you@company.com" class="h-11 w-full rounded-lg border border-line bg-white px-3.5 text-[15px] outline-none focus:border-forest focus:ring-2 focus:ring-mint" /></label>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <label class="block"><span class="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Role</span>
+            <select name="role" required class="h-11 w-full rounded-lg border border-line bg-white px-3 text-[15px] outline-none focus:border-forest focus:ring-2 focus:ring-mint">
+              <option value="" disabled selected>Select...</option>
+              <option>Founder</option><option>Agency owner</option><option>Sales / SDR</option><option>Sales manager</option><option>Consultant</option><option>Marketing</option><option>Operations</option><option>Other</option>
+            </select>
+          </label>
+          <label class="block"><span class="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Country</span><input name="country" required list="countries" placeholder="Search..." class="h-11 w-full rounded-lg border border-line bg-white px-3.5 text-[15px] outline-none focus:border-forest focus:ring-2 focus:ring-mint" /></label>
+        </div>
+        <p data-waitlist-error class="hidden text-[13px] text-ch-voice" role="alert"></p>
+        <button type="submit" data-waitlist-submit class="mt-2 h-12 w-full rounded-lg bg-forest text-[15px] font-bold text-white transition hover:bg-forest-3 disabled:opacity-60">Send Request</button>
+      </div>
+      <p class="mt-4 text-center font-mono text-[11.5px] text-muted">We only use these details to contact you about the pilot.</p>
+    </form>
+  </dialog>
+  <datalist id="countries">
+    <option>United States</option><option>United Kingdom</option><option>Canada</option><option>Australia</option><option>Germany</option><option>France</option><option>Netherlands</option><option>Spain</option><option>Italy</option><option>Sweden</option><option>Ireland</option><option>India</option><option>Bangladesh</option><option>Pakistan</option><option>Singapore</option><option>United Arab Emirates</option><option>South Africa</option><option>Brazil</option><option>Mexico</option><option>New Zealand</option><option>Japan</option><option>Other</option>
+  </datalist>
+
+  <script>
+    const WAITLIST_SCRIPT_URL = "";
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
+
+    const tabs = document.querySelectorAll("[data-tab]");
+    const panels = document.querySelectorAll("[data-panel]");
+    const caption = document.querySelector("[data-caption]");
+    function selectTab(id) {
+      tabs.forEach((t) => { const on = t.dataset.tab === id; t.dataset.active = String(on); t.setAttribute("aria-selected", String(on)); });
+      panels.forEach((p) => {
+        const on = p.dataset.panel === id;
+        p.hidden = !on;
+        if (on && caption) caption.textContent = p.dataset.captionText || "";
+      });
+    }
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => selectTab(t.dataset.tab));
+      t.addEventListener("keydown", (ev) => {
+        const d = ev.key === "ArrowRight" ? 1 : ev.key === "ArrowLeft" ? -1 : 0;
+        if (!d) return; ev.preventDefault();
+        const next = tabs[(i + d + tabs.length) % tabs.length]; next.focus(); selectTab(next.dataset.tab);
+      });
+    });
+
+    const navToggle = document.querySelector("[data-nav-toggle]");
+    const navMobile = document.querySelector("[data-nav-mobile]");
+    navToggle.addEventListener("click", () => {
+      const open = navMobile.classList.toggle("hidden") === false;
+      navToggle.setAttribute("aria-expanded", String(open));
+    });
+    navMobile.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => { navMobile.classList.add("hidden"); navToggle.setAttribute("aria-expanded", "false"); }));
+
+    const video = document.querySelector("[data-video]");
+    const playBtn = document.querySelector("[data-video-play]");
+    playBtn.addEventListener("click", () => video.play());
+    video.addEventListener("play", () => { playBtn.style.display = "none"; });
+    video.addEventListener("pause", () => { playBtn.style.display = ""; });
+    video.addEventListener("ended", () => { playBtn.style.display = ""; });
+
+    const dlg = document.querySelector("[data-waitlist]");
+    const form = document.querySelector("[data-waitlist-form]");
+    const errEl = document.querySelector("[data-waitlist-error]");
+    const submitBtn = document.querySelector("[data-waitlist-submit]");
+    document.querySelectorAll("[data-open-waitlist]").forEach((b) => b.addEventListener("click", () => dlg.showModal()));
+    document.querySelector("[data-close-waitlist]").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener("close", () => { form.reset(); errEl.classList.add("hidden"); submitBtn.disabled = false; submitBtn.textContent = "Send Request"; });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      const payload = Object.fromEntries(new FormData(form).entries());
+      submitBtn.disabled = true; submitBtn.textContent = "Sending..."; errEl.classList.add("hidden");
+      try {
+        if (WAITLIST_SCRIPT_URL) {
+          const res = await fetch(WAITLIST_SCRIPT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload), redirect: "follow" });
+          if (!res.ok) throw new Error("bad response");
+        } else {
+          await new Promise((r) => setTimeout(r, 600));
+        }
+        submitBtn.textContent = "Request sent";
+        setTimeout(() => dlg.close(), 800);
+      } catch {
+        errEl.textContent = "Something went wrong. Please try again.";
+        errEl.classList.remove("hidden");
+        submitBtn.disabled = false; submitBtn.textContent = "Send Request";
+      }
+    });
+  </script>
+</body>
+</html>
