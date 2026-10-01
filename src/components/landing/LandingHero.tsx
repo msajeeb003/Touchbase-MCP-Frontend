@@ -186,7 +186,7 @@ export default function LandingHero() {
           </h1>
           <p className="mx-auto mb-0 mt-6 max-w-[62ch] text-[clamp(17px,1.4vw,19px)] text-landing-fog/60">
             Import your leads, connect Fathom, and select what happened on the
-            call. Follow-Up AI routes each outcome into the right sequence and
+            call. Touchbase AI routes each outcome into the right sequence and
             sends every touchpoint across email, WhatsApp, SMS, and AI voice,
             on schedule.
           </p>

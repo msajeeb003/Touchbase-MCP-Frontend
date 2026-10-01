@@ -148,7 +148,7 @@ export function LandingHowItWorks() {
               <span className={stepBadge}>05 · Run</span>
               <h3 className={stepTitle}>Keep the conversation moving</h3>
               <p className={cn(stepBody, "mx-auto max-w-none")}>
-                Follow-Up AI executes the scheduled sequence so leads continue
+                Touchbase AI executes the scheduled sequence so leads continue
                 hearing from you across multiple channels, not just through
                 another email sitting in their inbox.
               </p>

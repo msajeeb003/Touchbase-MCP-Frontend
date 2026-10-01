@@ -28,7 +28,7 @@ export default function LandingFooter() {
           onClick={() => scrollToSection("top")}
         >
           <BrandMark />
-          Follow-Up AI
+          Touchbase AI
         </button>
         <nav
           aria-label="Footer"

@@ -40,7 +40,7 @@ export function LandingPositioning() {
             </h2>
             <p className="m-0 mt-4 max-w-[50ch] text-[17px] text-landing-fog/60">
               CRMs help you store lead information. Email tools help you send
-              emails. Follow-Up AI is designed for what happens{" "}
+              emails. Touchbase AI is designed for what happens{" "}
               <strong className="font-semibold text-landing-fog">
                 between sales conversations
               </strong>

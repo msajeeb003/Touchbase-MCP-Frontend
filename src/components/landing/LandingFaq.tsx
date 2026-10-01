@@ -9,7 +9,7 @@ import { band, bandAlt, eyebrow, sec } from "./landingUi";
 
 const FAQS = [
   {
-    q: "Is Follow-Up AI a CRM?",
+    q: "Is Touchbase AI a CRM?",
     a: "No. It is a post-call follow-up automation platform. It can work with lead information imported from your existing spreadsheet without requiring you to replace your current sales system.",
   },
   {

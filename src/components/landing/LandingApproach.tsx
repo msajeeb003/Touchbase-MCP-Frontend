@@ -23,7 +23,7 @@ export function LandingApproach() {
               Map each outcome once. Route every lead automatically.
             </h2>
             <p className={lede}>
-              Follow-Up AI turns each stage of your sales process into a
+              Touchbase AI turns each stage of your sales process into a
               reusable, multi-channel sequence. After a call, you select the
               outcome. The right touchpoints are scheduled across the channels
               you choose.

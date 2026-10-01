@@ -14,7 +14,7 @@ export function LandingOrigin() {
       </h2>
       <div className="mt-5 space-y-3.5 text-[16px] text-landing-fog/60">
         <p className="m-0">
-          We originally created Follow-Up AI for our own agency.
+          We originally created Touchbase AI for our own agency.
         </p>
         <p className="m-0">
           We were managing leads in spreadsheets, holding discovery calls,
@@ -27,7 +27,7 @@ export function LandingOrigin() {
           context, for every opportunity.
         </p>
         <p className="m-0 font-semibold text-landing-fog">
-          Follow-Up AI turns that manual process into a repeatable system.
+          Touchbase AI turns that manual process into a repeatable system.
         </p>
       </div>
     </div>

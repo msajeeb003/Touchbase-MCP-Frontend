@@ -46,7 +46,7 @@ export default function LandingNav() {
           onClick={() => goTo("top")}
         >
           <BrandMark />
-          Follow-Up AI
+          Touchbase AI
         </button>
         <nav
           className="ml-auto hidden items-center gap-7 md:flex"

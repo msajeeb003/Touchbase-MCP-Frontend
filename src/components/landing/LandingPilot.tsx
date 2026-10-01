@@ -28,10 +28,10 @@ export function LandingPilot() {
       <div className={wrap}>
         <div className="max-w-[720px]">
           <p className={eyebrow}>Pilot programme</p>
-          <h2 className={sec}>Join the Follow-Up AI Pilot.</h2>
+          <h2 className={sec}>Join the Touchbase AI Pilot.</h2>
           <p className={lede}>
             We are inviting a limited number of agencies and service businesses
-            to test Follow-Up AI using their real sales workflows. During the
+            to test Touchbase AI using their real sales workflows. During the
             pilot, we will help you:
           </p>
         </div>

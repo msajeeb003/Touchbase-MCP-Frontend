@@ -40,7 +40,7 @@ function useLandingFonts() {
 
     const previousTitle = document.title;
     document.title =
-      "Follow-Up AI — your follow-up, running as a system";
+      "Touchbase AI — your follow-up, running as a system";
 
     let description = document.querySelector('meta[name="description"]');
     const createdDescription = !description;
