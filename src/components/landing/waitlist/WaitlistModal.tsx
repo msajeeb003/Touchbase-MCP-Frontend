@@ -37,10 +37,10 @@ const ROLES = [
 ] as const;
 
 const fieldLabel =
-  "mb-1.5 block font-landing-mono text-[11px] uppercase tracking-[0.14em] text-landing-muted";
+  "mb-1.5 block font-landing-mono text-[11px] uppercase tracking-[0.14em] text-landing-fog/50";
 
 const fieldControl =
-  "h-11 rounded-[10px] border-landing-line bg-white font-landing-sans text-[15px] text-landing-ink placeholder:text-landing-muted/70 focus-visible:ring-landing-indigo";
+  "h-11 rounded-md border-landing-line bg-landing-steel font-landing-sans text-[15px] text-landing-fog placeholder:text-landing-fog/35 focus:ring-landing-sky focus:ring-offset-0 focus-visible:ring-landing-sky focus-visible:ring-offset-0";
 
 export function WaitlistModal() {
   const { open, setOpen, closeWaitlist } = useWaitlist();
@@ -100,19 +100,19 @@ export function WaitlistModal() {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
-        <DialogOverlay className="z-[70] bg-black/55" />
+        <DialogOverlay className="z-[70] bg-landing-steel/80" />
         <DialogPrimitive.Content
           className={cn(
             "fixed left-1/2 top-1/2 z-[80] grid w-[calc(100%-2rem)] max-w-[440px] -translate-x-1/2 -translate-y-1/2",
-            "gap-0 overflow-hidden rounded-2xl border border-landing-line bg-white p-0 font-landing-sans",
-            "shadow-[0_24px_80px_rgba(14,17,48,0.28)] duration-200",
+            "gap-0 overflow-hidden rounded-2xl border border-landing-line bg-landing-steel-2 p-0 font-landing-sans text-landing-fog",
+            "shadow-[0_24px_80px_rgba(0,0,0,0.7)] duration-200",
             "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
           )}
         >
           <DialogPrimitive.Close
             type="button"
-            className="absolute right-4 top-4 rounded-md border border-landing-line bg-[#f4f5f8] p-1.5 text-landing-ink opacity-90 transition-opacity hover:opacity-100"
+            className="absolute right-4 top-4 rounded-md border border-landing-line bg-white/5 p-1.5 text-landing-fog transition-colors hover:bg-white/10"
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
@@ -120,10 +120,10 @@ export function WaitlistModal() {
 
           <div className="px-6 pb-6 pt-7 sm:px-7">
             <DialogHeader className="mb-6 space-y-2 text-left">
-              <DialogTitle className="font-landing-display text-[clamp(24px,3vw,28px)] font-bold tracking-[-0.02em] text-landing-ink">
+              <DialogTitle className="font-landing-display text-[26px] font-bold leading-tight tracking-[-0.02em] text-landing-fog">
                 Join the waitlist
               </DialogTitle>
-              <DialogDescription className="text-[15px] leading-[1.55] text-landing-muted">
+              <DialogDescription className="text-[15px] leading-[1.55] text-landing-fog/60">
                 Tell us a little about you and we will be in touch about a pilot
                 place.
               </DialogDescription>
@@ -203,7 +203,7 @@ export function WaitlistModal() {
               </div>
 
               {error ? (
-                <p className="text-[13px] text-red-600" role="alert">
+                <p className="text-[13px] text-landing-voice" role="alert">
                   {error}
                 </p>
               ) : null}
@@ -214,7 +214,7 @@ export function WaitlistModal() {
                 className={cn(
                   btn,
                   btnPrimary,
-                  "mt-2 h-12 w-full rounded-[10px] text-[15px] disabled:opacity-60",
+                  "mt-2 w-full disabled:cursor-not-allowed disabled:opacity-60",
                 )}
               >
                 {submitted
@@ -225,7 +225,7 @@ export function WaitlistModal() {
               </button>
             </form>
 
-            <p className="mt-4 text-center font-landing-mono text-[11.5px] leading-[1.5] text-landing-muted">
+            <p className="mb-0 mt-4 text-center font-landing-mono text-[11.5px] leading-[1.5] text-landing-fog/45">
               We only use these details to contact you about the pilot.
             </p>
           </div>

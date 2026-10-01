@@ -5,44 +5,39 @@ type LandingShotProps = {
   alt: string;
   caption: string;
   src: string;
-  /** Lighter caption text for dark page sections. */
-  dark?: boolean;
   wide?: boolean;
+  /** Centre the caption under the screenshot. */
+  centerCaption?: boolean;
   className?: string;
 };
 
-/** Editor chrome around a screenshot. Tab bar is always #23274C. */
+/** Browser chrome around a product screenshot. */
 export function LandingShot({
   url,
   alt,
   caption,
   src,
-  dark = false,
   wide = false,
+  centerCaption = false,
   className,
 }: LandingShotProps) {
   return (
     <figure
       data-reveal
       className={cn(
-        "mt-[22px] w-full",
+        "m-0 mt-[22px] w-full",
         wide ? "max-w-none" : "max-w-[720px]",
         className,
       )}
     >
-      <div
-        className={cn(
-          "w-full overflow-hidden rounded-[14px] border border-white/[0.12] bg-white shadow-[0_18px_50px_rgba(20,20,36,0.12)]",
-          dark && "shadow-[0_22px_60px_rgba(0,0,0,0.35)]",
-        )}
-      >
-        <div className="flex items-center gap-3 border-b border-white/[0.1] bg-[#23274C] px-3.5 py-2.5">
-          <div className="flex shrink-0 items-center gap-[7px]" aria-hidden>
-            <span className="h-[9px] w-[9px] rounded-full bg-[#6b6f8a]" />
-            <span className="h-[9px] w-[9px] rounded-full bg-[#6b6f8a]" />
-            <span className="h-[9px] w-[9px] rounded-full bg-[#6b6f8a]" />
+      <div className="w-full overflow-hidden rounded-2xl border border-landing-line bg-white shadow-[0_30px_70px_-30px_rgba(0,0,0,0.9)]">
+        <div className="flex items-center gap-3 border-b border-landing-line bg-landing-steel-3 px-3.5 py-2.5">
+          <div className="flex shrink-0 items-center gap-1.5" aria-hidden>
+            <span className="h-2 w-2 rounded-full bg-landing-fog/25" />
+            <span className="h-2 w-2 rounded-full bg-landing-fog/25" />
+            <span className="h-2 w-2 rounded-full bg-landing-fog/25" />
           </div>
-          <div className="min-w-0 max-w-[min(100%,520px)] truncate rounded-md border border-white/[0.1] bg-[#252841] px-3 py-1.5 font-landing-sans text-[12px] leading-none text-white/65">
+          <div className="min-w-0 max-w-[min(100%,520px)] truncate rounded-md border border-landing-line bg-white/5 px-3 py-1 font-landing-mono text-[11px] leading-[1.4] text-landing-fog/60">
             {url}
           </div>
         </div>
@@ -58,8 +53,8 @@ export function LandingShot({
 
       <figcaption
         className={cn(
-          "mt-3 w-full font-landing-mono text-[13px] leading-[1.5]",
-          dark ? "text-[rgba(196,196,210,0.72)]" : "text-landing-muted",
+          "mt-3 w-full font-landing-mono text-[12.5px] leading-[1.5] text-landing-fog/45",
+          centerCaption && "text-center",
         )}
       >
         {caption}

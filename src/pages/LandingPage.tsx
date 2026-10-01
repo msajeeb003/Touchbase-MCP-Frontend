@@ -7,7 +7,6 @@ import { LandingChannels } from "@/components/landing/LandingChannels";
 import { LandingCta } from "@/components/landing/LandingCta";
 import { LandingFaq } from "@/components/landing/LandingFaq";
 import { LandingHowItWorks } from "@/components/landing/LandingHowItWorks";
-import { LandingOrigin } from "@/components/landing/LandingOrigin";
 import { LandingPilot } from "@/components/landing/LandingPilot";
 import { LandingPositioning } from "@/components/landing/LandingPositioning";
 import { LandingScenarios } from "@/components/landing/LandingScenarios";
@@ -20,7 +19,7 @@ import {
 import { useLandingReveal } from "@/components/landing/useLandingReveal";
 
 const FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap";
+  "https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap";
 
 function useLandingFonts() {
   useEffect(() => {
@@ -41,7 +40,7 @@ function useLandingFonts() {
 
     const previousTitle = document.title;
     document.title =
-      "Follow-Up AI — turn every sales call into a consistent follow-up sequence";
+      "Follow-Up AI — your follow-up, running as a system";
 
     let description = document.querySelector('meta[name="description"]');
     const createdDescription = !description;
@@ -77,7 +76,7 @@ export default function LandingPage() {
   return (
     <WaitlistProvider>
       <div
-        className="landing-page min-h-screen bg-landing-paper font-landing-sans text-[17px] leading-[1.62] text-landing-body antialiased [&_img]:block [&_img]:max-w-full [&_svg]:block [&_svg]:max-w-full"
+        className="landing-page min-h-screen bg-landing-steel font-landing-sans text-[17px] leading-[1.6] text-landing-fog/80 antialiased [&_img]:block [&_img]:max-w-full [&_svg]:block [&_svg]:max-w-full"
         id="top"
       >
         <LandingNav />
@@ -90,7 +89,6 @@ export default function LandingPage() {
           <LandingChannels />
           <LandingScenarios />
           <LandingPositioning />
-          <LandingOrigin />
           <LandingPilot />
           <LandingFaq />
           <LandingCta />

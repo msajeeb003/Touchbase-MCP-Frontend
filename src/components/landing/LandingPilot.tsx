@@ -2,17 +2,13 @@ import { WaitlistButton } from "@/components/landing/waitlist";
 import { cn } from "@/lib/utils";
 import {
   band,
-  bandDark,
   btn,
   btnGhost,
   btnPrimary,
   ctaRow,
   eyebrow,
-  eyebrowOnDark,
   lede,
-  ledeOnDark,
   sec,
-  secOnDark,
   wrap,
 } from "./landingUi";
 
@@ -28,30 +24,41 @@ const PILOT_ITEMS = [
 
 export function LandingPilot() {
   return (
-    <section className={cn(band, bandDark)} id="pilot">
+    <section className={band} id="pilot">
       <div className={wrap}>
-        <p className={cn(eyebrow, eyebrowOnDark)}>Pilot programme</p>
-        <h2 className={cn(sec, secOnDark)}>Join the Follow-Up AI Pilot.</h2>
-        <p className={cn(lede, ledeOnDark)}>
-          We are inviting a limited number of agencies and service businesses to
-          test Follow-Up AI using their real sales workflows. During the pilot,
-          we will help you:
-        </p>
+        <div className="max-w-[720px]">
+          <p className={eyebrow}>Pilot programme</p>
+          <h2 className={sec}>Join the Follow-Up AI Pilot.</h2>
+          <p className={lede}>
+            We are inviting a limited number of agencies and service businesses
+            to test Follow-Up AI using their real sales workflows. During the
+            pilot, we will help you:
+          </p>
+        </div>
 
-        <ul className="mt-9 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-4">
-          {PILOT_ITEMS.map((item) => (
+        <ol className="m-0 mt-10 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-4">
+          {PILOT_ITEMS.map((item, index) => (
             <li
               key={item}
               data-reveal
-              className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-4 text-[14.5px] leading-[1.5] text-white/[0.78]"
+              className="rounded-xl border border-landing-line bg-landing-steel-2 px-4 py-4 text-[14.5px] leading-[1.5] text-landing-fog/85"
             >
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-landing-indigo-lift" />
+              <span className="mb-2 block font-landing-mono text-[11px] text-landing-sky">
+                {String(index + 1).padStart(2, "0")}
+              </span>
               {item}
             </li>
           ))}
-        </ul>
+          <li
+            data-reveal
+            className="flex items-center rounded-xl border border-dashed border-landing-line px-4 py-4 font-landing-mono text-[12px] leading-[1.6] text-landing-fog/45"
+          >
+            No complicated migration. Start with the leads and sales process you
+            already have.
+          </li>
+        </ol>
 
-        <div className={ctaRow}>
+        <div className={cn(ctaRow, "mt-9")}>
           <WaitlistButton className={cn(btn, btnPrimary)}>
             Apply to Join the Pilot
           </WaitlistButton>
@@ -59,11 +66,6 @@ export function LandingPilot() {
             Read the FAQ
           </a>
         </div>
-
-        <p className="mt-4 max-w-[46ch] pt-[18px] font-landing-mono text-xs leading-[1.75] text-white/[0.42]">
-          No complicated migration. Start with the leads and sales process you
-          already have.
-        </p>
       </div>
     </section>
   );

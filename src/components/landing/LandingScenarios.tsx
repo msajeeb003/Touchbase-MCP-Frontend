@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { band, eyebrow, lede, sec, wrap } from "./landingUi";
 
 const SCENARIOS = [
@@ -23,31 +22,28 @@ export function LandingScenarios() {
   return (
     <section className={band} id="scenarios">
       <div className={wrap}>
-        <p className={eyebrow}>Scenarios</p>
-        <h2 className={sec}>Built for the moments where deals usually stall.</h2>
-        <p className={lede}>
-          Each of these has a sequence behind it — switch between them at the top
-          of the page to see the touchpoints.
-        </p>
+        <div className="max-w-[720px]">
+          <p className={eyebrow}>Scenarios</p>
+          <h2 className={sec}>Built for the moments where deals usually stall.</h2>
+          <p className={lede}>
+            Each of these has a sequence behind it. Switch between them in the
+            routing preview at the top of the page.
+          </p>
+        </div>
 
         <div
           data-reveal
-          className="mt-9 grid grid-cols-1 overflow-hidden rounded-2xl border border-landing-line bg-white md:grid-cols-3"
+          className="mt-10 grid grid-cols-1 divide-y divide-landing-line rounded-2xl border border-landing-line bg-landing-steel-2 md:grid-cols-3 md:divide-x md:divide-y-0"
         >
           {SCENARIOS.map(({ key, title, body }) => (
-            <div
-              key={key}
-              className={cn(
-                "border-b border-landing-line px-6 py-8 last:border-b-0 md:border-b-0 md:border-r md:px-8 md:py-10 md:last:border-r-0",
-              )}
-            >
-              <p className="mb-3 font-landing-mono text-[11px] uppercase tracking-[0.14em] text-landing-muted">
+            <div key={key} className="px-7 py-8">
+              <p className="m-0 font-landing-mono text-[11px] uppercase tracking-[0.14em] text-landing-sky">
                 {key}
               </p>
-              <h3 className="mb-2.5 font-landing-display text-[clamp(18px,1.8vw,22px)] font-semibold tracking-[-0.02em] text-landing-ink">
+              <h3 className="m-0 mt-3 font-landing-display text-[21px] font-bold leading-tight text-landing-fog">
                 {title}
               </h3>
-              <p className="m-0 text-[14.5px] leading-[1.6] text-landing-muted">
+              <p className="m-0 mt-2.5 text-[14.5px] leading-[1.6] text-landing-fog/60">
                 {body}
               </p>
             </div>

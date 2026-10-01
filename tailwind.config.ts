@@ -64,24 +64,24 @@ export default {
 				ring: 'hsl(var(--sidebar-ring))'
 			},
 			landing: {
-				ink: '#0e1130',
-				'ink-2': '#171b42',
-				indigo: '#5b4df5',
-				'indigo-lift': '#7c6fff',
-				paper: '#f6f7fb',
-				body: '#3a3f5c',
-				muted: '#6e7392',
-				line: '#e2e5f0',
-				'line-dark': 'rgba(255, 255, 255, 0.13)',
-				amber: '#f0a93b',
-				emerald: '#17a673',
-				coral: '#f2603c',
+				steel: '#0d1117',
+				'steel-2': '#131a22',
+				'steel-3': '#1a232e',
+				'steel-4': '#232e3b',
+				fog: '#e9eef3',
+				sky: '#4f9cf9',
+				'sky-deep': '#3b84de',
+				'sky-soft': 'rgba(79, 156, 249, 0.14)',
+				line: 'rgba(233, 238, 243, 0.10)',
+				email: '#7fb4ff',
+				whatsapp: '#5edba6',
+				sms: '#f2c86a', voice: '#ff9a7a',
 			},
 		},
 		fontFamily: {
-			'landing-display': ['"Bricolage Grotesque"', 'Georgia', 'serif'],
-			'landing-sans': ['"Instrument Sans"', 'system-ui', '-apple-system', 'sans-serif'],
-			'landing-mono': ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+			'landing-display': ['"Red Hat Display"', 'system-ui', 'sans-serif'],
+			'landing-sans': ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+			'landing-mono': ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
 		},
 		borderRadius: {
 			lg: 'var(--radius)',
@@ -89,6 +89,8 @@ export default {
 			sm: 'calc(var(--radius) - 4px)'
 		},
 		keyframes: {
+				'landing-travel-h': { from: { left: '0' }, to: { left: '100%' } },
+				'landing-travel-v': { from: { top: '0' }, to: { top: '100%' } },
 			'accordion-down': {
 				from: {
 					height: '0'
@@ -109,6 +111,8 @@ export default {
 		animation: {
 			'accordion-down': 'accordion-down 0.2s ease-out',
 			'accordion-up': 'accordion-up 0.2s ease-out',
+				'landing-travel-h': 'landing-travel-h 2.2s linear infinite',
+				'landing-travel-v': 'landing-travel-v 2.2s linear infinite',
 		}
 	}
   },

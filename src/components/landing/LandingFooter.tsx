@@ -12,18 +12,18 @@ const FOOTER_LINKS = [
 
 export default function LandingFooter() {
   return (
-    <footer className="mt-[clamp(48px,8vw,116px)] border-t border-landing-line pb-10 pt-8 sm:pb-[52px] sm:pt-[38px]">
+    <footer className="border-t border-landing-line py-10">
       <div
         className={cn(
           wrap,
-          "flex flex-col gap-5 text-[13.5px] text-landing-muted sm:flex-row sm:flex-wrap sm:items-center sm:gap-[18px]",
+          "flex flex-col gap-5 text-[13.5px] text-landing-fog/50 sm:flex-row sm:items-center",
         )}
       >
         <button
           type="button"
           className={cn(
             brand,
-            "cursor-pointer border-0 bg-transparent p-0 text-landing-ink",
+            "cursor-pointer border-0 bg-transparent p-0 text-[17px]",
           )}
           onClick={() => scrollToSection("top")}
         >
@@ -32,13 +32,13 @@ export default function LandingFooter() {
         </button>
         <nav
           aria-label="Footer"
-          className="flex flex-wrap gap-x-5 gap-y-2.5 sm:ml-auto sm:gap-[22px]"
+          className="flex flex-wrap gap-x-5 gap-y-2 font-medium sm:ml-auto"
         >
           {FOOTER_LINKS.map(({ id, label }) => (
             <button
               key={id}
               type="button"
-              className="cursor-pointer border-0 bg-transparent p-0 font-inherit text-inherit hover:text-landing-ink"
+              className="cursor-pointer border-0 bg-transparent p-0 font-inherit text-inherit hover:text-landing-fog"
               onClick={() => scrollToSection(id)}
             >
               {label}

@@ -53,7 +53,7 @@ export function CountryCombobox({
           disabled={disabled}
           className={cn(
             "flex w-full items-center justify-between border px-3 text-left outline-none",
-            "focus-visible:ring-2 focus-visible:ring-landing-indigo focus-visible:ring-offset-2",
+            "focus-visible:ring-2 focus-visible:ring-landing-sky focus-visible:ring-offset-0",
             "disabled:cursor-not-allowed disabled:opacity-50",
             className,
           )}
@@ -61,7 +61,7 @@ export function CountryCombobox({
           <span
             className={cn(
               "truncate",
-              !selected && "text-landing-muted/70",
+              !selected && "text-landing-fog/35",
             )}
           >
             {selected ?? "United States"}

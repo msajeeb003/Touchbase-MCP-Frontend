@@ -1,177 +1,216 @@
 import { useState, type CSSProperties, type KeyboardEvent } from "react";
+import dashboardShot from "@/assets/landingPageImages/dashboard1.png";
 import { WaitlistButton } from "@/components/landing/waitlist";
 import { cn } from "@/lib/utils";
-import {
-  btn,
-  btnGhost,
-  btnPrimary,
-  ctaRow,
-  eyebrow,
-  eyebrowOnDark,
-  wrap,
-} from "./landingUi";
+import { LandingShot } from "./LandingShot";
+import { btn, btnGhost, btnPrimary, gridBgStyle, wrap } from "./landingUi";
 
 type OutcomeId = "noshow" | "second" | "proposal";
 
+type ChannelKey = "email" | "whatsapp" | "sms" | "voice";
+
 type OutcomeStep = {
-  channel: string;
+  channel: ChannelKey;
   label: string;
-  when: string;
-  color: string;
+  day: number;
 };
 
 type OutcomePanel = {
   id: OutcomeId;
   tabLabel: string;
-  caption: string;
+  exit: string;
   steps: OutcomeStep[];
+};
+
+/** Channel label and accent. Hex values mirror the landing-* channel tokens. */
+const CHANNELS: Record<ChannelKey, { label: string; color: string }> = {
+  email: { label: "Email", color: "#7FB4FF" },
+  whatsapp: { label: "WhatsApp", color: "#5EDBA6" },
+  sms: { label: "SMS", color: "#F2C86A" },
+  voice: { label: "AI voice", color: "#FF9A7A" },
 };
 
 const OUTCOMES: OutcomePanel[] = [
   {
     id: "noshow",
     tabLabel: "No-show",
-    caption:
-      "Checks whether they are still interested, and gives them a clear way to reschedule.",
+    exit: "lead reschedules",
     steps: [
-      { channel: "Email", label: "Sorry we missed you", when: "shortly after", color: "#7C6FFF" },
-      { channel: "WhatsApp", label: "Reminder", when: "next day", color: "#17A673" },
-      { channel: "SMS", label: "Rescheduling link", when: "+2 days", color: "#F0A93B" },
-      { channel: "Email", label: "Final check-in", when: "+5 days", color: "#7C6FFF" },
+      { channel: "email", label: "Sorry we missed you", day: 0 },
+      { channel: "whatsapp", label: "Reminder", day: 1 },
+      { channel: "sms", label: "Rescheduling link", day: 3 },
+      { channel: "email", label: "Final check-in", day: 6 },
     ],
   },
   {
     id: "second",
     tabLabel: "Second meeting",
-    caption:
-      "Runs until the lead schedules the next conversation to review the PRD, plan, or proposed solution.",
+    exit: "next meeting booked",
     steps: [
-      { channel: "Email", label: "Next step, summarised", when: "same day", color: "#7C6FFF" },
-      { channel: "WhatsApp", label: "Reminder", when: "+2 days", color: "#17A673" },
-      { channel: "SMS", label: "Short follow-up", when: "+4 days", color: "#F0A93B" },
-      { channel: "AI voice", label: "Call if still no response", when: "+6 days", color: "#F2603C" },
+      { channel: "email", label: "Next step, summarised", day: 0 },
+      { channel: "whatsapp", label: "Reminder", day: 2 },
+      { channel: "sms", label: "Short follow-up", day: 4 },
+      { channel: "voice", label: "Call if still no response", day: 6 },
     ],
   },
   {
     id: "proposal",
     tabLabel: "Proposal sent",
-    caption:
-      "Stays present after the proposal without relying on someone remembering every follow-up.",
+    exit: "decision received",
     steps: [
-      { channel: "Email", label: "Proposal follow-up", when: "+2 days", color: "#7C6FFF" },
-      { channel: "WhatsApp", label: "Short check-in", when: "+4 days", color: "#17A673" },
-      { channel: "SMS", label: "Reminder", when: "+6 days", color: "#F0A93B" },
-      { channel: "AI voice", label: "Request an update", when: "+8 days", color: "#F2603C" },
-      { channel: "Email", label: "Decision and next step", when: "+11 days", color: "#7C6FFF" },
+      { channel: "email", label: "Proposal follow-up", day: 2 },
+      { channel: "whatsapp", label: "Short check-in", day: 4 },
+      { channel: "sms", label: "Reminder", day: 6 },
+      { channel: "voice", label: "Request an update", day: 8 },
+      { channel: "email", label: "Decision and next step", day: 11 },
     ],
   },
 ];
 
-function OutcomePicker() {
+const SYSTEM_NOTES = [
+  "Pause or resume any time",
+  "Review or regenerate any step",
+  "Sent vs failed tracked per channel",
+] as const;
+
+function RoutingPreview() {
   const [activeId, setActiveId] = useState<OutcomeId>("noshow");
 
   const selectByIndex = (index: number) => {
     const next = OUTCOMES[(index + OUTCOMES.length) % OUTCOMES.length];
     setActiveId(next.id);
+    document.getElementById(`t-${next.id}`)?.focus();
   };
 
   const onTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const delta =
-      event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-    if (!delta) return;
+    const forward = event.key === "ArrowRight" || event.key === "ArrowDown";
+    const backward = event.key === "ArrowLeft" || event.key === "ArrowUp";
+    if (!forward && !backward) return;
     event.preventDefault();
-    selectByIndex(index + delta);
+    selectByIndex(index + (forward ? 1 : -1));
   };
 
   return (
     <div
       data-reveal
-      className="overflow-hidden rounded-2xl border border-landing-line-dark bg-gradient-to-[170deg] from-landing-ink-2 to-[#121634]"
-      style={{ background: "linear-gradient(170deg, #171b42, #121634)" }}
+      className="mx-auto mt-14 max-w-[1040px] rounded-2xl border border-landing-line bg-landing-steel-2 p-5 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] sm:p-7"
       id="picker"
     >
-      <div className="border-b border-landing-line-dark px-5 pb-4 pt-5">
-        <p className="mb-[13px] font-landing-mono text-[10.5px] uppercase tracking-[0.16em] text-white/[0.42]">
-          Select the call outcome
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="m-0 font-landing-mono text-[10.5px] uppercase tracking-[0.14em] text-landing-fog/45">
+          Routing preview · pick an outcome
         </p>
-        <div className="flex flex-wrap gap-[7px]" role="tablist" aria-label="Call outcome">
-          {OUTCOMES.map((outcome, index) => {
-            const selected = activeId === outcome.id;
-            return (
-              <button
-                key={outcome.id}
-                type="button"
-                className={cn(
-                  "cursor-pointer rounded-lg border px-[13px] py-2 font-landing-sans text-[13.5px] font-medium transition-all duration-[180ms]",
-                  selected
-                    ? "border-landing-indigo bg-landing-indigo text-white"
-                    : "border-landing-line-dark bg-transparent text-white/[0.62] hover:border-white/[0.32] hover:text-white",
-                )}
-                role="tab"
-                id={`t-${outcome.id}`}
-                aria-selected={selected}
-                aria-controls={`p-${outcome.id}`}
-                onClick={() => setActiveId(outcome.id)}
-                onKeyDown={(event) => onTabKeyDown(event, index)}
-              >
-                {outcome.tabLabel}
-              </button>
-            );
-          })}
-        </div>
+        <span className="flex items-center gap-2 font-landing-mono text-[10.5px] uppercase tracking-[0.12em] text-landing-sky">
+          <i className="h-1.5 w-1.5 rounded-full bg-landing-sky shadow-[0_0_8px_#4F9CF9]" />
+          automated
+        </span>
       </div>
 
-      <div className="px-5 pb-5 pt-[18px]">
-        {OUTCOMES.map((outcome) => {
-          const isActive = activeId === outcome.id;
-          return (
+      <div className="mt-5 grid grid-cols-1 gap-3.5 sm:grid-cols-[minmax(0,1fr)_56px_minmax(0,1.15fr)] sm:gap-0">
+        {/* Trigger node */}
+        <div className="rounded-xl border border-landing-line bg-landing-steel p-4">
+          <p className="m-0 font-landing-mono text-[10.5px] uppercase tracking-[0.14em] text-landing-fog/45">
+            Trigger
+          </p>
+          <p className="m-0 mt-1 text-[15px] font-semibold text-landing-fog">
+            Call outcome selected
+          </p>
+          <div
+            className="mt-3 flex flex-col gap-1.5"
+            role="tablist"
+            aria-label="Call outcome"
+            aria-orientation="vertical"
+          >
+            {OUTCOMES.map((outcome, index) => {
+              const selected = activeId === outcome.id;
+              return (
+                <button
+                  key={outcome.id}
+                  type="button"
+                  role="tab"
+                  id={`t-${outcome.id}`}
+                  aria-selected={selected}
+                  aria-controls={`p-${outcome.id}`}
+                  tabIndex={selected ? 0 : -1}
+                  className={cn(
+                    "flex cursor-pointer items-center justify-between rounded-md border px-3 py-2 text-left font-landing-sans text-[13.5px] font-semibold transition-colors duration-150",
+                    selected
+                      ? "border-landing-sky bg-landing-sky-soft text-landing-fog"
+                      : "border-landing-line bg-transparent text-landing-fog/60 hover:border-landing-fog/40 hover:text-landing-fog",
+                  )}
+                  onClick={() => setActiveId(outcome.id)}
+                  onKeyDown={(event) => onTabKeyDown(event, index)}
+                >
+                  {outcome.tabLabel}
+                  <span className="font-landing-mono text-[10.5px] font-normal opacity-60">
+                    {outcome.steps.length} steps
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="m-0 mt-3 font-landing-mono text-[10.5px] leading-[1.6] text-landing-fog/40">
+            + Fathom notes attached as context
+          </p>
+        </div>
+
+        {/* Connector: vertical on mobile, horizontal from sm up */}
+        <div className="relative h-8 sm:h-auto" aria-hidden>
+          <span className="absolute bottom-0 left-1/2 top-0 w-px bg-landing-fog/15 sm:bottom-auto sm:left-0 sm:right-0 sm:top-1/2 sm:h-px sm:w-auto" />
+          <span className="absolute left-1/2 top-0 -ml-[3px] h-1.5 w-1.5 animate-landing-travel-v rounded-full bg-landing-sky shadow-[0_0_10px_#4F9CF9] motion-reduce:animate-none sm:left-0 sm:top-1/2 sm:-mt-[3px] sm:ml-0 sm:animate-landing-travel-h sm:motion-reduce:animate-none" />
+        </div>
+
+        {/* Sequence nodes */}
+        <div>
+          {OUTCOMES.map((outcome) => (
             <div
               key={outcome.id}
               role="tabpanel"
               id={`p-${outcome.id}`}
               aria-labelledby={`t-${outcome.id}`}
-              hidden={!isActive}
+              hidden={activeId !== outcome.id}
+              className="space-y-2"
             >
-              <p className="mb-4 text-sm leading-[1.55] text-white/[0.56]">
-                {outcome.caption}
-              </p>
-              <ul className="relative m-0 list-none p-0 before:absolute before:bottom-[18px] before:left-[7px] before:top-[18px] before:w-[1.5px] before:bg-landing-line-dark before:content-['']">
-                {outcome.steps.map((step) => (
-                  <li
-                    key={`${outcome.id}-${step.channel}-${step.label}`}
-                    className="relative py-2 pl-[30px]"
-                    style={{ "--chan": step.color } as CSSProperties}
+              {outcome.steps.map((step) => {
+                const channel = CHANNELS[step.channel];
+                return (
+                  <div
+                    key={`${outcome.id}-${step.day}-${step.label}`}
+                    className="relative rounded-xl border border-landing-line bg-landing-steel px-4 py-3 before:absolute before:-left-px before:bottom-3 before:top-3 before:w-0.5 before:rounded-sm before:bg-[var(--chan)] before:content-['']"
+                    style={{ "--chan": channel.color } as CSSProperties}
                   >
-                    <span
-                      className="absolute left-0 top-[15px] grid h-[15px] w-[15px] place-items-center rounded-full border-[1.5px] border-[color:var(--chan,#7c6fff)] bg-landing-ink-2 after:h-[5px] after:w-[5px] after:rounded-full after:bg-[var(--chan,#7c6fff)] after:content-['']"
-                    />
-                    <div className="flex flex-wrap items-center gap-[9px]">
+                    <div className="flex items-center justify-between gap-3">
                       <span
-                        className="flex-none rounded-[5px] border px-[7px] py-[3px] font-landing-mono text-[10px] uppercase tracking-[0.1em]"
-                        style={{
-                          color: step.color,
-                          borderColor: `color-mix(in srgb, ${step.color} 38%, transparent)`,
-                        }}
+                        className="font-landing-mono text-[10.5px] uppercase tracking-[0.1em]"
+                        style={{ color: channel.color }}
                       >
-                        {step.channel}
+                        {channel.label}
                       </span>
-                      <span className="text-[14.5px] font-medium tracking-[-0.01em] text-white/[0.9]">
-                        {step.label}
-                      </span>
-                      <span className="ml-auto flex-none font-landing-mono text-[11px] text-white/[0.4]">
-                        {step.when}
+                      <span className="font-landing-mono text-[10.5px] text-landing-fog/40">
+                        day {step.day}
                       </span>
                     </div>
-                  </li>
-                ))}
-              </ul>
+                    <p className="m-0 mt-1 text-[14px] font-semibold text-landing-fog">
+                      {step.label}
+                    </p>
+                  </div>
+                );
+              })}
+              <p className="m-0 pt-1 font-landing-mono text-[11px] text-landing-fog/45">
+                exit: {outcome.exit}
+              </p>
             </div>
-          );
-        })}
+          ))}
+        </div>
+      </div>
 
-        <p className="mt-[18px] border-t border-landing-line-dark pt-4 font-landing-mono text-[11px] leading-[1.7] text-white/[0.36]">
-          You define the strategy once. The system executes it consistently for every lead.
-        </p>
+      <div className="mt-5 grid grid-cols-1 gap-2 border-t border-landing-line pt-4 font-landing-mono text-[11.5px] text-landing-fog/50 sm:grid-cols-3">
+        {SYSTEM_NOTES.map((note) => (
+          <span key={note} className="flex items-center gap-2">
+            <i className="h-1 w-1 flex-none rounded-full bg-landing-sky" />
+            {note}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -179,37 +218,40 @@ function OutcomePicker() {
 
 export default function LandingHero() {
   return (
-    <section
-      className="relative overflow-hidden bg-landing-ink pt-[clamp(56px,7vw,92px)] pb-[clamp(70px,9vw,116px)] text-white/[0.72]"
-    >
+    <section className="relative overflow-hidden" style={gridBgStyle}>
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-[10%] bottom-[-60%] left-[28%] h-[70%] bg-[radial-gradient(ellipse_at_center,rgba(91,77,245,0.3),transparent_68%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[560px] bg-[radial-gradient(50%_60%_at_50%_0%,rgba(79,156,249,0.14),transparent_70%)]"
       />
-      <div
-        className={cn(
-          wrap,
-          "relative z-[1] grid grid-cols-1 items-start gap-[clamp(40px,5vw,68px)] min-[921px]:grid-cols-[minmax(0,1fr)_minmax(0,0.94fr)]",
-        )}
-      >
-        <div className="flex flex-col gap-5 min-[921px]:gap-6">
-          <p className={cn(eyebrow, eyebrowOnDark, "mb-0")}>Post-call follow-up</p>
-          <h1 className="m-0 max-w-[22ch] font-landing-display text-[clamp(36px,5.6vw,62px)] font-bold leading-[1.06] tracking-[-0.022em] text-white min-[921px]:max-w-[17ch]">
-            Turn every sales call into a{" "}
-            <em className="not-italic text-landing-indigo-lift">
-              consistent follow-up sequence.
-            </em>
+      <div className={cn(wrap, "relative z-[1] pb-16 pt-16 lg:pb-24 lg:pt-24")}>
+        <div className="mx-auto max-w-[800px] text-center">
+          <p className="m-0 inline-flex items-center gap-2 rounded-md border border-landing-line bg-landing-steel-2 px-3 py-1 font-landing-mono text-[11px] uppercase tracking-[0.14em] text-landing-sky">
+            <svg
+              viewBox="0 0 20 20"
+              className="h-3.5 w-3.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              aria-hidden
+            >
+              <circle cx="4" cy="10" r="2" />
+              <circle cx="16" cy="5" r="2" />
+              <circle cx="16" cy="15" r="2" />
+              <path d="M6 10h4l4-5M10 10l4 5" />
+            </svg>
+            Follow-up automation
+          </p>
+          <h1 className="m-0 mt-6 font-landing-display text-[clamp(38px,5.6vw,68px)] font-extrabold leading-[1.02] tracking-[-0.03em] text-landing-fog">
+            Your follow-up,{" "}
+            <span className="text-landing-sky">running as a system.</span>
           </h1>
-          <div className="flex max-w-[50ch] flex-col gap-3.5 text-[clamp(17px,1.55vw,19.5px)] text-white/[0.66]">
-            <p className="m-0">
-              Import your leads, connect Fathom, select what happened on the call, and launch
-              coordinated outreach across email, WhatsApp, SMS, and AI voice.
-            </p>
-            <p className="m-0">
-              Stay in front of every opportunity — without manually chasing every lead.
-            </p>
-          </div>
-          <div className={cn(ctaRow, "mt-0")}>
+          <p className="mx-auto mb-0 mt-6 max-w-[62ch] text-[clamp(17px,1.4vw,19px)] text-landing-fog/60">
+            Import your leads, connect Fathom, and select what happened on the
+            call. Follow-Up AI routes each outcome into the right sequence and
+            sends every touchpoint across email, WhatsApp, SMS, and AI voice,
+            on schedule.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <WaitlistButton className={cn(btn, btnPrimary)}>
               Join the Pilot
             </WaitlistButton>
@@ -217,13 +259,23 @@ export default function LandingHero() {
               See How It Works
             </a>
           </div>
-          <p className="m-0 max-w-[46ch] border-t border-landing-line-dark pt-5 font-landing-mono text-xs leading-[1.75] text-white/[0.42]">
-            Built for agencies, consultancies, and service businesses that sell through
-            discovery calls, demos, and proposals.
+          <p className="mx-auto mb-0 mt-5 max-w-[60ch] font-landing-mono text-[12px] leading-[1.7] text-landing-fog/40">
+            Built for agencies, consultancies, and service businesses that sell
+            through discovery calls, demos, and proposals.
           </p>
         </div>
 
-        <OutcomePicker />
+        <RoutingPreview />
+
+        <LandingShot
+          wide
+          centerCaption
+          className="mx-auto mt-6 max-w-[1040px]"
+          url="followupaitool.com/dashboard"
+          src={dashboardShot}
+          alt="Dashboard overview: leads by stage, sequences by status, and messages sent per channel"
+          caption="One place to see it working: leads by stage, sequences by status, and everything that has gone out across each channel."
+        />
       </div>
     </section>
   );

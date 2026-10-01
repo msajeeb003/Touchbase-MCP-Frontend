@@ -5,7 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-import { band, eyebrow, sec, wrap } from "./landingUi";
+import { band, bandAlt, eyebrow, sec } from "./landingUi";
 
 const FAQS = [
   {
@@ -40,8 +40,8 @@ const FAQS = [
 
 export function LandingFaq() {
   return (
-    <section className={band} id="faq">
-      <div className={cn(wrap, "max-w-[880px]")}>
+    <section className={cn(band, bandAlt)} id="faq">
+      <div className="mx-auto w-full max-w-[860px] px-5 sm:px-6">
         <p className={eyebrow}>FAQ</p>
         <h2 className={sec}>Frequently asked questions</h2>
 
@@ -55,19 +55,19 @@ export function LandingFaq() {
             <AccordionItem
               key={q}
               value={`item-${index}`}
-              className="border-landing-line"
+              className="border-b border-landing-line"
             >
               <AccordionTrigger
                 className={cn(
-                  "py-5 text-left hover:no-underline",
-                  "font-landing-display text-[clamp(17px,1.6vw,20px)] font-semibold tracking-[-0.02em] text-landing-ink",
-                  "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-landing-indigo-lift",
+                  "gap-6 py-5 text-left hover:no-underline",
+                  "font-landing-display text-[19px] font-bold text-landing-fog",
+                  "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-landing-sky",
                 )}
               >
                 {q}
               </AccordionTrigger>
-              <AccordionContent className="pb-5 text-[15.5px] leading-[1.65] text-landing-muted">
-                <p className="m-0 max-w-[58ch]">{a}</p>
+              <AccordionContent className="pb-5 text-[15.5px] leading-[1.65] text-landing-fog/60">
+                <p className="m-0 max-w-[60ch]">{a}</p>
               </AccordionContent>
             </AccordionItem>
           ))}
