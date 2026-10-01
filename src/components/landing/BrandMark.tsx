@@ -1,4 +1,5 @@
-import logo from "@/assets/logo.png";
+// Landing-only mark in the steel/sky palette. The app keeps "@/assets/logo.png".
+import logo from "@/assets/landingpagelogo.png";
 import { cn } from "@/lib/utils";
 
 type BrandMarkProps = {
