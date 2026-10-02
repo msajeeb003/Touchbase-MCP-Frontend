@@ -75,7 +75,7 @@ export default function SignIn() {
 
   return (
     <AuthShell
-      title='Touch Base AI'
+      title='Touchbase AI'
       subtitle='Transform your call transcripts into personalized follow-ups with AI'
     >
       <Form {...signInForm}>

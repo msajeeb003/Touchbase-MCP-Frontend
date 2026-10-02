@@ -119,7 +119,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 text-indigo-600">
             {/* <Bot className="h-4 w-4" /> */}
             <Logo className="h-8 w-8"></Logo>
-            <p className="text-sm font-semibold">Touch Base AI</p>
+            <p className="text-sm font-semibold">Touchbase AI</p>
             {/* <p className="text-sm font-semibold">Follow-Up Agent</p> */}
           </div>
         </SidebarHeader>
