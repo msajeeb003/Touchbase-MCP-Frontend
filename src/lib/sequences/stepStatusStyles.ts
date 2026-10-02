@@ -3,50 +3,50 @@ export function getSendLogStatusClass(status: string | null | undefined) {
   const value = (status || "").toLowerCase();
   if (value === "sent") {
     return {
-      box: "border-emerald-200 bg-emerald-50",
-      label: "text-emerald-700",
-      text: "text-emerald-900",
+      box: "border-landing-whatsapp/40 bg-landing-whatsapp/10",
+      label: "text-landing-whatsapp",
+      text: "text-landing-fog/80",
     };
   }
   if (value === "failed") {
     return {
-      box: "border-rose-200 bg-rose-50",
-      label: "text-rose-700",
-      text: "text-rose-900",
+      box: "border-landing-voice/40 bg-landing-voice/10",
+      label: "text-landing-voice",
+      text: "text-landing-fog/80",
     };
   }
   if (value === "sending" || value === "calling") {
     return {
-      box: "border-violet-200 bg-violet-50",
-      label: "text-violet-700",
-      text: "text-violet-900",
+      box: "border-[#A78BFA]/40 bg-[#A78BFA]/10",
+      label: "text-[#A78BFA]",
+      text: "text-landing-fog/80",
     };
   }
   if (value === "scheduled") {
     return {
-      box: "border-blue-200 bg-blue-50",
-      label: "text-blue-700",
-      text: "text-blue-900",
+      box: "border-landing-email/40 bg-landing-email/10",
+      label: "text-landing-email",
+      text: "text-landing-fog/80",
     };
   }
   if (value === "pending") {
     return {
-      box: "border-amber-200 bg-amber-50",
-      label: "text-amber-700",
-      text: "text-amber-900",
+      box: "border-landing-sms/40 bg-landing-sms/10",
+      label: "text-landing-sms",
+      text: "text-landing-fog/80",
     };
   }
   if (value === "skipped") {
     return {
-      box: "border-slate-200 bg-slate-100",
-      label: "text-slate-600",
-      text: "text-slate-700",
+      box: "border-landing-line bg-white/[0.06]",
+      label: "text-landing-fog/65",
+      text: "text-landing-fog/80",
     };
   }
   // draft / unknown
   return {
-    box: "border-slate-200 bg-slate-50",
-    label: "text-slate-500",
-    text: "text-slate-700",
+    box: "border-landing-line bg-white/[0.04]",
+    label: "text-landing-fog/55",
+    text: "text-landing-fog/80",
   };
 }
