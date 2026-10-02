@@ -95,24 +95,24 @@ export interface SequenceStep {
 
 const getStepStatusBadgeClass = (status: string) => {
   const value = status.toLowerCase();
-  if (value === "sent") return "border-emerald-200 bg-emerald-100 text-emerald-700";
-  if (value === "pending") return "border-amber-200 bg-amber-100 text-amber-700";
-  if (value === "draft") return "border-slate-200 bg-slate-100 text-slate-700";
-  if (value === "scheduled") return "border-blue-200 bg-blue-100 text-blue-700";
-  if (value === "sending" || value === "calling") return "border-violet-200 bg-violet-100 text-violet-700";
-  if (value === "skipped") return "border-slate-200 bg-slate-100 text-slate-600";
-  if (value === "failed") return "border-rose-200 bg-rose-100 text-rose-700";
-  return "border-slate-200 bg-slate-100 text-slate-700";
+  if (value === "sent") return "border-landing-whatsapp/40 bg-landing-whatsapp/15 text-landing-whatsapp";
+  if (value === "pending") return "border-landing-sms/40 bg-landing-sms/15 text-landing-sms";
+  if (value === "draft") return "border-landing-line bg-white/[0.06] text-landing-fog/80";
+  if (value === "scheduled") return "border-landing-email/40 bg-landing-email/15 text-landing-email";
+  if (value === "sending" || value === "calling") return "border-[#A78BFA]/40 bg-[#A78BFA]/15 text-[#A78BFA]";
+  if (value === "skipped") return "border-landing-line bg-white/[0.06] text-landing-fog/65";
+  if (value === "failed") return "border-landing-voice/40 bg-landing-voice/15 text-landing-voice";
+  return "border-landing-line bg-white/[0.06] text-landing-fog/80";
 };
 
 const getSequenceStatusBadgeClass = (status: string) => {
   const value = status.toLowerCase();
-  if (value === "active") return "border-green-200 bg-green-100 text-green-700";
-  if (value === "draft") return "border-amber-200 bg-amber-100 text-amber-700";
-  if (value === "completed") return "border-emerald-200 bg-emerald-100 text-emerald-700";
-  if (value === "cancelled") return "border-rose-200 bg-rose-100 text-rose-700";
-  if (value === "paused") return "border-blue-200 bg-blue-100 text-blue-700";
-  return "border-slate-200 bg-slate-100 text-slate-700";
+  if (value === "active") return "border-landing-whatsapp/40 bg-landing-whatsapp/15 text-landing-whatsapp";
+  if (value === "draft") return "border-landing-sms/40 bg-landing-sms/15 text-landing-sms";
+  if (value === "completed") return "border-landing-sky/40 bg-landing-sky-soft text-landing-sky";
+  if (value === "cancelled") return "border-landing-voice/40 bg-landing-voice/15 text-landing-voice";
+  if (value === "paused") return "border-landing-email/40 bg-landing-email/15 text-landing-email";
+  return "border-landing-line bg-white/[0.06] text-landing-fog/80";
 };
 
 const formatStepStatus = (status: string) =>
@@ -129,8 +129,8 @@ const initialSteps: SequenceStep[] = [
     time: "Now",
     status: "draft",
     icon: Mail,
-    iconColor: "text-blue-500",
-    iconBg: "bg-blue-50",
+    iconColor: "text-landing-email",
+    iconBg: "bg-landing-email/15",
     subject: "Following up on our conversation",
     content: "Hi Art, I hope you're doing well. I wanted to follow up on our conversation...",
     hasPreview: true,
@@ -142,8 +142,8 @@ const initialSteps: SequenceStep[] = [
     time: "+2 days",
     status: "draft",
     icon: MessageSquare,
-    iconColor: "text-purple-500",
-    iconBg: "bg-purple-50",
+    iconColor: "text-landing-sms",
+    iconBg: "bg-landing-sms/15",
     content: "Hi Art, I tried reaching you earlier but couldn't connect. Are you still open to a quick chat this week?",
     hasPreview: true,
   },
@@ -154,8 +154,8 @@ const initialSteps: SequenceStep[] = [
     time: "+4 days",
     status: "draft",
     icon: MessageCircle,
-    iconColor: "text-green-500",
-    iconBg: "bg-green-50",
+    iconColor: "text-landing-whatsapp",
+    iconBg: "bg-landing-whatsapp/15",
     content: "Hi Art! Just checking in 🙂 Let me know if a quick call this week works for you.",
     hasPreview: true,
   },
@@ -166,8 +166,8 @@ const initialSteps: SequenceStep[] = [
     time: "+6 days",
     status: "draft",
     icon: Phone,
-    iconColor: "text-amber-500",
-    iconBg: "bg-amber-50",
+    iconColor: "text-landing-voice",
+    iconBg: "bg-landing-voice/15",
     content: "AI will call and leave a personalized voicemail asking to reschedule a call.",
     hasPreview: true,
     editLabel: "Edit Script",
@@ -179,8 +179,8 @@ const initialSteps: SequenceStep[] = [
     time: "+8 days",
     status: "draft",
     icon: Mail,
-    iconColor: "text-blue-500",
-    iconBg: "bg-blue-50",
+    iconColor: "text-landing-email",
+    iconBg: "bg-landing-email/15",
     subject: "Following up on our conversation",
     content: "Hi Art, I hope you're doing well. I wanted to follow up on our conversation...",
     hasPreview: true,
@@ -229,8 +229,8 @@ function SortableStep({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm transition-all hover:border-indigo-100 ${
-        isDragging ? "opacity-60 shadow-lg ring-1 ring-indigo-500 scale-[1.01]" : ""
+      className={`flex flex-col gap-3 rounded-xl border bg-landing-steel-2 p-4 shadow-sm transition-all hover:border-landing-sky/25 ${
+        isDragging ? "opacity-60 shadow-lg ring-1 ring-landing-sky scale-[1.01]" : ""
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -238,12 +238,12 @@ function SortableStep({
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab rounded p-1 text-slate-300 outline-none hover:bg-slate-50 hover:text-slate-500"
+            className="cursor-grab rounded p-1 text-landing-fog/25 outline-none hover:bg-white/[0.04] hover:text-landing-fog/55"
           >
             <GripVertical className="h-4 w-4" />
           </div>
 
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-xs font-semibold text-landing-fog/80">
             {step.stepOrder}
           </div>
 
@@ -297,18 +297,18 @@ function SortableStep({
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-landing-fog/40">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleDuplicateStep(index)}>
-                <Copy className="mr-2 h-4 w-4 text-slate-500" />
+                <Copy className="mr-2 h-4 w-4 text-landing-fog/55" />
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleDeleteStep(step.id)}
-                className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                className="text-landing-voice focus:bg-landing-voice/10 focus:text-landing-voice"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
@@ -319,18 +319,18 @@ function SortableStep({
       </div>
 
       <div className="min-w-0 space-y-1">
-        <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-slate-500">
+        <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-landing-fog/55">
           <Clock className="h-3.5 w-3.5 shrink-0" />
-          <span className="font-medium text-slate-600">Scheduled:</span>
+          <span className="font-medium text-landing-fog/65">Scheduled:</span>
           <span>{step.time}</span>
         </p>
 
         {step.subject && (
-          <p className="truncate text-sm font-medium text-slate-900">
+          <p className="truncate text-sm font-medium text-landing-fog">
             Subject: {step.subject}
           </p>
         )}
-        <p className="line-clamp-2 text-sm text-slate-500 sm:truncate sm:line-clamp-none">
+        <p className="line-clamp-2 text-sm text-landing-fog/55 sm:truncate sm:line-clamp-none">
           {step.content}
         </p>
       </div>
@@ -408,8 +408,8 @@ const mapApiStepToUiStep = (apiStep: SequenceStepItem, index: number): SequenceS
     scheduledAt: apiStep.scheduledAt ?? null,
     status: apiStep.status || "draft",
     icon: isEmail ? Mail : isSms ? MessageSquare : isWhatsapp ? MessageCircle : isCall ? Phone : Mail,
-    iconColor: isEmail ? "text-blue-500" : isSms ? "text-purple-500" : isWhatsapp ? "text-green-500" : "text-amber-500",
-    iconBg: isEmail ? "bg-blue-50" : isSms ? "bg-purple-50" : isWhatsapp ? "bg-green-50" : "bg-amber-50",
+    iconColor: isEmail ? "text-landing-email" : isSms ? "text-landing-sms" : isWhatsapp ? "text-landing-whatsapp" : "text-landing-voice",
+    iconBg: isEmail ? "bg-landing-email/15" : isSms ? "bg-landing-sms/15" : isWhatsapp ? "bg-landing-whatsapp/15" : "bg-landing-voice/15",
     subject: apiStep.subject || undefined,
     content: apiStep.content || "",
     sendLog: apiStep.sendLog ?? null,
@@ -796,11 +796,11 @@ export default function GeneratedSequenceList({
       <Card className="border shadow-sm">
         <CardHeader className="flex flex-col gap-3 space-y-0 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <h2 className="text-base font-semibold text-slate-900">
+            <h2 className="text-base font-semibold text-landing-fog">
               Your Generated Sequence
             </h2>
             {isGenerated && (
-              <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-normal hover:bg-slate-100 rounded-md">
+              <Badge variant="secondary" className="bg-white/[0.06] text-landing-fog/65 font-normal hover:bg-white/[0.06] rounded-md">
                 {steps.length} steps
               </Badge>
             )}
@@ -820,7 +820,7 @@ export default function GeneratedSequenceList({
                 variant="outline"
                 size="sm"
                 disabled={isRegenerating}
-                className="gap-2 text-slate-700 h-9"
+                className="gap-2 text-landing-fog/80 h-9"
               >
                 {isRegenerating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -830,21 +830,21 @@ export default function GeneratedSequenceList({
                 {isRegenerating ? "Regenerating..." : "Regenerate All"}
               </Button>
 
-              <Button onClick={onActivate} size="sm" className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white h-9 px-4">
+              <Button onClick={onActivate} size="sm" className="gap-2 bg-landing-sky hover:bg-landing-sky-deep text-landing-steel h-9 px-4">
                 <Send className="h-4 w-4" />
                 {sequenceStatus === "active" ? "Pause Sequence" : "Activate Sequence"}
               </Button>
             </div>
           )}
         </CardHeader>
-        <CardContent className={`flex flex-col gap-3 p-4 sm:p-6 ${isGenerated ? "bg-slate-50/50" : ""}`}>
+        <CardContent className={`flex flex-col gap-3 p-4 sm:p-6 ${isGenerated ? "bg-white/[0.03]" : ""}`}>
           {!isGenerated ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <div className="h-12 w-12 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
-                <Sparkles className="h-6 w-6 text-indigo-400" />
+              <div className="h-12 w-12 rounded-full bg-landing-sky-soft flex items-center justify-center mb-4">
+                <Sparkles className="h-6 w-6 text-landing-sky" />
               </div>
-              <h3 className="text-base font-semibold text-slate-900 mb-1">No sequence generated yet</h3>
-              <p className="text-sm text-slate-500 max-w-sm">
+              <h3 className="text-base font-semibold text-landing-fog mb-1">No sequence generated yet</h3>
+              <p className="text-sm text-landing-fog/55 max-w-sm">
                 Configure your preferences above and click Generate to see your AI-crafted follow-up sequence here.
               </p>
             </div>
@@ -885,7 +885,7 @@ export default function GeneratedSequenceList({
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="gap-2 text-slate-600 rounded-full h-8 px-4 border-dashed border-slate-300 bg-white hover:bg-slate-50"
+                        className="gap-2 text-landing-fog/65 rounded-full h-8 px-4 border-dashed border-landing-fog/20 bg-landing-steel hover:bg-white/[0.04]"
                       >
                         <Plus className="h-3.5 w-3.5" />
                         Add Step
@@ -893,19 +893,19 @@ export default function GeneratedSequenceList({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="center" className="w-40">
                       <DropdownMenuItem onClick={() => handleAddStep("Email")}>
-                        <Mail className="mr-2 h-4 w-4 text-blue-500" />
+                        <Mail className="mr-2 h-4 w-4 text-landing-email" />
                         Email
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleAddStep("SMS")}>
-                        <MessageSquare className="mr-2 h-4 w-4 text-purple-500" />
+                        <MessageSquare className="mr-2 h-4 w-4 text-landing-sms" />
                         SMS
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleAddStep("WhatsApp")}>
-                        <MessageCircle className="mr-2 h-4 w-4 text-green-500" />
+                        <MessageCircle className="mr-2 h-4 w-4 text-landing-whatsapp" />
                         WhatsApp
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleAddStep("AI Call")}>
-                        <Phone className="mr-2 h-4 w-4 text-amber-500" />
+                        <Phone className="mr-2 h-4 w-4 text-landing-voice" />
                         AI Call
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -922,7 +922,7 @@ export default function GeneratedSequenceList({
       <Dialog open={!!previewStep} onOpenChange={(open) => !open && setPreviewStep(null)}>
         <DialogContent className="flex max-h-[85vh] w-[calc(100vw-2rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl p-0">
           <DialogHeader className="shrink-0 border-b px-6 py-4">
-            <DialogTitle className="text-base font-semibold text-slate-900">
+            <DialogTitle className="text-base font-semibold text-landing-fog">
               {previewStep?.type === "Email" ? "Email preview" : 
                previewStep?.type === "SMS" ? "SMS preview" : 
                previewStep?.type === "WhatsApp" ? "WhatsApp preview" : 
@@ -930,22 +930,22 @@ export default function GeneratedSequenceList({
             </DialogTitle>
           </DialogHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="flex items-center gap-1.5 text-xs text-landing-fog/55">
               <Clock className="h-3.5 w-3.5" />
               {previewStep?.time}
             </div>
             <div className="flex flex-col gap-2">
               {previewStep?.subject && (
-                <div className="text-sm font-semibold text-slate-900">
+                <div className="text-sm font-semibold text-landing-fog">
                   Subject: {previewStep.subject}
                 </div>
               )}
               {previewStep?.type === "AI Call" && (
-                <div className="text-sm font-semibold text-slate-900">
+                <div className="text-sm font-semibold text-landing-fog">
                   AI Call Script
                 </div>
               )}
-              <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-landing-fog/80">
                 {previewStep?.content}
               </div>
             </div>
@@ -962,7 +962,7 @@ export default function GeneratedSequenceList({
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 justify-end border-t bg-slate-50/50 px-6 py-4">
+          <div className="flex shrink-0 justify-end border-t bg-white/[0.03] px-6 py-4">
             <Button variant="outline" onClick={() => setPreviewStep(null)} className="h-9">
               Close
             </Button>
@@ -974,7 +974,7 @@ export default function GeneratedSequenceList({
       <Dialog open={!!editStep} onOpenChange={(open) => !open && !isSavingStep && setEditStep(null)}>
         <DialogContent className="flex max-h-[85vh] w-[calc(100vw-2rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl p-0">
           <DialogHeader className="shrink-0 border-b px-6 py-4">
-            <DialogTitle className="text-base font-semibold text-slate-900">
+            <DialogTitle className="text-base font-semibold text-landing-fog">
               {editStep?.type === "Email" ? "Edit Email message" : 
                editStep?.type === "SMS" ? "Edit SMS message" : 
                editStep?.type === "WhatsApp" ? "Edit WhatsApp message" : "Edit call script"}
@@ -983,7 +983,7 @@ export default function GeneratedSequenceList({
           <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6">
             {editStep?.type === "Email" && (
               <div className="flex flex-col gap-2">
-                <Label className="font-normal text-slate-700">Subject</Label>
+                <Label className="font-normal text-landing-fog/80">Subject</Label>
                 <Input 
                   value={editSubject}
                   onChange={(e) => setEditSubject(e.target.value)}
@@ -993,7 +993,7 @@ export default function GeneratedSequenceList({
               </div>
             )}
             <div className="flex flex-col gap-2">
-              <Label className="font-normal text-slate-700">Scheduled at</Label>
+              <Label className="font-normal text-landing-fog/80">Scheduled at</Label>
               <Input
                 type="datetime-local"
                 value={editScheduledAt}
@@ -1003,7 +1003,7 @@ export default function GeneratedSequenceList({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label className="font-normal text-slate-700">
+              <Label className="font-normal text-landing-fog/80">
                 {editStep?.type === "AI Call" ? "Call script" : "Message"}
               </Label>
               <Textarea 
@@ -1014,19 +1014,19 @@ export default function GeneratedSequenceList({
               />
             </div>
           </div>
-          <div className="flex shrink-0 justify-end gap-3 border-t bg-slate-50/50 px-6 py-4">
+          <div className="flex shrink-0 justify-end gap-3 border-t bg-white/[0.03] px-6 py-4">
             <Button 
               variant="ghost" 
               onClick={() => setEditStep(null)} 
               disabled={isSavingStep}
-              className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 h-9"
+              className="text-landing-fog/80 hover:text-landing-fog hover:bg-white/[0.06] h-9"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleSaveEdit} 
               disabled={isSavingStep}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white h-9 px-5"
+              className="bg-landing-sky hover:bg-landing-sky-deep text-landing-steel h-9 px-5"
             >
               {isSavingStep ? (
                 <>
@@ -1050,32 +1050,32 @@ export default function GeneratedSequenceList({
       >
         <DialogContent className="flex max-h-[85vh] w-[calc(100vw-2rem)] max-w-md flex-col gap-0 overflow-hidden rounded-xl p-0">
           <DialogHeader className="shrink-0 border-b px-6 py-4">
-            <DialogTitle className="text-base font-semibold text-slate-900">
+            <DialogTitle className="text-base font-semibold text-landing-fog">
               Add {addStepChannel ?? "Step"}
             </DialogTitle>
           </DialogHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6">
             <div className="flex flex-col gap-2">
-              <Label className="font-normal text-slate-700">Step order</Label>
+              <Label className="font-normal text-landing-fog/80">Step order</Label>
               <Input
                 value={String(addStepOrder)}
                 disabled
-                className="h-10 bg-slate-50 text-sm"
+                className="h-10 bg-white/[0.04] text-sm"
               />
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-landing-fog/55">
                 Automatically set to the next available order.
               </p>
             </div>
             <div className="flex flex-col gap-2">
-              <Label className="font-normal text-slate-700">Channel</Label>
+              <Label className="font-normal text-landing-fog/80">Channel</Label>
               <Input
                 value={addStepChannel ?? ""}
                 disabled
-                className="h-10 bg-slate-50 text-sm"
+                className="h-10 bg-white/[0.04] text-sm"
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label className="font-normal text-slate-700">Scheduled at</Label>
+              <Label className="font-normal text-landing-fog/80">Scheduled at</Label>
               <Input
                 type="datetime-local"
                 value={addScheduledAt}
@@ -1083,24 +1083,24 @@ export default function GeneratedSequenceList({
                 disabled={isCreatingStep}
                 className="h-10 text-sm"
               />
-              {/* <p className="text-xs text-slate-500">
+              {/* <p className="text-xs text-landing-fog/55">
                 Default is the latest step time plus one day.
               </p> */}
             </div>
           </div>
-          <div className="flex shrink-0 justify-end gap-3 border-t bg-slate-50/50 px-6 py-4">
+          <div className="flex shrink-0 justify-end gap-3 border-t bg-white/[0.03] px-6 py-4">
             <Button
               variant="ghost"
               onClick={handleCloseAddStep}
               disabled={isCreatingStep}
-              className="h-9 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+              className="h-9 text-landing-fog/80 hover:bg-white/[0.06] hover:text-landing-fog"
             >
               Cancel
             </Button>
             <Button
               onClick={() => void handleConfirmAddStep()}
               disabled={isCreatingStep || !addScheduledAt.trim()}
-              className="h-9 bg-indigo-600 px-5 text-white hover:bg-indigo-700"
+              className="h-9 bg-landing-sky px-5 text-landing-steel hover:bg-landing-sky-deep"
             >
               {isCreatingStep ? (
                 <>

@@ -69,20 +69,20 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden">
         <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle className="text-lg font-semibold text-slate-900">
+          <DialogTitle className="text-lg font-semibold text-landing-fog">
             Manage prompt templates
           </DialogTitle>
         </DialogHeader>
         
         {/* Subheader */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-landing-fog/55">
             Create, edit and delete the saved prompts used in your sequences.
           </p>
           {!isCreating && (
             <Button 
               onClick={() => setIsCreating(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-9 px-4 rounded-md"
+              className="bg-landing-sky hover:bg-landing-sky-deep text-landing-steel gap-2 h-9 px-4 rounded-md"
             >
               <Plus className="h-4 w-4" />
               New template
@@ -91,15 +91,15 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
         </div>
 
         {/* Scrollable List */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 bg-slate-50/50">
+        <div className="flex-1 overflow-y-auto px-6 py-4 bg-white/[0.03]">
           <div className="flex flex-col gap-3 min-h-[100px]">
             {isCreating && (
-              <div className="flex flex-col gap-5 p-5 border border-indigo-100 rounded-xl bg-white shadow-sm mb-2">
-                <h3 className="text-sm font-semibold text-slate-900">New template</h3>
+              <div className="flex flex-col gap-5 p-5 border border-landing-sky/25 rounded-xl bg-landing-steel-2 shadow-sm mb-2">
+                <h3 className="text-sm font-semibold text-landing-fog">New template</h3>
                 
                 <div className="flex gap-4">
                   <div className="flex-1 flex flex-col gap-2">
-                    <Label htmlFor="tpl-name" className="text-slate-700 font-normal">Name</Label>
+                    <Label htmlFor="tpl-name" className="text-landing-fog/80 font-normal">Name</Label>
                     <Input 
                       id="tpl-name" 
                       value={name} 
@@ -108,7 +108,7 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
                     />
                   </div>
                   <div className="w-1/3 flex flex-col gap-2">
-                    <Label htmlFor="tpl-stage" className="text-slate-700 font-normal">Stage</Label>
+                    <Label htmlFor="tpl-stage" className="text-landing-fog/80 font-normal">Stage</Label>
                     <Input 
                       id="tpl-stage" 
                       value={stage} 
@@ -119,16 +119,16 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="tpl-prompt" className="text-slate-700 font-normal">Prompt</Label>
+                  <Label htmlFor="tpl-prompt" className="text-landing-fog/80 font-normal">Prompt</Label>
                   <Textarea 
                     id="tpl-prompt" 
                     value={promptText}
                     onChange={e => setPromptText(e.target.value)}
                     placeholder="Describe how the AI should write for this situation..." 
-                    className="min-h-[120px] resize-none text-sm placeholder:text-slate-400"
+                    className="min-h-[120px] resize-none text-sm placeholder:text-landing-fog/40"
                     disabled={isCreatingMutation}
                   />
-                  <span className="text-xs text-slate-400">{promptText.length} characters (min 10)</span>
+                  <span className="text-xs text-landing-fog/40">{promptText.length} characters (min 10)</span>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 mt-1">
@@ -136,14 +136,14 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
                     variant="ghost" 
                     onClick={() => setIsCreating(false)} 
                     disabled={isCreatingMutation}
-                    className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    className="text-landing-fog/65 hover:text-landing-fog hover:bg-white/[0.06]"
                   >
                     Cancel
                   </Button>
                   <Button 
                     onClick={handleCreate}
                     disabled={isCreatingMutation || promptText.length < 10 || !name.trim()}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    className="bg-landing-sky hover:bg-landing-sky-deep text-landing-steel"
                   >
                     {isCreatingMutation ? "Creating..." : "Create template"}
                   </Button>
@@ -152,28 +152,28 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
             )}
 
             {isLoadingTemplates && !isCreating ? (
-              <div className="flex items-center justify-center p-8 text-sm text-slate-500">
+              <div className="flex items-center justify-center p-8 text-sm text-landing-fog/55">
                 Loading templates...
               </div>
             ) : templates.length === 0 && !isCreating ? (
-               <div className="flex items-center justify-center p-8 text-sm text-slate-500">
+               <div className="flex items-center justify-center p-8 text-sm text-landing-fog/55">
                 No templates found.
               </div>
             ) : (
               templates.map((tpl) => (
-                <div key={tpl.id} className="flex items-center justify-between p-4 border rounded-xl bg-white shadow-sm hover:border-indigo-100 transition-colors">
+                <div key={tpl.id} className="flex items-center justify-between p-4 border rounded-xl bg-landing-steel-2 shadow-sm hover:border-landing-sky/25 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 shrink-0 bg-indigo-50 flex items-center justify-center rounded-lg">
-                      <BookOpen className="h-5 w-5 text-indigo-500" />
+                    <div className="h-10 w-10 shrink-0 bg-landing-sky-soft flex items-center justify-center rounded-lg">
+                      <BookOpen className="h-5 w-5 text-landing-sky" />
                     </div>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-slate-900">{tpl.name}</span>
-                        <Badge variant="secondary" className="bg-slate-100 text-slate-500 text-[10px] uppercase font-medium rounded-full px-2 py-0.5">
+                        <span className="text-sm font-semibold text-landing-fog">{tpl.name}</span>
+                        <Badge variant="secondary" className="bg-white/[0.06] text-landing-fog/55 text-[10px] uppercase font-medium rounded-full px-2 py-0.5">
                           {tpl.followUpStage}
                         </Badge>
                       </div>
-                      <span className="text-sm text-slate-500 line-clamp-1 max-w-lg">{tpl.promptText}</span>
+                      <span className="text-sm text-landing-fog/55 line-clamp-1 max-w-lg">{tpl.promptText}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -184,17 +184,17 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
                         onUseTemplate?.(tpl.promptText);
                         onOpenChange(false);
                       }}
-                      className="h-9 px-4 text-slate-700 font-medium"
+                      className="h-9 px-4 text-landing-fog/80 font-medium"
                     >
                       Use
                     </Button>
-                    <Button variant="outline" size="icon" className="h-9 w-9 text-slate-500"><PenLine className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="icon" className="h-9 w-9 text-landing-fog/55"><PenLine className="h-4 w-4" /></Button>
                     <Button 
                       variant="outline" 
                       size="icon" 
                       onClick={() => handleDelete(tpl.id)}
                       disabled={isDeleting}
-                      className="h-9 w-9 text-red-500 hover:text-red-600 hover:bg-red-50 border-red-100"
+                      className="h-9 w-9 text-landing-voice hover:text-landing-voice hover:bg-landing-voice/10 border-landing-voice/40"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -206,8 +206,8 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t flex justify-end bg-white">
-          <Button variant="secondary" onClick={() => onOpenChange(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700">Done</Button>
+        <div className="px-6 py-4 border-t flex justify-end bg-landing-steel-2">
+          <Button variant="secondary" onClick={() => onOpenChange(false)} className="px-6 bg-white/[0.06] hover:bg-white/10 text-landing-fog/80">Done</Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -70,7 +70,7 @@ export default function SequenceSidebar({
               variant="outline" 
               size="sm" 
               onClick={() => setIsLeadDialogOpen(true)}
-              className="h-7 text-xs px-2 gap-1.5 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+              className="h-7 text-xs px-2 gap-1.5 text-landing-sky border-landing-sky/40 hover:bg-landing-sky-soft"
             >
               <Users className="h-3 w-3" />
               Pick from Leads
@@ -80,7 +80,7 @@ export default function SequenceSidebar({
               size="sm" 
               onClick={() => setIsEditDialogOpen(true)}
               disabled={!selectedLead}
-              className="h-7 text-xs px-2 gap-1.5 text-slate-600"
+              className="h-7 text-xs px-2 gap-1.5 text-landing-fog/65"
             >
               <PenLine className="h-3 w-3" />
               Edit
@@ -91,58 +91,58 @@ export default function SequenceSidebar({
           {selectedLead ? (
             <div className="flex items-center gap-3 mb-1">
               <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-indigo-600 text-white font-medium">{getInitials(selectedLead.name)}</AvatarFallback>
+                <AvatarFallback className="bg-landing-sky text-landing-steel font-medium">{getInitials(selectedLead.name)}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-semibold text-slate-900 truncate">{selectedLead.name}</span>
-                {selectedLead.email && <span className="text-xs text-slate-500 truncate">{selectedLead.email}</span>}
-                {selectedLead.phone && <span className="text-xs text-slate-500 truncate">{selectedLead.phone}</span>}
+                <span className="text-sm font-semibold text-landing-fog truncate">{selectedLead.name}</span>
+                {selectedLead.email && <span className="text-xs text-landing-fog/55 truncate">{selectedLead.email}</span>}
+                {selectedLead.phone && <span className="text-xs text-landing-fog/55 truncate">{selectedLead.phone}</span>}
               </div>
             </div>
           ) : (
-            <div className="text-sm text-slate-500 italic mb-1">No lead selected</div>
+            <div className="text-sm text-landing-fog/55 italic mb-1">No lead selected</div>
           )}
         <Separator className="my-5" />
 
         {/* Follow-up Summary */}
         <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-slate-900 px-1">Follow-up Summary</h3>
+          <h3 className="text-sm font-semibold text-landing-fog px-1">Follow-up Summary</h3>
           <div className="flex flex-col gap-3 text-sm px-1">
             <div className="flex justify-between items-center gap-3">
-              <span className="text-slate-500 shrink-0">Prompt</span>
-              <span className="font-medium text-slate-900 text-right truncate">
+              <span className="text-landing-fog/55 shrink-0">Prompt</span>
+              <span className="font-medium text-landing-fog text-right truncate">
                 {selectedPromptName || "-"}
               </span>
             </div>
             <div className="flex justify-between items-center gap-3">
-              <span className="text-slate-500 shrink-0">Goal</span>
-              <span className="font-medium text-slate-900 text-right truncate">{goal || "-"}</span>
+              <span className="text-landing-fog/55 shrink-0">Goal</span>
+              <span className="font-medium text-landing-fog text-right truncate">{goal || "-"}</span>
             </div>
             <div className="flex justify-between items-center gap-3">
-              <span className="text-slate-500 shrink-0">Tone</span>
-              <span className="font-medium text-slate-900 text-right truncate">{tone || "-"}</span>
+              <span className="text-landing-fog/55 shrink-0">Tone</span>
+              <span className="font-medium text-landing-fog text-right truncate">{tone || "-"}</span>
             </div>
             <div className="flex justify-between items-center gap-3">
-              <span className="text-slate-500 shrink-0">Intensity</span>
-              <span className="font-medium text-slate-900 text-right truncate">{intensity || "-"}</span>
+              <span className="text-landing-fog/55 shrink-0">Intensity</span>
+              <span className="font-medium text-landing-fog text-right truncate">{intensity || "-"}</span>
             </div>
             <div className="flex justify-between items-center gap-3">
-              <span className="text-slate-500 shrink-0">Cadence</span>
-              <span className="font-medium text-slate-900 text-right truncate">{cadence || "-"}</span>
+              <span className="text-landing-fog/55 shrink-0">Cadence</span>
+              <span className="font-medium text-landing-fog text-right truncate">{cadence || "-"}</span>
             </div>
             <div className="flex justify-between items-center mt-1">
-              <span className="text-slate-500">Channels</span>
-              <div className="flex gap-2 text-slate-400">
-                {channels.includes("email") && <Mail className="h-4 w-4 text-blue-500" />}
-                {channels.includes("sms") && <MessageSquare className="h-4 w-4 text-purple-500" />}
-                {channels.includes("whatsapp") && <MessageCircle className="h-4 w-4 text-green-500" />}
-                {channels.includes("aicall") && <Phone className="h-4 w-4 text-amber-500" />}
-                {channels.length === 0 && <span className="font-medium text-slate-900">-</span>}
+              <span className="text-landing-fog/55">Channels</span>
+              <div className="flex gap-2 text-landing-fog/40">
+                {channels.includes("email") && <Mail className="h-4 w-4 text-landing-email" />}
+                {channels.includes("sms") && <MessageSquare className="h-4 w-4 text-landing-sms" />}
+                {channels.includes("whatsapp") && <MessageCircle className="h-4 w-4 text-landing-whatsapp" />}
+                {channels.includes("aicall") && <Phone className="h-4 w-4 text-landing-voice" />}
+                {channels.length === 0 && <span className="font-medium text-landing-fog">-</span>}
               </div>
             </div>
           </div>
           
-          <div className="mt-2 flex items-start gap-3 rounded-lg bg-indigo-50 p-4 text-indigo-700">
+          <div className="mt-2 flex items-start gap-3 rounded-lg bg-landing-sky-soft p-4 text-landing-sky">
             <Sparkles className="h-5 w-5 shrink-0 mt-0.5" />
             <p className="text-xs font-medium leading-relaxed">
               AI will generate a sequence optimized for this prompt and your goal.
@@ -160,29 +160,29 @@ export default function SequenceSidebar({
         <CardContent className="px-5 pb-5">
           <div className="flex flex-col gap-4">
             <div className="flex gap-3">
-              <CheckCircle2 className="h-4 w-4 text-slate-300 shrink-0 mt-0.5" />
+              <CheckCircle2 className="h-4 w-4 text-landing-fog/25 shrink-0 mt-0.5" />
               <div className="flex flex-col">
-                <span className="text-sm text-slate-700">Best time to reach out:</span>
-                <span className="text-sm text-slate-500">Weekdays, 10am - 2pm</span>
+                <span className="text-sm text-landing-fog/80">Best time to reach out:</span>
+                <span className="text-sm text-landing-fog/55">Weekdays, 10am - 2pm</span>
               </div>
             </div>
             <div className="flex gap-3">
-              <CheckCircle2 className="h-4 w-4 text-slate-300 shrink-0 mt-0.5" />
-              <span className="text-sm text-slate-700">Keep messages short and clear</span>
+              <CheckCircle2 className="h-4 w-4 text-landing-fog/25 shrink-0 mt-0.5" />
+              <span className="text-sm text-landing-fog/80">Keep messages short and clear</span>
             </div>
             <div className="flex gap-3">
-              <CheckCircle2 className="h-4 w-4 text-slate-300 shrink-0 mt-0.5" />
-              <span className="text-sm text-slate-700">Offer an easy next step</span>
+              <CheckCircle2 className="h-4 w-4 text-landing-fog/25 shrink-0 mt-0.5" />
+              <span className="text-sm text-landing-fog/80">Offer an easy next step</span>
             </div>
             <div className="flex gap-3">
-              <CheckCircle2 className="h-4 w-4 text-slate-300 shrink-0 mt-0.5" />
-              <span className="text-sm text-slate-700">Don't sound needy</span>
+              <CheckCircle2 className="h-4 w-4 text-landing-fog/25 shrink-0 mt-0.5" />
+              <span className="text-sm text-landing-fog/80">Don't sound needy</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Button className="w-full gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 h-10 mt-2 font-medium">
+      <Button className="w-full gap-2 bg-landing-sky-soft text-landing-sky hover:bg-landing-sky/20 h-10 mt-2 font-medium">
         <BookOpen className="h-4 w-4" />
         View Playbook (No-show)
       </Button>

@@ -21,18 +21,18 @@ export default function WizardProgress({ currentStep }: WizardProgressProps) {
     <>
       <div className="flex flex-col gap-2 py-2 sm:hidden">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-sm font-medium text-indigo-600">{activeStep.title}</span>
-          <span className="shrink-0 text-xs text-slate-500">
+          <span className="text-sm font-medium text-landing-sky">{activeStep.title}</span>
+          <span className="shrink-0 text-xs text-landing-fog/55">
             Step {boundedStep} of {steps.length}
           </span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
           <div
-            className="h-full rounded-full bg-indigo-600 transition-all"
+            className="h-full rounded-full bg-landing-sky transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <span className="text-xs text-slate-500">{activeStep.desc}</span>
+        <span className="text-xs text-landing-fog/55">{activeStep.desc}</span>
       </div>
 
       <div className="hidden w-full items-center justify-between gap-2 py-4 sm:flex xl:gap-4">
@@ -45,8 +45,8 @@ export default function WizardProgress({ currentStep }: WizardProgressProps) {
               <div
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium ${
                   isActive || isCompleted
-                    ? "bg-indigo-600 text-white"
-                    : "bg-slate-100 text-slate-500"
+                    ? "bg-landing-sky text-landing-steel"
+                    : "bg-white/[0.06] text-landing-fog/55"
                 }`}
               >
                 {isCompleted ? <Check className="h-4 w-4" /> : step.num}
@@ -54,19 +54,19 @@ export default function WizardProgress({ currentStep }: WizardProgressProps) {
               <div className="flex min-w-0 flex-col">
                 <span
                   className={`truncate text-xs font-medium xl:text-sm ${
-                    isActive || isCompleted ? "text-indigo-600" : "text-slate-900"
+                    isActive || isCompleted ? "text-landing-sky" : "text-landing-fog"
                   }`}
                 >
                   {step.title}
                 </span>
-                <span className="hidden truncate text-xs text-slate-500 xl:block">
+                <span className="hidden truncate text-xs text-landing-fog/55 xl:block">
                   {step.desc}
                 </span>
               </div>
               {index < steps.length - 1 && (
                 <div
                   className={`ml-1 hidden h-[1px] flex-1 md:block xl:ml-4 ${
-                    isCompleted ? "bg-indigo-600" : "bg-slate-200"
+                    isCompleted ? "bg-landing-sky" : "bg-white/10"
                   }`}
                 />
               )}

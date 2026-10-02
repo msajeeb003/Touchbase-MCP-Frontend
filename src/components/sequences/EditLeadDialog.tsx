@@ -56,14 +56,14 @@ export default function EditLeadDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md gap-0 p-0 overflow-hidden rounded-xl">
         <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle className="text-base font-semibold text-slate-900">
+          <DialogTitle className="text-base font-semibold text-landing-fog">
             Edit lead
           </DialogTitle>
         </DialogHeader>
 
         <div className="p-6 flex flex-col gap-5">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="lead-name" className="text-slate-700 font-normal">Name</Label>
+            <Label htmlFor="lead-name" className="text-landing-fog/80 font-normal">Name</Label>
             <Input 
               id="lead-name"
               value={name}
@@ -73,7 +73,7 @@ export default function EditLeadDialog({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="lead-email" className="text-slate-700 font-normal">Email</Label>
+            <Label htmlFor="lead-email" className="text-landing-fog/80 font-normal">Email</Label>
             <Input 
               id="lead-email"
               value={email}
@@ -83,7 +83,7 @@ export default function EditLeadDialog({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="lead-phone" className="text-slate-700 font-normal">Phone</Label>
+            <Label htmlFor="lead-phone" className="text-landing-fog/80 font-normal">Phone</Label>
             <Input 
               id="lead-phone"
               value={phone}
@@ -94,19 +94,19 @@ export default function EditLeadDialog({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t bg-slate-50/50">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t bg-white/[0.03]">
           <Button 
             variant="ghost" 
             onClick={() => onOpenChange(false)} 
             disabled={isLoading}
-            className="text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+            className="text-landing-fog/80 hover:text-landing-fog hover:bg-white/[0.06]"
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSave} 
             disabled={isLoading}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-landing-sky hover:bg-landing-sky-deep text-landing-steel"
           >
             {isLoading ? "Saving..." : "Save changes"}
           </Button>

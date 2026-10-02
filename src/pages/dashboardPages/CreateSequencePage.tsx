@@ -10,6 +10,7 @@ import { useGetSingleLeadQuery } from "@/store/features/leads/leadsApi";
 import { useUpdateSequenceMutation, useGetSingleSequenceQuery } from "@/store/features/sequences/sequencesApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { useParams } from "react-router-dom";
+import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 
 function readSequenceGoal(goal: SequenceItem["goal"] | { id?: string; label?: string } | null) {
   if (!goal) return null;
@@ -19,6 +20,7 @@ function readSequenceGoal(goal: SequenceItem["goal"] | { id?: string; label?: st
 
 export default function CreateSequencePage() {
   const { id } = useParams<{ id: string }>();
+  useSteelTheme();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [situation, setSituation] = useState<string | null>(null);
@@ -102,12 +104,12 @@ export default function CreateSequencePage() {
   const isEditMode = Boolean(id);
 
   return (
-    <div className="flex flex-col space-y-6 pb-10">
+    <div className="flex flex-col space-y-6 pb-10 font-landing-sans text-landing-fog/80">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="font-landing-display text-[clamp(24px,2.6vw,30px)] font-bold tracking-[-0.02em] text-landing-fog">
           {isEditMode ? "Edit Follow-up Sequence" : "Create Follow-up Sequence"}
         </h1>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-landing-fog/55">
           {isEditMode
             ? "Update preferences, regenerate steps, or refine your follow-up sequence."
             : "Generate a multi-channel follow-up in seconds."}

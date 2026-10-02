@@ -87,35 +87,35 @@ export default function LeadSelectorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md gap-0 overflow-hidden rounded-xl p-0">
         <DialogHeader className="border-b px-5 py-4">
-          <DialogTitle className="text-base font-semibold text-slate-900">
+          <DialogTitle className="text-base font-semibold text-landing-fog">
             Pick from Leads
           </DialogTitle>
         </DialogHeader>
 
         <div className="border-b p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-landing-fog/40" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email or phone..."
-              className="h-10 rounded-lg border-indigo-200 pl-9 text-sm placeholder:text-slate-400 focus-visible:ring-indigo-600"
+              className="h-10 rounded-lg border-landing-sky/40 pl-9 text-sm placeholder:text-landing-fog/40 focus-visible:ring-landing-sky"
             />
           </div>
         </div>
 
         <div className="flex max-h-[350px] min-h-[100px] flex-col overflow-y-auto p-2">
           {isLoading ? (
-            <div className="flex items-center justify-center gap-2 p-8 text-sm text-slate-500">
+            <div className="flex items-center justify-center gap-2 p-8 text-sm text-landing-fog/55">
               <Loader2 className="h-4 w-4 animate-spin" />
               Loading leads...
             </div>
           ) : isError ? (
-            <div className="flex items-center justify-center p-8 text-sm text-red-600">
+            <div className="flex items-center justify-center p-8 text-sm text-landing-voice">
               Failed to load leads.
             </div>
           ) : leads.length === 0 ? (
-            <div className="flex items-center justify-center p-8 text-sm text-slate-500">
+            <div className="flex items-center justify-center p-8 text-sm text-landing-fog/55">
               {debouncedSearch ? "No leads match your search." : "No leads found."}
             </div>
           ) : (
@@ -132,24 +132,24 @@ export default function LeadSelectorDialog({
                   }}
                   className={`flex cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors ${
                     isSelected
-                      ? "border border-indigo-200 bg-indigo-50"
-                      : "border border-transparent hover:bg-slate-50"
+                      ? "border border-landing-sky/40 bg-landing-sky-soft"
+                      : "border border-transparent hover:bg-white/[0.04]"
                   }`}
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-sm font-semibold text-white">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-landing-sky text-sm font-semibold text-landing-steel">
                     {initials}
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-sm font-semibold text-slate-900">
+                    <span className="truncate text-sm font-semibold text-landing-fog">
                       {lead.name}
                     </span>
-                    <span className="truncate text-[13px] text-slate-500">
+                    <span className="truncate text-[13px] text-landing-fog/55">
                       {lead.email}
                       {lead.phone ? ` · ${lead.phone}` : ""}
                     </span>
                   </div>
                   {isSelected && (
-                    <Check className="ml-2 h-5 w-5 shrink-0 text-indigo-600" />
+                    <Check className="ml-2 h-5 w-5 shrink-0 text-landing-sky" />
                   )}
                 </div>
               );
@@ -158,7 +158,7 @@ export default function LeadSelectorDialog({
         </div>
 
         <div className="flex items-center justify-between gap-2 border-t px-4 py-3">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-landing-fog/55">
             {total === 0
               ? "0 leads"
               : `Showing ${startItem}-${endItem} of ${total}`}
@@ -176,7 +176,7 @@ export default function LeadSelectorDialog({
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="min-w-[4.5rem] text-center text-xs font-medium text-slate-600">
+            <span className="min-w-[4.5rem] text-center text-xs font-medium text-landing-fog/65">
               {currentPage} / {totalPages}
             </span>
             <Button

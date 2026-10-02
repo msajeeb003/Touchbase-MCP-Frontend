@@ -236,20 +236,20 @@ export default function SequenceConfigForm({
         onClick={() => handleSituationSelect(item.id, item.isCustom)}
         className={`cursor-pointer rounded-xl border p-4 transition-all ${
           isSelected
-            ? "border-indigo-600 bg-indigo-50 shadow-sm"
-            : "border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50"
+            ? "border-landing-sky bg-landing-sky-soft shadow-sm"
+            : "border-landing-line bg-landing-steel hover:border-landing-sky/50 hover:bg-white/[0.04]"
         }`}
       >
         <item.icon
-          className={`mb-3 h-5 w-5 ${isSelected ? "text-indigo-600" : "text-slate-500"}`}
+          className={`mb-3 h-5 w-5 ${isSelected ? "text-landing-sky" : "text-landing-fog/55"}`}
         />
         <h3
-          className={`text-sm font-semibold ${isSelected ? "text-indigo-900" : "text-slate-900"}`}
+          className={`text-sm font-semibold ${isSelected ? "text-landing-fog" : "text-landing-fog"}`}
         >
           {item.title}
         </h3>
         <p
-          className={`mt-1 line-clamp-2 text-xs ${isSelected ? "text-indigo-700" : "text-slate-500"}`}
+          className={`mt-1 line-clamp-2 text-xs ${isSelected ? "text-landing-sky" : "text-landing-fog/55"}`}
         >
           {item.desc}
         </p>
@@ -420,16 +420,16 @@ export default function SequenceConfigForm({
         <WizardProgress
           currentStep={sequenceStatus === "active" ? 6 : currentStep}
         />
-        <hr className="border-slate-100" />
+        <hr className="border-landing-line" />
 
         {/* Section 1 */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="text-base font-semibold text-slate-900">
+              <h2 className="text-base font-semibold text-landing-fog">
                 1. What happened with this lead?
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-landing-fog/55">
                 This helps us choose the right follow-up strategy.
               </p>
             </div>
@@ -446,10 +446,10 @@ export default function SequenceConfigForm({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {isLoadingTemplates && (
-              <p className="text-sm text-slate-500">Loading templates...</p>
+              <p className="text-sm text-landing-fog/55">Loading templates...</p>
             )}
             {isTemplatesError && (
-              <p className="text-sm text-red-500">Failed to load templates.</p>
+              <p className="text-sm text-landing-voice">Failed to load templates.</p>
             )}
             {!isLoadingTemplates && !isTemplatesError && visibleSituations.map(renderSituationCard)}
           </div>
@@ -470,15 +470,15 @@ export default function SequenceConfigForm({
             </div>
           )}
           {situation === "Custom" && (
-            <div className="flex flex-col gap-4 rounded-xl border border-indigo-100 bg-slate-50/50 p-5 mt-2">
+            <div className="flex flex-col gap-4 rounded-xl border border-landing-sky/25 bg-white/[0.03] p-5 mt-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-indigo-600">
+                <div className="flex items-center gap-2 text-landing-sky">
                   <Sparkles className="h-4 w-4" />
-                  <span className="text-sm font-semibold text-slate-900">Describe your situation</span>
+                  <span className="text-sm font-semibold text-landing-fog">Describe your situation</span>
                 </div>
                 <button
                   onClick={() => setSituation("")}
-                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 transition-colors"
+                  className="flex items-center gap-1 text-xs text-landing-fog/55 hover:text-landing-fog transition-colors"
                 >
                   <X className="h-3 w-3" />
                   Cancel
@@ -490,13 +490,13 @@ export default function SequenceConfigForm({
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
                   placeholder="e.g. Lead downloaded our pricing PDF twice but hasn't booked a demo..."
-                  className="min-h-[120px] resize-none bg-white border-slate-200 placeholder:text-slate-400 focus-visible:ring-indigo-600"
+                  className="min-h-[120px] resize-none bg-landing-steel border-landing-line placeholder:text-landing-fog/40 focus-visible:ring-landing-sky"
                 />
                 <div className="flex items-center justify-between px-1 mt-1">
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-landing-fog/55">
                     Write it in your own words — the AI follows this exactly.
                   </span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-landing-fog/40">
                     {customPrompt.length} characters
                   </span>
                 </div>
@@ -504,30 +504,30 @@ export default function SequenceConfigForm({
 
               <div className="flex flex-col gap-3 pt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-700">Or use one of your saved prompts</span>
+                  <span className="text-sm font-medium text-landing-fog/80">Or use one of your saved prompts</span>
                   <button
                     onClick={() => setIsManageTemplatesOpen(true)}
-                    className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-medium text-landing-sky hover:text-landing-sky transition-colors"
                   >
                     <Settings className="h-3.5 w-3.5" />
                     Manage templates
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {isLoadingTemplates && <span className="text-sm text-slate-500 py-1">Loading saved prompts...</span>}
-                  {!isLoadingTemplates && templates.length === 0 && <span className="text-sm text-slate-500 py-1">No saved prompts yet.</span>}
+                  {isLoadingTemplates && <span className="text-sm text-landing-fog/55 py-1">Loading saved prompts...</span>}
+                  {!isLoadingTemplates && templates.length === 0 && <span className="text-sm text-landing-fog/55 py-1">No saved prompts yet.</span>}
                   {templates.map((tpl) => (
                     <button
                       key={tpl.id}
                       onClick={() => setCustomPrompt(tpl.promptText)}
-                      className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:border-indigo-200 hover:bg-slate-50 transition-colors"
+                      className="flex items-center gap-2 rounded-full border border-landing-line bg-landing-steel px-3 py-1.5 text-sm text-landing-fog/80 hover:border-landing-sky/40 hover:bg-white/[0.04] transition-colors"
                     >
-                      <BookOpen className="h-3.5 w-3.5 text-slate-400" />
+                      <BookOpen className="h-3.5 w-3.5 text-landing-fog/40" />
                       {tpl.name}
                     </button>
                   ))}
                 </div>
-                <span className="text-xs text-slate-500 mt-1">
+                <span className="text-xs text-landing-fog/55 mt-1">
                   Pick a saved prompt to steer the AI, type your own situation above, or both.
                 </span>
               </div>
@@ -537,23 +537,23 @@ export default function SequenceConfigForm({
 
         {/* Section 2 */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-landing-fog">
             2. What is your goal?
           </h2>
           <div className="flex flex-wrap gap-3">
             {isLoadingGoals && (
-              <span className="flex items-center gap-2 py-1 text-sm text-slate-500">
+              <span className="flex items-center gap-2 py-1 text-sm text-landing-fog/55">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading goals...
               </span>
             )}
             {isGoalsError && !isLoadingGoals && (
-              <span className="py-1 text-sm text-red-600">
+              <span className="py-1 text-sm text-landing-voice">
                 Failed to load goals. Please refresh.
               </span>
             )}
             {!isLoadingGoals && !isGoalsError && goals.length === 0 && !isAddingGoal && (
-              <span className="py-1 text-sm text-slate-500">
+              <span className="py-1 text-sm text-landing-fog/55">
                 No goals yet. Add one to get started.
               </span>
             )}
@@ -589,7 +589,7 @@ export default function SequenceConfigForm({
                       size="sm"
                       onClick={() => void handleSaveEditGoal()}
                       disabled={isUpdatingGoal || !editGoalLabel.trim()}
-                      className="bg-indigo-600 hover:bg-indigo-700"
+                      className="bg-landing-sky hover:bg-landing-sky-deep"
                     >
                       {isUpdatingGoal ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -617,14 +617,14 @@ export default function SequenceConfigForm({
                     variant={isSelected ? "default" : "outline"}
                     className={`gap-2 rounded-full pr-8 ${
                       isSelected
-                        ? "border border-indigo-200 bg-indigo-50 text-indigo-700 shadow-none hover:bg-indigo-100"
-                        : "text-slate-700"
+                        ? "border border-landing-sky/40 bg-landing-sky-soft text-landing-sky shadow-none hover:bg-landing-sky/20"
+                        : "text-landing-fog/80"
                     }`}
                     onClick={() => handleGoalSelect(item.label)}
                   >
                     <Icon
                       className={`h-4 w-4 ${
-                        isSelected ? "text-indigo-600" : "text-slate-400"
+                        isSelected ? "text-landing-sky" : "text-landing-fog/40"
                       }`}
                     />
                     {item.label}
@@ -636,8 +636,8 @@ export default function SequenceConfigForm({
                         aria-label={`Manage ${item.label}`}
                         className={`absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full transition-opacity ${
                           isSelected
-                            ? "text-indigo-600 opacity-100 hover:bg-indigo-100"
-                            : "text-slate-400 opacity-0 hover:bg-slate-100 group-hover:opacity-100 focus:opacity-100"
+                            ? "text-landing-sky opacity-100 hover:bg-landing-sky/20"
+                            : "text-landing-fog/40 opacity-0 hover:bg-white/[0.06] group-hover:opacity-100 focus:opacity-100"
                         }`}
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -646,12 +646,12 @@ export default function SequenceConfigForm({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => handleStartEditGoal(item)}>
-                        <PenLine className="mr-2 h-4 w-4 text-slate-500" />
+                        <PenLine className="mr-2 h-4 w-4 text-landing-fog/55" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => setGoalPendingDelete(item)}
-                        className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                        className="text-landing-voice focus:bg-landing-voice/10 focus:text-landing-voice"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
@@ -665,10 +665,10 @@ export default function SequenceConfigForm({
               <Button
                 type="button"
                 variant="outline"
-                className="gap-2 rounded-full border-dashed text-slate-700"
+                className="gap-2 rounded-full border-dashed text-landing-fog/80"
                 onClick={handleStartAddGoal}
               >
-                <Plus className="h-4 w-4 text-slate-400" />
+                <Plus className="h-4 w-4 text-landing-fog/40" />
                 Add goal
               </Button>
             )}
@@ -696,7 +696,7 @@ export default function SequenceConfigForm({
                 size="sm"
                 onClick={() => void handleSaveNewGoal()}
                 disabled={isCreatingGoal || !newGoalLabel.trim()}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-landing-sky hover:bg-landing-sky-deep"
               >
                 {isCreatingGoal ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -719,13 +719,13 @@ export default function SequenceConfigForm({
 
         {/* Section 3 */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-landing-fog">
             3. Preferences
           </h2>
           <div className="flex flex-col gap-6">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <Label className="text-slate-700">Tone</Label>
+                <Label className="text-landing-fog/80">Tone</Label>
                 <Select value={tone} onValueChange={setTone}>
                   <SelectTrigger>
                     <SelectValue />
@@ -756,7 +756,7 @@ export default function SequenceConfigForm({
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label className="text-slate-700">Intensity</Label>
+                <Label className="text-landing-fog/80">Intensity</Label>
                 <Select value={intensity} onValueChange={setIntensity}>
                   <SelectTrigger>
                     <SelectValue />
@@ -772,10 +772,10 @@ export default function SequenceConfigForm({
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <Label className="text-slate-700">Cadence</Label>
+                <Label className="text-landing-fog/80">Cadence</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="cadence-steps" className="text-xs font-normal text-slate-500">
+                    <Label htmlFor="cadence-steps" className="text-xs font-normal text-landing-fog/55">
                       Steps
                     </Label>
                     <Input
@@ -789,11 +789,11 @@ export default function SequenceConfigForm({
                       aria-invalid={Boolean(stepsError)}
                     />
                     {stepsError && (
-                      <p className="text-xs text-red-500">{stepsError}</p>
+                      <p className="text-xs text-landing-voice">{stepsError}</p>
                     )}
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="cadence-days" className="text-xs font-normal text-slate-500">
+                    <Label htmlFor="cadence-days" className="text-xs font-normal text-landing-fog/55">
                       Days
                     </Label>
                     <Input
@@ -807,11 +807,11 @@ export default function SequenceConfigForm({
                       aria-invalid={Boolean(daysError)}
                     />
                     {daysError && (
-                      <p className="text-xs text-red-500">{daysError}</p>
+                      <p className="text-xs text-landing-voice">{daysError}</p>
                     )}
                   </div>
-                  <p className="col-span-2 text-xs text-slate-500">
-                    <span className="font-medium text-slate-700">
+                  <p className="col-span-2 text-xs text-landing-fog/55">
+                    <span className="font-medium text-landing-fog/80">
                       {isCadenceValid ? cadence : "—"}
                     </span>
                   </p>
@@ -819,17 +819,17 @@ export default function SequenceConfigForm({
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label className="text-slate-700">Channels</Label>
+                <Label className="text-landing-fog/80">Channels</Label>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="ch-email"
                       checked={channels.includes("email")}
                       onCheckedChange={() => toggleChannel("email")}
-                      className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                      className="data-[state=checked]:bg-landing-sky data-[state=checked]:border-landing-sky"
                     />
-                    <Label htmlFor="ch-email" className="flex items-center gap-1.5 font-normal text-slate-700">
-                      <Mail className="h-3.5 w-3.5 text-blue-500" />
+                    <Label htmlFor="ch-email" className="flex items-center gap-1.5 font-normal text-landing-fog/80">
+                      <Mail className="h-3.5 w-3.5 text-landing-email" />
                       Email
                     </Label>
                   </div>
@@ -838,10 +838,10 @@ export default function SequenceConfigForm({
                       id="ch-sms"
                       checked={channels.includes("sms")}
                       onCheckedChange={() => toggleChannel("sms")}
-                      className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                      className="data-[state=checked]:bg-landing-sky data-[state=checked]:border-landing-sky"
                     />
-                    <Label htmlFor="ch-sms" className="flex items-center gap-1.5 font-normal text-slate-700">
-                      <MessageSquare className="h-3.5 w-3.5 text-purple-500" />
+                    <Label htmlFor="ch-sms" className="flex items-center gap-1.5 font-normal text-landing-fog/80">
+                      <MessageSquare className="h-3.5 w-3.5 text-landing-sms" />
                       SMS
                     </Label>
                   </div>
@@ -850,10 +850,10 @@ export default function SequenceConfigForm({
                       id="ch-whatsapp"
                       checked={channels.includes("whatsapp")}
                       onCheckedChange={() => toggleChannel("whatsapp")}
-                      className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                      className="data-[state=checked]:bg-landing-sky data-[state=checked]:border-landing-sky"
                     />
-                    <Label htmlFor="ch-whatsapp" className="flex items-center gap-1.5 font-normal text-slate-700">
-                      <MessageCircle className="h-3.5 w-3.5 text-green-500" />
+                    <Label htmlFor="ch-whatsapp" className="flex items-center gap-1.5 font-normal text-landing-fog/80">
+                      <MessageCircle className="h-3.5 w-3.5 text-landing-whatsapp" />
                       WhatsApp
                     </Label>
                   </div>
@@ -862,10 +862,10 @@ export default function SequenceConfigForm({
                       id="ch-aicall"
                       checked={channels.includes("aicall")}
                       onCheckedChange={() => toggleChannel("aicall")}
-                      className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                      className="data-[state=checked]:bg-landing-sky data-[state=checked]:border-landing-sky"
                     />
-                    <Label htmlFor="ch-aicall" className="flex items-center gap-1.5 font-normal text-slate-700">
-                      <Phone className="h-3.5 w-3.5 text-amber-500" />
+                    <Label htmlFor="ch-aicall" className="flex items-center gap-1.5 font-normal text-landing-fog/80">
+                      <Phone className="h-3.5 w-3.5 text-landing-voice" />
                       AI Call
                     </Label>
                   </div>
@@ -880,7 +880,7 @@ export default function SequenceConfigForm({
           <Button
             onClick={handleGenerate}
             disabled={currentStep < 2 || !goal || isGenerating || !selectedLead || !isCadenceValid}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-10 px-6 font-semibold"
+            className="bg-landing-sky hover:bg-landing-sky-deep text-landing-steel gap-2 h-10 px-6 font-semibold"
           >
             {isGenerating ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -895,7 +895,7 @@ export default function SequenceConfigForm({
                 ? "Update & Regenerate Sequence"
                 : "Generate Follow-up Sequence"}
           </Button>
-          <span className="text-sm text-slate-400">Usually takes 30–60 seconds</span>
+          <span className="text-sm text-landing-fog/40">Usually takes 30–60 seconds</span>
         </div>
       </CardContent>
       <ManageTemplatesDialog
