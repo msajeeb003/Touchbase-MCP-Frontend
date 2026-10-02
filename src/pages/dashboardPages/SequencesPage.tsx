@@ -50,16 +50,17 @@ import {
 import type { SequenceCountInfo, SequenceStatus } from "@/types/sequences";
 import { cn } from "@/lib/utils";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
+import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 
 const VALID_STATUSES: SequenceStatus[] = ["draft", "active", "paused", "completed", "cancelled"];
 
 const getStatusBadgeClass = (status: SequenceStatus | string) => {
-  if (status === "active") return "border-green-200 bg-green-100 text-green-700";
-  if (status === "draft") return "border-amber-200 bg-amber-100 text-amber-700";
-  if (status === "completed") return "border-emerald-200 bg-emerald-100 text-emerald-700";
-  if (status === "cancelled") return "border-rose-200 bg-rose-100 text-rose-700";
-  if (status === "paused") return "border-blue-200 bg-blue-100 text-blue-700";
-  return "border-slate-200 bg-slate-100 text-slate-700";
+  if (status === "active") return "border-landing-whatsapp/40 bg-landing-whatsapp/15 text-landing-whatsapp";
+  if (status === "draft") return "border-landing-sms/40 bg-landing-sms/15 text-landing-sms";
+  if (status === "completed") return "border-landing-sky/40 bg-landing-sky-soft text-landing-sky";
+  if (status === "cancelled") return "border-landing-voice/40 bg-landing-voice/15 text-landing-voice";
+  if (status === "paused") return "border-landing-email/40 bg-landing-email/15 text-landing-email";
+  return "border-landing-line bg-white/5 text-landing-fog/70";
 };
 
 const getStatusLabel = (status: SequenceStatus | string) =>
@@ -102,28 +103,28 @@ const buildProgressMetrics = (counts: SequenceCountInfo) => {
       total: emailTotal,
       sent: emailSent,
       icon: Mail,
-      className: "bg-indigo-50 text-indigo-700",
+      className: "bg-landing-email/15 text-landing-email",
     },
     {
       key: "sms",
       total: smsTotal,
       sent: smsSent,
       icon: MessageSquare,
-      className: "bg-violet-50 text-violet-700",
+      className: "bg-landing-sms/15 text-landing-sms",
     },
     {
       key: "whatsapp",
       total: whatsappTotal,
       sent: whatsappSent,
       icon: MessageCircle,
-      className: "bg-emerald-50 text-emerald-700",
+      className: "bg-landing-whatsapp/15 text-landing-whatsapp",
     },
     {
       key: "call",
       total: callTotal,
       sent: callSent,
       icon: PhoneCall,
-      className: "bg-amber-50 text-amber-700",
+      className: "bg-landing-voice/15 text-landing-voice",
     },
   ].filter((channel) => channel.total > 0);
 
@@ -131,6 +132,7 @@ const buildProgressMetrics = (counts: SequenceCountInfo) => {
 };
 
 export default function SequencesPage() {
+  useSteelTheme();
   const [stageFilter, setStageFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [deletingSequenceId, setDeletingSequenceId] = useState<string | null>(null);
@@ -230,9 +232,9 @@ export default function SequencesPage() {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-dashed p-8 text-sm text-slate-500">
+      <div className="rounded-xl border border-dashed border-landing-line p-8 text-sm text-landing-fog/60">
         <div className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+          <Loader2 className="h-4 w-4 animate-spin text-landing-sky" />
           <span>Loading sequences...</span>
         </div>
       </div>
@@ -241,32 +243,32 @@ export default function SequencesPage() {
 
   if (isError) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-sm text-red-600">
+      <div className="rounded-xl border border-landing-voice/40 bg-landing-voice/10 p-8 text-sm text-landing-voice">
         Failed to fetch sequences.
       </div>
     );
   }
 
   return (
-    <div className="w-full min-w-0 space-y-4 overflow-x-hidden">
+    <div className="w-full min-w-0 space-y-4 overflow-x-hidden font-landing-sans text-landing-fog/80">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           {/* <p className="text-sm text-slate-500">Follow Up Dashboard</p> */}
-          <h2 className="flex items-center gap-2 text-3xl font-semibold text-slate-900">
-            <RefreshCw className="h-6 w-6 text-indigo-500" />
+          <h2 className="flex items-center gap-2 font-landing-display text-[clamp(26px,3vw,34px)] font-bold tracking-[-0.02em] text-landing-fog">
+            <RefreshCw className="h-6 w-6 text-landing-sky" />
             Sequences
           </h2>
         </div>
         <Link to="/dashboard/sequences/new">
-          <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+          <Button className="gap-2 bg-landing-sky font-semibold text-landing-steel hover:bg-landing-sky-deep">
             <Wand2 className="h-4 w-4" />
             Generate Sequence
           </Button>
         </Link>
       </div>
 
-      <div className="w-full min-w-0 rounded-xl border bg-white shadow-sm">
-        <div className="flex flex-wrap items-center gap-3 border-b p-4">
+      <div className="w-full min-w-0 rounded-2xl border border-landing-line bg-landing-steel-2">
+        <div className="flex flex-wrap items-center gap-3 border-b border-landing-line p-4">
           <div className="w-full sm:w-[140px]">
             <Select value={stageFilter} onValueChange={setStageFilter}>
               <SelectTrigger>
@@ -301,12 +303,12 @@ export default function SequencesPage() {
 
         {filteredSequences.length === 0 ? (
           <div className="p-8 text-center">
-            <h3 className="text-lg font-semibold text-slate-900">No sequences found</h3>
-            <p className="mt-1 text-sm text-slate-500">Try changing the filters to see available sequences.</p>
+            <h3 className="font-landing-display text-lg font-bold text-landing-fog">No sequences found</h3>
+            <p className="mt-1 text-sm text-landing-fog/55">Try changing the filters to see available sequences.</p>
           </div>
         ) : (
           <div className="w-full max-w-full overflow-x-auto">
-            <Table className="min-w-[1320px]">
+            <Table className="min-w-[1320px] [&_th]:font-landing-mono [&_th]:text-[10.5px] [&_th]:font-normal [&_th]:uppercase [&_th]:tracking-[0.1em] [&_th]:text-landing-fog/45 [&_tr:hover]:bg-white/[0.03]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -324,12 +326,12 @@ export default function SequencesPage() {
               <TableBody>
                 {filteredSequences.map((sequence) => (
                   <TableRow key={sequence.id}>
-                    <TableCell className="font-medium text-slate-900">{sequence.name}</TableCell>
-                    <TableCell className="text-slate-600">{sequence.lead?.name || "N/A"}</TableCell>
-                    <TableCell className="text-slate-600">
+                    <TableCell className="font-medium text-landing-fog">{sequence.name}</TableCell>
+                    <TableCell className="text-landing-fog/70">{sequence.lead?.name || "N/A"}</TableCell>
+                    <TableCell className="text-landing-fog/70">
                       {sequence.promptTemplate?.followUpStage || sequence.promptTemplate?.name || "N/A"}
                     </TableCell>
-                    <TableCell className="text-slate-600">
+                    <TableCell className="text-landing-fog/70">
                       {sequence._count?.steps ?? 0}/{sequence.totalSteps}
                     </TableCell>
                     <TableCell>
@@ -339,18 +341,18 @@ export default function SequencesPage() {
 
                         return (
                           <div className="space-y-2">
-                            <div className="flex items-center justify-between text-xs text-slate-600">
+                            <div className="flex items-center justify-between font-landing-mono text-[11px] text-landing-fog/60">
                               <span>{sentCount}/{totalForProgress} sent</span>
                               <span>{Math.round(progressValue)}%</span>
                             </div>
-                            <div className="h-2 overflow-hidden rounded-full bg-indigo-100">
+                            <div className="h-2 overflow-hidden rounded-full bg-white/10">
                               <div
-                                className="h-full rounded-full bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-700 transition-all duration-500"
+                                className="h-full rounded-full bg-landing-sky transition-all duration-500"
                                 style={{ width: `${progressValue}%` }}
                               />
                             </div>
                             {channels.length > 0 && (
-                              <div className="flex items-center gap-2 text-[11px] text-slate-600">
+                              <div className="flex items-center gap-2 font-landing-mono text-[11px] text-landing-fog/60">
                                 {channels.map((channel) => {
                                   const Icon = channel.icon;
                                   return (
@@ -373,7 +375,7 @@ export default function SequencesPage() {
                       })()}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button asChild variant="ghost" className="gap-1 text-indigo-600 hover:text-indigo-700">
+                      <Button asChild variant="ghost" className="gap-1 text-landing-sky hover:bg-white/5 hover:text-landing-sky">
                         <Link to={`/dashboard/sequences/${sequence.id}/view`}>
                           View
                           <ChevronRight className="h-4 w-4" />
@@ -414,13 +416,13 @@ export default function SequencesPage() {
                             "text-xs",
                             sequence.status === "active"
                               ? "text-muted-foreground"
-                              : "font-medium text-slate-700",
+                              : "font-medium text-landing-fog",
                           )}
                         >
                           Paused
                         </span>
                         <Switch
-                          className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-slate-300"
+                          className="data-[state=checked]:bg-landing-whatsapp data-[state=unchecked]:bg-white/15"
                           checked={sequence.status === "active"}
                           disabled={
                             updatingStatusId === sequence.id || sequence.status === "completed"
@@ -441,7 +443,7 @@ export default function SequencesPage() {
                           className={cn(
                             "text-xs",
                             sequence.status === "active"
-                              ? "font-medium text-green-600"
+                              ? "font-medium text-landing-whatsapp"
                               : "text-muted-foreground",
                           )}
                         >
@@ -450,7 +452,7 @@ export default function SequencesPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button asChild variant="ghost" size="icon" className="text-indigo-600 hover:text-indigo-700">
+                      <Button asChild variant="ghost" size="icon" className="text-landing-sky hover:bg-white/5 hover:text-landing-sky">
                         <Link to={`/dashboard/sequences/${sequence.id}/steps`}>
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Update sequence</span>
@@ -463,7 +465,7 @@ export default function SequencesPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="text-rose-600 hover:text-rose-700"
+                            className="text-landing-voice hover:bg-landing-voice/10 hover:text-landing-voice"
                             disabled={deletingSequenceId === sequence.id}
                           >
                             {deletingSequenceId === sequence.id ? (
