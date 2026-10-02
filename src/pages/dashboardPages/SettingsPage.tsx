@@ -32,8 +32,9 @@ import {
 } from "@/store/features/settings/settingsApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { AI_PROVIDER, type SettingsItem, type UpdateSettingsRequestBody } from "@/types/settings";
+import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 
-const sectionCardClass = "rounded-xl border bg-white shadow-sm";
+const sectionCardClass = "overflow-hidden rounded-2xl border border-landing-line bg-landing-steel-2";
 const generalSettingsKeys = [
   "aiProvider",
   "aiApiKey",
@@ -180,6 +181,7 @@ const sanitizeUpdatePayload = (
 };
 
 export default function SettingsPage() {
+  useSteelTheme();
   const { data, isLoading, isError } = useGetSettingsQuery();
   const [updateSettings, { isLoading: isSaving }] = useUpdateSettingsMutation();
 
@@ -241,35 +243,35 @@ export default function SettingsPage() {
   };
 
   if (isLoading) {
-    return <div className="rounded-lg border border-dashed p-8 text-sm text-slate-500">Loading settings...</div>;
+    return <div className="rounded-xl border border-dashed border-landing-line p-8 font-landing-sans text-sm text-landing-fog/60">Loading settings...</div>;
   }
 
   if (isError) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-sm text-red-600">
+      <div className="rounded-xl border border-landing-voice/40 bg-landing-voice/10 p-8 font-landing-sans text-sm text-landing-voice">
         Failed to fetch settings.
       </div>
     );
   }
 
   return (
-    <div className="space-y-5">
-      <h2 className="text-3xl font-semibold text-slate-900">Settings</h2>
+    <div className="space-y-5 font-landing-sans text-landing-fog/80">
+      <h2 className="font-landing-display text-[clamp(26px,3vw,34px)] font-bold tracking-[-0.02em] text-landing-fog">Settings</h2>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50/70 px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
-                <Bot className="mt-0.5 h-4 w-4 text-indigo-600" />
+                <Bot className="mt-0.5 h-4 w-4 text-landing-sky" />
                 <div>
-                  <h3 className="font-medium text-slate-900">AI Configuration</h3>
-                  <p className="text-xs text-slate-500">Configure your AI assistant settings and models.</p>
+                  <h3 className="font-landing-display font-bold text-landing-fog">AI Configuration</h3>
+                  <p className="text-xs text-landing-fog/55">Configure your AI assistant settings and models.</p>
                 </div>
               </div>
               <Link
                 to="/docs/ai-credentials"
-                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
+                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
               >
                 Credential help and official docs
               </Link>
@@ -337,19 +339,19 @@ export default function SettingsPage() {
           </section>
 
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50/70 px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
-                <BarChart3 className="mt-0.5 h-4 w-4 text-emerald-600" />
+                <BarChart3 className="mt-0.5 h-4 w-4 text-[#A78BFA]" />
                 <div>
-                  <h3 className="font-medium text-slate-900">Fathom Call Transcripts</h3>
-                  <p className="text-xs text-slate-500">
+                  <h3 className="font-landing-display font-bold text-landing-fog">Fathom Call Transcripts</h3>
+                  <p className="text-xs text-landing-fog/55">
                     Connect your Fathom analytics account to import call transcripts.
                   </p>
                 </div>
               </div>
               <Link
                 to="/docs/fathom-transcripts"
-                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
+                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
               >
                 Fathom help and official docs
               </Link>
@@ -373,18 +375,18 @@ export default function SettingsPage() {
                 control={form.control}
                 name="autoDraftEnabled"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col items-start gap-3 rounded-lg border bg-slate-50/60 px-4 py-3">
+                  <FormItem className="flex flex-col items-start gap-3 rounded-lg border border-landing-line bg-landing-steel px-4 py-3">
                     <div className="space-y-1">
-                      <FormLabel className="text-sm font-medium text-slate-900">
+                      <FormLabel className="text-sm font-medium text-landing-fog">
                         Auto draft
                       </FormLabel>
-                      <FormDescription className="text-xs text-slate-500">
+                      <FormDescription className="text-xs text-landing-fog/55">
                         Automatically draft follow-up sequences from new Fathom call transcripts.
                       </FormDescription>
                     </div>
                     <FormControl>
                       <Switch
-                        className="data-[state=checked]:bg-indigo-600 data-[state=unchecked]:bg-slate-300"
+                        className="data-[state=checked]:bg-landing-whatsapp data-[state=unchecked]:bg-white/15"
                         checked={Boolean(field.value)}
                         onCheckedChange={field.onChange}
                         aria-label="Toggle auto draft"
@@ -397,19 +399,19 @@ export default function SettingsPage() {
           </section>
 
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50/70 px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
-                <PhoneCall className="mt-0.5 h-4 w-4 text-sky-600" />
+                <PhoneCall className="mt-0.5 h-4 w-4 text-landing-voice" />
                 <div>
-                  <h3 className="font-medium text-slate-900">AI Calling (Retell)</h3>
-                  <p className="text-xs text-slate-500">
+                  <h3 className="font-landing-display font-bold text-landing-fog">AI Calling (Retell)</h3>
+                  <p className="text-xs text-landing-fog/55">
                     Connect Retell to run outbound AI voice calls from your sequences.
                   </p>
                 </div>
               </div>
               <Link
                 to="/docs/retell-ai-calling"
-                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
+                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
               >
                 Retell help and setup
               </Link>
@@ -429,7 +431,7 @@ export default function SettingsPage() {
                         autoComplete="off"
                       />
                     </FormControl>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-landing-fog/55">
                       From Retell dashboard. Used to authenticate Retell API requests.
                     </p>
                     <FormMessage />
@@ -446,7 +448,7 @@ export default function SettingsPage() {
                     <FormControl>
                       <Input placeholder="agent_..." {...field} value={field.value ?? ""} />
                     </FormControl>
-                    <p className="text-xs text-slate-500">The voice agent that handles your calls.</p>
+                    <p className="text-xs text-landing-fog/55">The voice agent that handles your calls.</p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -461,7 +463,7 @@ export default function SettingsPage() {
                     <FormControl>
                       <Input placeholder="+1234567890" {...field} value={field.value ?? ""} />
                     </FormControl>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-landing-fog/55">
                       E.164 phone number shown or used as the outbound caller ID (per your Retell setup).
                     </p>
                     <FormMessage />
@@ -472,17 +474,17 @@ export default function SettingsPage() {
           </section>
 
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50/70 px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
-                <Mail className="mt-0.5 h-4 w-4 text-violet-600" />
+                <Mail className="mt-0.5 h-4 w-4 text-landing-email" />
                 <div>
-                  <h3 className="font-medium text-slate-900">Email (SMTP) Settings</h3>
-                  <p className="text-xs text-slate-500">Configure SMTP settings for outgoing email follow-ups.</p>
+                  <h3 className="font-landing-display font-bold text-landing-fog">Email (SMTP) Settings</h3>
+                  <p className="text-xs text-landing-fog/55">Configure SMTP settings for outgoing email follow-ups.</p>
                 </div>
               </div>
               <Link
                 to="/docs/email-smtp"
-                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
+                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
               >
                 SMTP help and setup
               </Link>
@@ -571,19 +573,19 @@ export default function SettingsPage() {
           </section>
 
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50/70 px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
-                <MessageSquare className="mt-0.5 h-4 w-4 text-orange-600" />
+                <MessageSquare className="mt-0.5 h-4 w-4 text-landing-sms" />
                 <div>
-                  <h3 className="font-medium text-slate-900">SMS Settings</h3>
-                  <p className="text-xs text-slate-500">
+                  <h3 className="font-landing-display font-bold text-landing-fog">SMS Settings</h3>
+                  <p className="text-xs text-landing-fog/55">
                     Choose an SMS provider or disable SMS for text follow-ups.
                   </p>
                 </div>
               </div>
               <Link
                 to="/docs/sms-settings"
-                className="shrink-0 text-sm font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
+                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
               >
                 SMS help and setup
               </Link>
@@ -617,7 +619,7 @@ export default function SettingsPage() {
               />
 
               {smsProvider === "" ? (
-                <div className="rounded-lg border border-dashed bg-slate-50 px-4 py-3 text-sm text-slate-500 md:col-span-2">
+                <div className="rounded-lg border border-dashed border-landing-line bg-landing-steel px-4 py-3 text-sm text-landing-fog/55 md:col-span-2">
                   SMS is currently disabled. Select a provider above to configure text follow-ups.
                 </div>
               ) : null}
@@ -656,7 +658,7 @@ export default function SettingsPage() {
 
               {smsProvider === "twilio" ? (
                 <>
-                  <div className="rounded-lg border border-dashed bg-green-50 px-4 py-3 text-xs text-green-600 md:col-span-2">
+                  <div className="rounded-lg border border-dashed border-landing-whatsapp/40 bg-landing-whatsapp/10 px-4 py-3 text-xs text-landing-whatsapp md:col-span-2">
                     Use one Twilio account for both channels. Account SID and Auth Token are required for
                     sending SMS and WhatsApp messages.
                   </div>
@@ -673,7 +675,7 @@ export default function SettingsPage() {
                             value={field.value ?? ""}
                           />
                         </FormControl>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-landing-fog/55">
                           Found in Twilio Console. Used to authenticate API requests.
                         </p>
                         <FormMessage />
@@ -690,7 +692,7 @@ export default function SettingsPage() {
                         <FormControl>
                           <Input placeholder="twilio_auth_token" {...field} value={field.value ?? ""} />
                         </FormControl>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-landing-fog/55">
                           Keep this secret. Required with SID for SMS and WhatsApp send APIs.
                         </p>
                         <FormMessage />
@@ -707,7 +709,7 @@ export default function SettingsPage() {
                         <FormControl>
                           <Input placeholder="+1234567890" {...field} value={field.value ?? ""} />
                         </FormControl>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-landing-fog/55">
                           E.164 format. This number sends regular SMS.
                         </p>
                         <FormMessage />
@@ -724,7 +726,7 @@ export default function SettingsPage() {
                         <FormControl>
                           <Input placeholder="+12345678910" {...field} value={field.value ?? ""} />
                         </FormControl>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-landing-fog/55">
                           WhatsApp-enabled Twilio sender in format: +countrycode-number.
                         </p>
                         <FormMessage />
@@ -736,8 +738,8 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <div className="flex flex-col gap-3 border-t bg-white/70 px-1 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-slate-500">
+          <div className="flex flex-col gap-3 border-t border-landing-line px-1 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-landing-fog/55">
               Last updated:{" "}
               {data?.data.updatedAt
                 ? new Date(data.data.updatedAt).toLocaleString()
@@ -747,7 +749,7 @@ export default function SettingsPage() {
               <Button type="button" variant="outline" onClick={() => form.reset(toInitialValues(data?.data))}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-700">
+              <Button type="submit" disabled={isSaving} className="bg-landing-sky font-semibold text-landing-steel hover:bg-landing-sky-deep">
                 {isSaving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
