@@ -96,7 +96,7 @@ export default function ViewTranscriptDialog({
           <div className="flex items-start justify-between gap-3">
             <div>
               <DialogTitle className="text-left">{meetingTitle}</DialogTitle>
-              <p className="text-xs text-slate-500">{summary}</p>
+              <p className="text-xs text-muted-foreground">{summary}</p>
             </div>
             <Button
               type="button"
@@ -114,15 +114,15 @@ export default function ViewTranscriptDialog({
 
         <div className="max-h-[72vh] overflow-y-auto px-4 py-4 sm:px-6">
           {isFetching ? (
-            <p className="text-sm text-slate-500">Loading transcript...</p>
+            <p className="text-sm text-muted-foreground">Loading transcript...</p>
           ) : isError ? (
-            <p className="text-sm text-red-600">Failed to load transcript.</p>
+            <p className="text-sm text-destructive">Failed to load transcript.</p>
           ) : lines.length === 0 ? (
             <div className="rounded-md border border-dashed p-8 text-center">
-              <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                <MessageSquareText className="h-4 w-4 text-slate-500" />
+              <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <MessageSquareText className="h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-sm text-slate-600">No transcript lines found for this meeting.</p>
+              <p className="text-sm text-muted-foreground">No transcript lines found for this meeting.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -138,12 +138,12 @@ export default function ViewTranscriptDialog({
                       {getSpeakerInitials(speakerName)}
                     </div>
 
-                    <div className="min-w-0 rounded-lg border bg-white px-3 py-2 shadow-sm">
+                    <div className="min-w-0 rounded-lg border bg-card px-3 py-2 shadow-sm">
                       <div className="mb-1 flex items-center gap-2">
-                        <p className="text-sm font-semibold text-slate-800">{speakerName}</p>
-                        <span className="text-xs text-slate-500">{item.timestamp}</span>
+                        <p className="text-sm font-semibold text-foreground">{speakerName}</p>
+                        <span className="text-xs text-muted-foreground">{item.timestamp}</span>
                       </div>
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{item.text}</p>
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">{item.text}</p>
                     </div>
                   </div>
                 );
