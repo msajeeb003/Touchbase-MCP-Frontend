@@ -16,10 +16,10 @@ interface ViewTemplateDialogProps {
 
 const getStageBadgeClass = (stage: string) => {
   const value = stage.toLowerCase();
-  if (value.includes("no")) return "bg-indigo-100 text-indigo-700 border-indigo-200";
-  if (value.includes("after")) return "bg-purple-100 text-purple-700 border-purple-200";
-  if (value.includes("cancel")) return "bg-pink-100 text-pink-700 border-pink-200";
-  return "bg-slate-100 text-slate-700 border-slate-200";
+  if (value.includes("no")) return "bg-landing-sky/20 text-landing-sky border-landing-sky/40";
+  if (value.includes("after")) return "bg-[#A78BFA]/15 text-[#A78BFA] border-[#A78BFA]/40";
+  if (value.includes("cancel")) return "bg-landing-voice/15 text-landing-voice border-landing-voice/40";
+  return "bg-white/[0.06] text-landing-fog/80 border-landing-line";
 };
 
 export default function ViewTemplateDialog({ templateId, trigger }: ViewTemplateDialogProps) {
@@ -37,32 +37,32 @@ export default function ViewTemplateDialog({ templateId, trigger }: ViewTemplate
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-3xl p-0 sm:w-full">
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-3xl border-landing-line bg-landing-steel-2 p-0 font-landing-sans sm:w-full">
         <DialogHeader className="px-4 pt-5 sm:px-6">
           <DialogTitle>View Prompt Template</DialogTitle>
         </DialogHeader>
 
         <div className="max-h-[75vh] overflow-y-auto px-4 pb-5 sm:px-6 sm:pb-6">
           {isFetching ? (
-            <p className="mt-2 text-sm text-slate-500">Loading template...</p>
+            <p className="mt-2 text-sm text-landing-fog/55">Loading template...</p>
           ) : isError ? (
-            <p className="mt-2 text-sm text-red-600">Failed to load template details.</p>
+            <p className="mt-2 text-sm text-landing-voice">Failed to load template details.</p>
           ) : template ? (
             <div className="mt-2 space-y-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                <h3 className="text-base font-semibold text-slate-900 sm:text-lg">{template.name}</h3>
-                <Badge variant="outline" className={getStageBadgeClass(template.followUpStage)}>
+                <h3 className="font-landing-display text-base font-bold text-landing-fog sm:text-lg">{template.name}</h3>
+                <Badge variant="outline" className={`flex-none whitespace-nowrap font-landing-mono text-[11px] ${getStageBadgeClass(template.followUpStage)}`}>
                   {template.followUpStage}
                 </Badge>
               </div>
-              <div className="rounded-md border bg-slate-50 p-3 sm:p-4">
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+              <div className="rounded-xl border border-landing-line bg-landing-steel p-3 sm:p-4">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-landing-fog/80">
                   {template.promptText}
                 </p>
               </div>
             </div>
           ) : (
-            <p className="mt-2 text-sm text-slate-500">Template not found.</p>
+            <p className="mt-2 text-sm text-landing-fog/55">Template not found.</p>
           )}
         </div>
       </DialogContent>
