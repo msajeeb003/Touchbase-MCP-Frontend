@@ -153,10 +153,10 @@ CALL (talking points only):
 function IdeaSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-2">
-      <h3 className="text-sm font-semibold tracking-wide text-emerald-600">
+      <h3 className="text-sm font-semibold tracking-wide text-primary">
         ## {title}
       </h3>
-      <div className="text-sm leading-relaxed text-slate-600">{children}</div>
+      <div className="text-sm leading-relaxed text-muted-foreground">{children}</div>
     </section>
   );
 }
@@ -172,26 +172,26 @@ export default function PromptTemplateReference() {
   };
 
   return (
-    <div className="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 via-white to-slate-50/60 p-1 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-1 shadow-sm">
       <Tabs defaultValue="idea" className="w-full">
-        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-lg bg-slate-100/90 p-1">
+        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-lg bg-muted p-1">
           <TabsTrigger
             value="idea"
-            className="gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
           >
             <Lightbulb className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">Prompt idea</span>
           </TabsTrigger>
           <TabsTrigger
             value="variables"
-            className="gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
           >
             <Braces className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">Variables</span>
           </TabsTrigger>
           <TabsTrigger
             value="example"
-            className="gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
           >
             <FileText className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">Example</span>
@@ -336,8 +336,8 @@ export default function PromptTemplateReference() {
         </TabsContent>
 
         <TabsContent value="example" className="mt-0 rounded-b-lg px-4 pb-4 pt-3">
-          <p className="mb-2 text-sm font-medium text-slate-800">Sample prompt (for inspiration)</p>
-          <pre className="max-h-[min(420px,55vh)] overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-white/90 p-3 text-xs leading-relaxed text-slate-600 shadow-inner">
+          <p className="mb-2 text-sm font-medium text-foreground">Sample prompt (for inspiration)</p>
+          <pre className="max-h-[min(420px,55vh)] overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-3 text-xs leading-relaxed text-muted-foreground shadow-inner">
             {PROMPT_TEMPLATE_EXAMPLE}
           </pre>
         </TabsContent>

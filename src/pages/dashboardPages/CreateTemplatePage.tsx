@@ -30,6 +30,7 @@ import {
   useGeneratePromptTextMutation,
 } from "@/store/features/templates/templatesApi";
 import type { GeneratePromptTextRequestBody } from "@/types/templates";
+import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 const STAGE_PRESETS = ["NoShow", "Interested", "Proposal sent", "Cold lead"];
@@ -57,7 +58,7 @@ function FieldLabel({
   optional?: boolean;
 }) {
   return (
-    <Label className="flex items-center gap-1.5 font-semibold text-slate-800">
+    <Label className="flex items-center gap-1.5 font-semibold text-landing-fog">
       <span>
         {children}
         {required && (
@@ -67,7 +68,7 @@ function FieldLabel({
         )}
       </span>
       {optional && (
-        <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+        <span className="rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-landing-fog/55">
           Optional
         </span>
       )}
@@ -76,6 +77,7 @@ function FieldLabel({
 }
 
 export default function CreateTemplatePage() {
+  useSteelTheme();
   const navigate = useNavigate();
   const promptRef = useRef<HTMLTextAreaElement>(null);
 
@@ -244,11 +246,11 @@ export default function CreateTemplatePage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-landing-sans text-landing-fog/80">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-semibold text-slate-900">Create Prompt Template</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="font-landing-display text-[clamp(24px,2.6vw,30px)] font-bold tracking-[-0.02em] text-landing-fog">Create Prompt Template</h2>
+          <p className="mt-1 text-sm text-landing-fog/55">
             {step === "brief"
               ? "Answer a few questions and the prompt is written for you."
               : "Name the template, then edit the prompt."}
@@ -260,7 +262,7 @@ export default function CreateTemplatePage() {
       </div>
 
       {step === "brief" ? (
-        <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
+        <div className="rounded-2xl border border-landing-line bg-landing-steel-2 p-4 sm:p-6">
           <div className="space-y-5">
             <div className="flex flex-col gap-2">
               <FieldLabel required>What is the situation?</FieldLabel>
@@ -320,7 +322,7 @@ export default function CreateTemplatePage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 gap-1.5 px-2 text-slate-600 hover:text-slate-900"
+                  className="h-8 gap-1.5 px-2 text-landing-fog/65 hover:text-landing-fog"
                 >
                   <ChevronDown
                     className={`h-4 w-4 transition-transform ${advancedOpen ? "rotate-180" : ""}`}
@@ -372,14 +374,14 @@ export default function CreateTemplatePage() {
             <Button
               variant="ghost"
               onClick={() => setStep("editor")}
-              className="text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+              className="text-landing-fog/80 hover:bg-white/[0.06] hover:text-landing-fog"
             >
               Write it myself
             </Button>
             <Button
               onClick={() => void runGenerate()}
               disabled={isGenerating}
-              className="gap-2 bg-indigo-600 px-5 hover:bg-indigo-700"
+              className="gap-2 bg-landing-sky px-5 font-semibold text-landing-steel hover:bg-landing-sky-deep"
             >
               {isGenerating ? (
                 <>
@@ -396,19 +398,19 @@ export default function CreateTemplatePage() {
           </div>
         </div>
       ) : (
-        <div className="rounded-2xl border bg-white shadow-sm">
+        <div className="rounded-2xl border border-landing-line bg-landing-steel-2">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-4 sm:px-6">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setStep("brief")}
-                className="h-8 gap-1.5 px-2 text-slate-600 hover:text-slate-900"
+                className="h-8 gap-1.5 px-2 text-landing-fog/65 hover:text-landing-fog"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Brief
               </Button>
-              <span className="text-sm font-medium text-slate-900">Prompt</span>
+              <span className="text-sm font-medium text-landing-fog">Prompt</span>
             </div>
             <Button
               variant="outline"
@@ -426,7 +428,7 @@ export default function CreateTemplatePage() {
             </Button>
           </div>
 
-          <div className="space-y-4 border-b bg-slate-50/60 px-4 py-5 sm:px-6">
+          <div className="space-y-4 border-b border-landing-line bg-landing-steel/50 px-4 py-5 sm:px-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <FieldLabel required>Template name</FieldLabel>
@@ -437,7 +439,7 @@ export default function CreateTemplatePage() {
                     setSaveErrors((prev) => ({ ...prev, name: undefined }));
                   }}
                   placeholder="NoShow Follow-up Template"
-                  className="h-10 bg-white text-sm"
+                  className="h-10 bg-landing-steel text-sm"
                 />
                 {saveErrors.name && (
                   <p className="text-xs text-destructive">{saveErrors.name}</p>
@@ -453,8 +455,8 @@ export default function CreateTemplatePage() {
                       onClick={() => handleSelectStage(preset)}
                       className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                         !isCustomStage && followUpStage === preset
-                          ? "border-indigo-200 bg-indigo-50 text-indigo-700"
-                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                          ? "border-landing-sky/40 bg-landing-sky-soft text-landing-sky"
+                          : "border-landing-line bg-landing-steel text-landing-fog/65 hover:border-landing-sky/40 hover:text-landing-fog"
                       }`}
                     >
                       {preset}
@@ -465,8 +467,8 @@ export default function CreateTemplatePage() {
                     onClick={handleSelectCustomStage}
                     className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                       isCustomStage
-                        ? "border-indigo-200 bg-indigo-50 text-indigo-700"
-                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        ? "border-landing-sky/40 bg-landing-sky-soft text-landing-sky"
+                        : "border-landing-line bg-landing-steel text-landing-fog/65 hover:border-landing-sky/40 hover:text-landing-fog"
                     }`}
                   >
                     Custom
@@ -480,7 +482,7 @@ export default function CreateTemplatePage() {
                       setSaveErrors((prev) => ({ ...prev, followUpStage: undefined }));
                     }}
                     placeholder="Enter a stage"
-                    className="h-10 bg-white text-sm"
+                    className="h-10 bg-landing-steel text-sm"
                   />
                 )}
                 {saveErrors.followUpStage && (
@@ -492,7 +494,7 @@ export default function CreateTemplatePage() {
 
           <div className="space-y-3 px-4 py-5 sm:px-6">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+              <span className="mr-1 font-landing-mono text-[10.5px] uppercase tracking-[0.1em] text-landing-fog/45">
                 Insert
               </span>
               {PROMPT_TEMPLATE_VARIABLE_ROWS.map((row) => (
@@ -500,7 +502,7 @@ export default function CreateTemplatePage() {
                   key={row.variable}
                   type="button"
                   onClick={() => insertVariable(row.variable)}
-                  className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-[11px] text-slate-600 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                  className="inline-flex items-center gap-1 rounded-full border border-landing-line bg-white/[0.04] px-2.5 py-1 font-landing-mono text-[11px] text-landing-fog/65 transition-colors hover:border-landing-sky/40 hover:bg-landing-sky-soft hover:text-landing-sky"
                 >
                   <Plus className="h-3 w-3" />
                   {row.variable}
@@ -518,7 +520,7 @@ export default function CreateTemplatePage() {
                   setSaveErrors((prev) => ({ ...prev, promptText: undefined }));
                 }}
                 placeholder="You are a virtual assistant for {{lead.company}}..."
-                className="min-h-[360px] resize-y font-mono text-sm leading-relaxed"
+                className="min-h-[360px] resize-y font-landing-mono text-[13px] leading-relaxed"
               />
               {saveErrors.promptText && (
                 <p className="text-xs text-destructive">{saveErrors.promptText}</p>
@@ -530,14 +532,14 @@ export default function CreateTemplatePage() {
             <Button
               variant="ghost"
               onClick={handleCancel}
-              className="text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+              className="text-landing-fog/80 hover:bg-white/[0.06] hover:text-landing-fog"
             >
               Cancel
             </Button>
             <Button
               onClick={() => void handleSave()}
               disabled={isSaving}
-              className="gap-2 bg-indigo-600 px-5 hover:bg-indigo-700"
+              className="gap-2 bg-landing-sky px-5 font-semibold text-landing-steel hover:bg-landing-sky-deep"
             >
               {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
               {isSaving ? "Saving..." : "Save template"}
@@ -552,7 +554,7 @@ export default function CreateTemplatePage() {
         open={pendingAction !== null}
         onOpenChange={(open) => !open && setPendingAction(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="border-landing-line bg-landing-steel-2 font-landing-sans">
           <AlertDialogHeader>
             <AlertDialogTitle>
               {pendingAction === "regenerate" ? "Replace this prompt?" : "Discard this prompt?"}
