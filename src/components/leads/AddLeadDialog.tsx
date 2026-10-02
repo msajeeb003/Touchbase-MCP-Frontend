@@ -107,9 +107,9 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="my-4 w-[calc(100vw-2rem)] max-h-[calc(90vh-2rem)] max-w-2xl overflow-y-auto p-0">
+      <DialogContent className="my-4 w-[calc(100vw-2rem)] max-h-[calc(90vh-2rem)] max-w-2xl overflow-y-auto border-landing-line bg-landing-steel-2 p-0">
         <DialogHeader className="border-b px-6 py-5 text-left">
-          <DialogTitle className="text-3xl font-semibold text-slate-800">Add New Lead</DialogTitle>
+          <DialogTitle className="font-landing-display text-2xl font-bold text-landing-fog">Add New Lead</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -244,7 +244,7 @@ export default function AddLeadDialog({ trigger }: AddLeadDialogProps) {
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading} className="bg-indigo-600 hover:bg-indigo-700">
+              <Button type="submit" disabled={isLoading} className="bg-landing-sky font-semibold text-landing-steel hover:bg-landing-sky-deep">
                 {isLoading ? "Adding..." : "Add Lead"}
               </Button>
             </DialogFooter>

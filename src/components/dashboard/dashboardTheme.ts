@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useEffect, type CSSProperties } from "react";
 
 /**
  * Steel theme for the dashboard overview.
@@ -23,7 +23,36 @@ export const steelSurfaceVars = {
   "--ring": "213 93% 64%",
   "--primary": "213 93% 64%",
   "--primary-foreground": "216 28% 7%",
+  "--secondary": "213 28% 14%",
+  "--secondary-foreground": "210 29% 93%",
 } as CSSProperties;
+
+/**
+ * Applies the steel variables to <body> while the calling page is mounted.
+ *
+ * Use this on pages that open dialogs, selects or tooltips: those render in
+ * portals outside the page's DOM, so variables scoped to a wrapper element
+ * never reach them. Previous values are restored on unmount, so pages that
+ * have not been restyled keep the light theme.
+ */
+export function useSteelTheme() {
+  useEffect(() => {
+    const body = document.body;
+    const entries = Object.entries(steelSurfaceVars) as [string, string][];
+    const previous = entries.map(
+      ([name]) => [name, body.style.getPropertyValue(name)] as const,
+    );
+
+    entries.forEach(([name, value]) => body.style.setProperty(name, value));
+
+    return () => {
+      previous.forEach(([name, value]) => {
+        if (value) body.style.setProperty(name, value);
+        else body.style.removeProperty(name);
+      });
+    };
+  }, []);
+}
 
 export const dashCard =
   "border-landing-line bg-landing-steel-2 text-landing-fog shadow-none";

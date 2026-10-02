@@ -52,8 +52,8 @@ export function LeadsBulkSelectionToolbar({ selectedIds, onDeleted }: LeadsBulkS
   };
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-rose-100 bg-rose-50/80 px-3 py-2">
-      <p className="text-sm text-slate-700">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-landing-voice/30 bg-landing-voice/10 px-3 py-2">
+      <p className="text-sm text-landing-fog/80">
         {count} lead{count === 1 ? "" : "s"} selected
       </p>
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>

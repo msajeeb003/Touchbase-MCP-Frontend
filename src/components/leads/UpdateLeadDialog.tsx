@@ -98,13 +98,13 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="my-4 w-[calc(100vw-2rem)] max-h-[calc(90vh-2rem)] max-w-2xl overflow-y-auto p-0">
+      <DialogContent className="my-4 w-[calc(100vw-2rem)] max-h-[calc(90vh-2rem)] max-w-2xl overflow-y-auto border-landing-line bg-landing-steel-2 p-0">
         <DialogHeader className="border-b px-6 py-5 text-left">
-          <DialogTitle className="text-3xl font-semibold text-slate-800">Update Lead</DialogTitle>
+          <DialogTitle className="font-landing-display text-2xl font-bold text-landing-fog">Update Lead</DialogTitle>
         </DialogHeader>
 
         {isLeadLoading ? (
-          <div className="px-6 py-8 text-sm text-slate-500">Loading lead details...</div>
+          <div className="px-6 py-8 text-sm text-landing-fog/55">Loading lead details...</div>
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 px-6 py-5">
@@ -222,7 +222,7 @@ export default function UpdateLeadDialog({ leadId, trigger }: UpdateLeadDialogPr
                 <Button
                   type="submit"
                   disabled={isUpdating}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-landing-sky font-semibold text-landing-steel hover:bg-landing-sky-deep"
                 >
                   {isUpdating ? "Updating..." : "Update Lead"}
                 </Button>

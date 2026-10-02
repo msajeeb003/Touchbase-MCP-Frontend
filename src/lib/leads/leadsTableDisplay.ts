@@ -1,22 +1,22 @@
 export const getStatusBadgeClass = (status: string | null | undefined) => {
   const value = (status ?? "").trim().toLowerCase().replace(/\s+/g, " ");
   if (value === "active") {
-    return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    return "border-landing-whatsapp/40 bg-landing-whatsapp/15 text-landing-whatsapp";
   }
   if (value === "not active" || value === "inactive" || value === "not_active") {
-    return "bg-slate-100 text-slate-600 border-slate-300";
+    return "border-landing-line bg-white/5 text-landing-fog/55";
   }
-  return "bg-slate-100 text-slate-700 border-slate-200";
+  return "border-landing-line bg-white/5 text-landing-fog/70";
 };
 
 export const getStageBadgeClass = (stage: string | null | undefined) => {
   const value = (stage ?? "").toLowerCase();
-  if (!value) return "bg-slate-100 text-slate-500 border-slate-200";
-  if (value.includes("no")) return "bg-indigo-100 text-indigo-700 border-indigo-200";
-  if (value.includes("after")) return "bg-purple-100 text-purple-700 border-purple-200";
-  if (value.includes("prd")) return "bg-violet-100 text-violet-700 border-violet-200";
-  if (value.includes("hot")) return "bg-emerald-100 text-emerald-700 border-emerald-200";
-  return "bg-slate-100 text-slate-700 border-slate-200";
+  if (!value) return "border-landing-line bg-white/5 text-landing-fog/50";
+  if (value.includes("no")) return "border-landing-sky/40 bg-landing-sky-soft text-landing-sky";
+  if (value.includes("after")) return "border-[#A78BFA]/40 bg-[#A78BFA]/15 text-[#A78BFA]";
+  if (value.includes("prd")) return "border-landing-email/40 bg-landing-email/15 text-landing-email";
+  if (value.includes("hot")) return "border-landing-voice/40 bg-landing-voice/15 text-landing-voice";
+  return "border-landing-line bg-white/5 text-landing-fog/70";
 };
 
 export const getShortNotes = (notes: string, maxLength = 15) => {

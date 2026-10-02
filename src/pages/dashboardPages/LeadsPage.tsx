@@ -70,6 +70,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useDeleteLeadMutation, useGetLeadsQuery } from "@/store/features/leads/leadsApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
+import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 
 export default function LeadsPage() {
   const [page, setPage] = useState(1);
@@ -80,6 +81,7 @@ export default function LeadsPage() {
   const [stage, setStage] = useState<string>("All");
   const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null);
   const [deleteLead] = useDeleteLeadMutation();
+  useSteelTheme();
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -179,19 +181,19 @@ export default function LeadsPage() {
   };
 
   return (
-    <div className="w-full min-w-0 space-y-4 overflow-x-hidden">
+    <div className="w-full min-w-0 space-y-4 overflow-x-hidden font-landing-sans text-landing-fog/80">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           {/* <p className="text-sm text-slate-500">Follow Up Dashboard</p> */}
-          <h2 className="flex items-center gap-2 text-3xl font-semibold text-slate-900">
-            <Users2 className="h-7 w-7 text-indigo-600" />
+          <h2 className="flex items-center gap-2 font-landing-display text-[clamp(26px,3vw,34px)] font-bold tracking-[-0.02em] text-landing-fog">
+            <Users2 className="h-7 w-7 text-landing-sky" />
             Leads
           </h2>
         </div>
         <div className="flex items-center gap-2">
           <ImportLeadsDialog
             trigger={
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 border-landing-line bg-transparent text-landing-fog hover:bg-white/5 hover:text-landing-fog">
                 <Upload className="h-4 w-4" />
                 Import CSV
               </Button>
@@ -199,7 +201,7 @@ export default function LeadsPage() {
           />
           <AddLeadDialog
             trigger={
-              <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+              <Button className="gap-2 bg-landing-sky font-semibold text-landing-steel hover:bg-landing-sky-deep">
                 <Plus className="h-4 w-4" />
                 Add Lead
               </Button>
@@ -208,10 +210,10 @@ export default function LeadsPage() {
         </div>
       </div>
 
-      <div className="w-full min-w-0 rounded-xl border bg-white p-4 shadow-sm">
+      <div className="w-full min-w-0 rounded-2xl border border-landing-line bg-landing-steel-2 p-4">
         <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-12">
           <div className="relative md:col-span-8">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-landing-fog/40" />
             <Input
               value={search}
               onChange={(event) => {
@@ -269,24 +271,24 @@ export default function LeadsPage() {
         <LeadsBulkSelectionToolbar selectedIds={selectedIds} onDeleted={clearSelection} />
 
         {isLoading ? (
-          <div className="rounded-md border border-dashed p-8 text-center text-slate-500">
+          <div className="rounded-xl border border-dashed border-landing-line p-8 text-center text-landing-fog/55">
             Loading leads...
           </div>
         ) : isError ? (
-          <div className="rounded-md border border-red-200 bg-red-50 p-8 text-center text-red-600">
+          <div className="rounded-xl border border-landing-voice/40 bg-landing-voice/10 p-8 text-center text-landing-voice">
             Failed to fetch leads.
           </div>
         ) : leads.length === 0 ? (
-          <div className="rounded-md border border-dashed p-8 text-center">
-            <h3 className="text-lg font-semibold text-slate-900">No leads found</h3>
-            <p className="mt-1 text-sm text-slate-500">
+          <div className="rounded-xl border border-dashed border-landing-line p-8 text-center">
+            <h3 className="font-landing-display text-lg font-bold text-landing-fog">No leads found</h3>
+            <p className="mt-1 text-sm text-landing-fog/55">
               Try changing filters or search keyword to find lead data.
             </p>
           </div>
         ) : (
           <>
             <div className="w-full max-w-full overflow-x-auto">
-              <Table className="min-w-[1240px]">
+              <Table className="min-w-[1240px] [&_th]:font-landing-mono [&_th]:text-[10.5px] [&_th]:font-normal [&_th]:uppercase [&_th]:tracking-[0.1em] [&_th]:text-landing-fog/45 [&_tr:hover]:bg-white/[0.03]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12 pr-2">
@@ -321,24 +323,24 @@ export default function LeadsPage() {
                       </TableCell>
                       <TableCell className="">
                         <div className="flex flex-col gap-y-0.5">
-                          <h3 className="font-medium">{lead.name}</h3>
-                            <span className="flex items-center gap-x-1 text-sm"><Building2 className="h-3 w-3" /> {lead.company || "---"}</span>
+                          <h3 className="font-medium text-landing-fog">{lead.name}</h3>
+                            <span className="flex items-center gap-x-1 text-sm text-landing-fog/60"><Building2 className="h-3 w-3" /> {lead.company || "---"}</span>
                         </div>
 
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-y-0.5">
-                          <span className="flex items-center gap-x-1 text-sm"><Mail className="h-3 w-3" /> {lead.email || "---"}</span>
-                          <span className="flex items-center gap-x-1 text-sm"><Phone className="h-3 w-3" /> {lead.phone || "---"}</span>
+                          <span className="flex items-center gap-x-1 text-sm text-landing-fog/60"><Mail className="h-3 w-3" /> {lead.email || "---"}</span>
+                          <span className="flex items-center gap-x-1 text-sm text-landing-fog/60"><Phone className="h-3 w-3" /> {lead.phone || "---"}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{lead.location || "---"}</TableCell>
+                      <TableCell className="text-landing-fog/75">{lead.location || "---"}</TableCell>
                       <TableCell className="max-w-[220px]">
                         {lead.notes ? (
                           <TooltipProvider delayDuration={150}>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <p className="cursor-help truncate text-sm text-slate-700">
+                                <p className="cursor-help truncate text-sm text-landing-fog/75">
                                   {getShortNotes(lead.notes)}
                                 </p>
                               </TooltipTrigger>
@@ -357,7 +359,7 @@ export default function LeadsPage() {
                             {lead.followUpStage}
                           </Badge>
                         ) : (
-                          <span className="text-sm text-slate-400">---</span>
+                          <span className="text-sm text-landing-fog/35">---</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -365,11 +367,11 @@ export default function LeadsPage() {
                           {lead.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-sm text-slate-600">
+                      <TableCell className="whitespace-nowrap font-landing-mono text-[12.5px] text-landing-fog/60">
                         {formatLeadAddedAt(lead.createdAt)}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button asChild variant="ghost" size="sm" className="gap-2 text-indigo-600 hover:text-indigo-700">
+                        <Button asChild variant="ghost" size="sm" className="gap-2 text-landing-sky hover:bg-white/5 hover:text-landing-sky">
                           <Link to={`/dashboard/leads/${lead.id}/transcripts`}>
                             <FileText className="h-4 w-4" />
                             Add
@@ -380,7 +382,7 @@ export default function LeadsPage() {
                         <UpdateLeadDialog
                           leadId={lead.id}
                           trigger={
-                            <Button variant="ghost" size="icon" className="text-indigo-600 hover:text-indigo-700">
+                            <Button variant="ghost" size="icon" className="text-landing-sky hover:bg-white/5 hover:text-landing-sky">
                               <Pencil className="h-4 w-4" />
                               <span className="sr-only">Update lead</span>
                             </Button>
@@ -393,7 +395,7 @@ export default function LeadsPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-rose-600 hover:text-rose-700"
+                              className="text-landing-voice hover:bg-landing-voice/10 hover:text-landing-voice"
                               disabled={deletingLeadId === lead.id}
                             >
                               {deletingLeadId === lead.id ? (
@@ -430,7 +432,7 @@ export default function LeadsPage() {
               </Table>
             </div>
 
-            <div className="mt-4 flex flex-col items-center justify-between gap-3 border-t pt-3 text-sm text-slate-600 md:flex-row">
+            <div className="mt-4 flex flex-col items-center justify-between gap-3 border-t border-landing-line pt-3 text-sm text-landing-fog/60 md:flex-row">
               <p>
                 Showing {startItem}-{endItem} of {total}
               </p>
