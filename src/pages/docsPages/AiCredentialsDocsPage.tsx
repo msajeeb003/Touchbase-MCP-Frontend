@@ -1,3 +1,4 @@
+import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { BookOpen, ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import {
@@ -19,7 +20,7 @@ function DocLink({ href, children }: { href: string; children: ReactNode }) {
     <a
       href={href}
       {...outbound}
-      className="inline-flex items-center gap-1 font-medium text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline"
+      className="inline-flex items-center gap-1 font-medium text-landing-sky underline-offset-2 hover:underline"
     >
       {children}
       <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
@@ -28,33 +29,34 @@ function DocLink({ href, children }: { href: string; children: ReactNode }) {
 }
 
 export default function AiCredentialsDocsPage() {
+  useSteelTheme();
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8 font-landing-sans text-landing-fog/80">
       <div>
-        <p className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600">
+        <p className="inline-flex items-center gap-2 font-landing-mono text-[11px] uppercase tracking-[0.14em] text-landing-sky">
           <BookOpen className="h-4 w-4" aria-hidden />
           Settings · Help
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+        <h1 className="mt-2 font-landing-display text-[clamp(26px,3vw,34px)] font-bold tracking-[-0.02em] text-landing-fog">
           AI provider credentials
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        <p className="mt-2 text-sm leading-relaxed text-landing-fog/65">
           Use this page to find official documentation and consoles for each provider. Model names, pricing,
           regions, and direct links change often — always rely on each vendor&apos;s current docs for the truth.
         </p>
       </div>
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
+      <div className="rounded-lg border border-landing-sms/40 bg-landing-sms/10 px-4 py-3 text-sm text-landing-sms">
         <strong className="font-semibold">Security.</strong> Never share API keys in chat or screenshots.
         Paste keys only into this app&apos;s Settings form. Stored values are handled according to our backend policy.
       </div>
 
-      <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">OpenAI</h2>
-        <p className="text-sm text-slate-600">
-          Compatible with GPT-family models referenced in Settings (e.g. <code className="rounded bg-slate-100 px-1 text-xs">gpt-4o-mini</code> — confirm the exact identifier in current docs).
+      <section className="space-y-3 rounded-2xl border border-landing-line bg-landing-steel-2 p-5">
+        <h2 className="font-landing-display text-lg font-bold text-landing-fog">OpenAI</h2>
+        <p className="text-sm text-landing-fog/65">
+          Compatible with GPT-family models referenced in Settings (e.g. <code className="rounded bg-white/10 px-1 font-landing-mono text-xs text-landing-fog">gpt-4o-mini</code> — confirm the exact identifier in current docs).
         </p>
-        <ul className="list-inside list-disc space-y-2 text-sm text-slate-700">
+        <ul className="list-inside list-disc space-y-2 text-sm text-landing-fog/80">
           <li>
             Documentation hub:&nbsp;
             <DocLink href={OPENAI_DOCS_HUB_URL}>OpenAI Platform docs overview</DocLink>
@@ -70,13 +72,13 @@ export default function AiCredentialsDocsPage() {
         </ul>
       </section>
 
-      <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">Google · Gemini API</h2>
-        <p className="text-sm text-slate-600">
+      <section className="space-y-3 rounded-2xl border border-landing-line bg-landing-steel-2 p-5">
+        <h2 className="font-landing-display text-lg font-bold text-landing-fog">Google · Gemini API</h2>
+        <p className="text-sm text-landing-fog/65">
           Gemini model IDs (for example&nbsp;
-          <code className="rounded bg-slate-100 px-1 text-xs">gemini-2.0-flash</code>) update — check the Gemini API docs for naming and quotas.
+          <code className="rounded bg-white/10 px-1 font-landing-mono text-xs text-landing-fog">gemini-2.0-flash</code>) update — check the Gemini API docs for naming and quotas.
         </p>
-        <ul className="list-inside list-disc space-y-2 text-sm text-slate-700">
+        <ul className="list-inside list-disc space-y-2 text-sm text-landing-fog/80">
           <li>
             Main API documentation:&nbsp;
             <DocLink href={GEMINI_API_DOCS_HUB_URL}>Gemini API docs</DocLink>
@@ -92,12 +94,12 @@ export default function AiCredentialsDocsPage() {
         </ul>
       </section>
 
-      <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">Anthropic · Claude</h2>
-        <p className="text-sm text-slate-600">
+      <section className="space-y-3 rounded-2xl border border-landing-line bg-landing-steel-2 p-5">
+        <h2 className="font-landing-display text-lg font-bold text-landing-fog">Anthropic · Claude</h2>
+        <p className="text-sm text-landing-fog/65">
           Claude model names and API versioning are documented centrally. Prefer the anthropic docs for model strings and deprecation notices.
         </p>
-        <ul className="list-inside list-disc space-y-2 text-sm text-slate-700">
+        <ul className="list-inside list-disc space-y-2 text-sm text-landing-fog/80">
           <li>
             Documentation:&nbsp;
             <DocLink href={ANTHROPIC_MAIN_DOCS_URL}>Anthropic documentation</DocLink>
@@ -113,7 +115,7 @@ export default function AiCredentialsDocsPage() {
         </ul>
       </section>
 
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-landing-fog/55">
         If a link returns 404 or redirects, open the provider&apos;s main documentation site from your browser and use their search — we refresh these entry points when we can, but vendors change URLs without notice.
       </p>
     </div>

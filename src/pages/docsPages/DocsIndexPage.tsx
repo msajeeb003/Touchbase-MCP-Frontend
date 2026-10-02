@@ -1,3 +1,4 @@
+import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -31,20 +32,21 @@ const docLinks: { to: string; title: string; description: string }[] = [
 ];
 
 const cardClass =
-  "block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50/40";
+  "block rounded-xl border border-landing-line bg-landing-steel-2 p-4 transition-colors hover:border-landing-sky/40 hover:bg-white/[0.03]";
 
 export default function DocsIndexPage() {
+  useSteelTheme();
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8 font-landing-sans text-landing-fog/80">
       <div>
-        <p className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600">
+        <p className="inline-flex items-center gap-2 font-landing-mono text-[11px] uppercase tracking-[0.14em] text-landing-sky">
           <BookOpen className="h-4 w-4" aria-hidden />
           Help
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">Documentation</h1>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        <h1 className="mt-2 font-landing-display text-[clamp(26px,3vw,34px)] font-bold tracking-[-0.02em] text-landing-fog">Documentation</h1>
+        <p className="mt-2 text-sm leading-relaxed text-landing-fog/65">
           Guides for configuring integrations in&nbsp;
-          <Link to="/dashboard/settings" className="font-medium text-indigo-600 hover:underline">
+          <Link to="/dashboard/settings" className="font-medium text-landing-sky hover:underline">
             Settings
           </Link>
           . Choose a topic below.
@@ -56,8 +58,8 @@ export default function DocsIndexPage() {
           {docLinks.map((item) => (
             <li key={item.to}>
               <Link to={item.to} className={cn(cardClass)}>
-                <span className="font-medium text-slate-900">{item.title}</span>
-                <p className="mt-1 text-sm text-slate-600">{item.description}</p>
+                <span className="font-medium text-landing-fog">{item.title}</span>
+                <p className="mt-1 text-sm text-landing-fog/65">{item.description}</p>
               </Link>
             </li>
           ))}
