@@ -17,9 +17,9 @@ import {
   WaitlistProvider,
 } from "@/components/landing/waitlist";
 import { useLandingReveal } from "@/components/landing/useLandingReveal";
+import { LANDING_FONT_HREF } from "@/components/landing/landingFonts";
 
-const FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap";
+const FONT_HREF = LANDING_FONT_HREF;
 
 function useLandingFonts() {
   useEffect(() => {
