@@ -10,62 +10,56 @@ import {
 import DashboardSummaryCard from "@/components/dashboard/DashboardSummaryCard";
 import type { DashboardSummary } from "@/types/dashboard";
 
+/** Channel cards use the same channel colours as the landing page. */
 const summaryCards = [
   {
     key: "totalLeads",
     title: "Total Leads",
     description: "All leads in your workspace",
     icon: Users2,
-    iconClassName: "bg-blue-100 text-blue-700",
-    valueClassName: "text-slate-900",
+    iconClassName: "bg-landing-sky-soft text-landing-sky",
   },
   {
     key: "totalEmailsSent",
     title: "Emails Sent",
     description: "Delivered from sequences",
     icon: MailCheck,
-    iconClassName: "bg-emerald-100 text-emerald-700",
-    valueClassName: "text-slate-900",
+    iconClassName: "bg-landing-email/15 text-landing-email",
   },
   {
     key: "totalSmsSent",
     title: "SMS Sent",
     description: "Sent to your leads",
     icon: MessageSquareText,
-    iconClassName: "bg-violet-100 text-violet-700",
-    valueClassName: "text-slate-900",
+    iconClassName: "bg-landing-sms/15 text-landing-sms",
   },
   {
     key: "totalWhatsAppSent",
     title: "WhatsApp Sent",
     description: "Sent to WhatsApp leads",
     icon: MessageCircle,
-    iconClassName: "bg-emerald-100 text-emerald-700",
-    valueClassName: "text-slate-900",
+    iconClassName: "bg-landing-whatsapp/15 text-landing-whatsapp",
   },
   {
     key: "totalCallsMade",
     title: "Calls Made",
     description: "AI voice calls completed",
     icon: PhoneCall,
-    iconClassName: "bg-amber-100 text-amber-800",
-    valueClassName: "text-slate-900",
+    iconClassName: "bg-landing-voice/15 text-landing-voice",
   },
   {
     key: "activeSequences",
     title: "Active Sequences",
     description: "Currently running follow-ups",
     icon: Layers3,
-    iconClassName: "bg-orange-100 text-orange-800",
-    valueClassName: "text-slate-900",
+    iconClassName: "bg-landing-sky-soft text-landing-sky",
   },
   {
     key: "totalTranscripts",
     title: "Total Transcripts",
     description: "Imported from meetings",
     icon: FileText,
-    iconClassName: "bg-indigo-100 text-indigo-700",
-    valueClassName: "text-slate-900",
+    iconClassName: "bg-landing-sky-soft text-landing-sky",
   },
 ] as const;
 
@@ -77,8 +71,8 @@ export default function DashboardSummarySection({
   summary,
 }: DashboardSummarySectionProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:grid-cols-4 xl:grid-cols-7">
-      {summaryCards.map((item, index) => (
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 2xl:grid-cols-7">
+      {summaryCards.map((item) => (
         <DashboardSummaryCard
           key={item.key}
           title={item.title}
@@ -86,8 +80,6 @@ export default function DashboardSummarySection({
           description={item.description}
           icon={item.icon}
           iconClassName={item.iconClassName}
-          valueClassName={item.valueClassName}
-          index={index}
         />
       ))}
     </div>

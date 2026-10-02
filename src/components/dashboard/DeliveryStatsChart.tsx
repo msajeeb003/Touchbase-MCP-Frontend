@@ -32,13 +32,13 @@ export default function DeliveryStatsChart({
         {
           dataKey: "sent",
           label: "Sent",
-          color: "#10b981",
+          color: "#4F9CF9",
           stackId: "delivery",
         },
         {
           dataKey: "failed",
           label: "Failed",
-          color: "#f43f5e",
+          color: "#FF9A7A",
           stackId: "delivery",
         },
       ]}

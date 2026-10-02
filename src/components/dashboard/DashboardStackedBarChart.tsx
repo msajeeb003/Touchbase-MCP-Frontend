@@ -47,15 +47,15 @@ export default function DashboardStackedBarChart({
 }: DashboardStackedBarChartProps) {
   if (data.length === 0 || series.length === 0) {
     return (
-      <Card className="border-slate-200 bg-white shadow-sm">
+      <Card className="border-landing-line bg-landing-steel-2 shadow-none">
         <CardHeader className="pb-2">
-          <CardTitle className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
-            {TitleIcon ? <TitleIcon className="h-5 w-5 text-indigo-600" /> : null}
+          <CardTitle className="inline-flex items-center gap-2 font-landing-display text-lg font-bold tracking-[-0.01em] text-landing-fog">
+            {TitleIcon ? <TitleIcon className="h-5 w-5 text-landing-sky" /> : null}
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-6 py-10 text-center text-sm text-slate-500">
+          <div className="rounded-xl border border-dashed border-landing-line bg-landing-steel px-6 py-10 text-center text-sm text-landing-fog/55">
             {emptyMessage}
           </div>
         </CardContent>
@@ -73,13 +73,13 @@ export default function DashboardStackedBarChart({
   }, {});
 
   return (
-    <Card className="border-slate-200 bg-white shadow-sm">
+    <Card className="border-landing-line bg-landing-steel-2 shadow-none">
       <CardHeader className="pb-2">
-        <CardTitle className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
-          {TitleIcon ? <TitleIcon className="h-5 w-5 text-indigo-600" /> : null}
+        <CardTitle className="inline-flex items-center gap-2 font-landing-display text-lg font-bold tracking-[-0.01em] text-landing-fog">
+          {TitleIcon ? <TitleIcon className="h-5 w-5 text-landing-sky" /> : null}
           {title}
         </CardTitle>
-        <p className="text-sm text-slate-500">{description}</p>
+        <p className="text-sm text-landing-fog/55">{description}</p>
       </CardHeader>
 
       <CardContent className="space-y-4">

@@ -33,22 +33,22 @@ export default function SentTrendLineChart({ data }: SentTrendLineChartProps) {
         {
           dataKey: "emails",
           label: "Emails",
-          color: "#4f46e5",
+          color: "#7FB4FF",
         },
         {
           dataKey: "sms",
           label: "SMS",
-          color: "#f59e0b",
+          color: "#F2C86A",
         },
         {
           dataKey: "whatsapp",
           label: "WhatsApp",
-          color: "#22c55e",
+          color: "#5EDBA6",
         },
         {
           dataKey: "calls",
           label: "Calls",
-          color: "#ea580c",
+          color: "#FF9A7A",
         },
       ]}
       xAxisTickFormatter={formatDateLabel}

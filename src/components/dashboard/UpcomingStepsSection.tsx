@@ -19,6 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  dashCard,
+  dashCardDesc,
+  dashCardIcon,
+  dashCardTitle,
+  dashEmpty,
+} from "@/components/dashboard/dashboardTheme";
 import type { DashboardUpcomingStepItem } from "@/types/dashboard";
 
 interface UpcomingStepsSectionProps {
@@ -33,12 +40,13 @@ const formatDateTime = (value: string) => {
   }
 };
 
+/** Tinted channel badges, using the same channel colours as the landing page. */
 const getStepTypeBadgeClass = (stepType: string) => {
-  if (stepType === "EMAIL") return "border-indigo-200 bg-indigo-50 text-indigo-700";
-  if (stepType === "SMS") return "border-amber-200 bg-amber-50 text-amber-700";
-  if (stepType === "WHATSAPP") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (stepType === "CALL") return "border-amber-200 bg-amber-50 text-amber-800";
-  return "border-slate-200 bg-slate-50 text-slate-700";
+  if (stepType === "EMAIL") return "border-landing-email/40 bg-landing-email/15 text-landing-email";
+  if (stepType === "SMS") return "border-landing-sms/40 bg-landing-sms/15 text-landing-sms";
+  if (stepType === "WHATSAPP") return "border-landing-whatsapp/40 bg-landing-whatsapp/15 text-landing-whatsapp";
+  if (stepType === "CALL") return "border-landing-voice/40 bg-landing-voice/15 text-landing-voice";
+  return "border-landing-line bg-landing-steel text-landing-fog/70";
 };
 
 const getStepTypeIcon = (stepType: string) => {
@@ -49,35 +57,51 @@ const getStepTypeIcon = (stepType: string) => {
   return MessageSquareText;
 };
 
+function StepTypeBadge({ stepType }: { stepType: string }) {
+  const Icon = getStepTypeIcon(stepType);
+  return (
+    <Badge
+      variant="outline"
+      className={`font-landing-mono text-[10.5px] font-medium tracking-[0.06em] ${getStepTypeBadgeClass(stepType)}`}
+    >
+      <span className="inline-flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5" />
+        {stepType}
+      </span>
+    </Badge>
+  );
+}
+
+const headCell =
+  "font-landing-mono text-[10.5px] font-normal uppercase tracking-[0.12em] text-landing-fog/45";
+
 export default function UpcomingStepsSection({
   data,
 }: UpcomingStepsSectionProps) {
   if (data.length === 0) {
     return (
-      <Card className="border-slate-200 bg-white shadow-sm">
+      <Card className={dashCard}>
         <CardHeader className="pb-2">
-          <CardTitle className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
-            <Clock3 className="h-5 w-5 text-indigo-600" />
+          <CardTitle className={dashCardTitle}>
+            <Clock3 className={dashCardIcon} />
             Upcoming Activity
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-6 py-10 text-center text-sm text-slate-500">
-            No upcoming steps scheduled yet.
-          </div>
+          <div className={dashEmpty}>No upcoming steps scheduled yet.</div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="border-slate-200 bg-white shadow-sm">
+    <Card className={dashCard}>
       <CardHeader className="pb-2">
-        <CardTitle className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
-          <Clock3 className="h-5 w-5 text-indigo-600" />
+        <CardTitle className={dashCardTitle}>
+          <Clock3 className={dashCardIcon} />
           Upcoming Activity
         </CardTitle>
-        <p className="text-sm text-slate-500">
+        <p className={dashCardDesc}>
           Next scheduled sequence steps for your leads.
         </p>
       </CardHeader>
@@ -87,40 +111,31 @@ export default function UpcomingStepsSection({
           {data.map((step) => (
             <div
               key={step.id}
-              className="rounded-2xl border border-slate-200 bg-slate-50/50 p-4"
+              className="rounded-2xl border border-landing-line bg-landing-steel p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-base font-semibold text-slate-900">
+                <div className="min-w-0">
+                  <p className="text-base font-semibold text-landing-fog">
                     {step.subject || `${step.stepType} follow-up`}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">{step.sequenceName}</p>
+                  <p className="mt-1 text-sm text-landing-fog/55">{step.sequenceName}</p>
                 </div>
-                <Badge
-                  variant="outline"
-                  className={getStepTypeBadgeClass(step.stepType)}
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    {(() => {
-                      const Icon = getStepTypeIcon(step.stepType);
-                      return <Icon className="h-3.5 w-3.5" />;
-                    })()}
-                    {step.stepType}
-                  </span>
-                </Badge>
+                <StepTypeBadge stepType={step.stepType} />
               </div>
 
-              <div className="mt-4 grid gap-2 text-sm text-slate-600">
+              <div className="mt-4 grid gap-2 text-sm text-landing-fog/65">
                 <p className="inline-flex items-center gap-2">
-                  <Hash className="h-4 w-4 text-slate-400" />
+                  <Hash className="h-4 w-4 flex-none text-landing-fog/35" />
                   Step {step.stepOrder}
                 </p>
-                <p className="inline-flex items-center gap-2">
-                  <UserRound className="h-4 w-4 text-slate-400" />
-                  {step.leadName} • {step.leadEmail}
+                <p className="inline-flex min-w-0 items-center gap-2">
+                  <UserRound className="h-4 w-4 flex-none text-landing-fog/35" />
+                  <span className="min-w-0 break-words">
+                    {step.leadName} • {step.leadEmail}
+                  </span>
                 </p>
                 <p className="inline-flex items-center gap-2">
-                  <CalendarClock className="h-4 w-4 text-slate-400" />
+                  <CalendarClock className="h-4 w-4 flex-none text-landing-fog/35" />
                   {formatDateTime(step.scheduledAt)}
                 </p>
               </div>
@@ -131,48 +146,40 @@ export default function UpcomingStepsSection({
         <div className="hidden md:block">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead>Step</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Lead</TableHead>
-                <TableHead>Sequence</TableHead>
-                <TableHead>Scheduled At</TableHead>
+              <TableRow className="border-landing-line hover:bg-transparent">
+                <TableHead className={headCell}>Type</TableHead>
+                <TableHead className={headCell}>Step</TableHead>
+                <TableHead className={headCell}>Subject</TableHead>
+                <TableHead className={headCell}>Lead</TableHead>
+                <TableHead className={headCell}>Sequence</TableHead>
+                <TableHead className={headCell}>Scheduled At</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.map((step) => (
-                <TableRow key={step.id}>
+                <TableRow
+                  key={step.id}
+                  className="border-landing-line hover:bg-white/[0.03]"
+                >
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={getStepTypeBadgeClass(step.stepType)}
-                    >
-                      <span className="inline-flex items-center gap-1.5">
-                        {(() => {
-                          const Icon = getStepTypeIcon(step.stepType);
-                          return <Icon className="h-3.5 w-3.5" />;
-                        })()}
-                        {step.stepType}
-                      </span>
-                    </Badge>
+                    <StepTypeBadge stepType={step.stepType} />
                   </TableCell>
-                  <TableCell className="font-medium text-slate-900">
+                  <TableCell className="font-medium text-landing-fog">
                     Step {step.stepOrder}
                   </TableCell>
                   <TableCell className="max-w-[320px]">
-                    <div className="truncate text-slate-700">
+                    <div className="truncate text-landing-fog/75">
                       {step.subject || `${step.stepType} follow-up`}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-medium text-slate-900">{step.leadName}</span>
-                      <span className="text-sm text-slate-500">{step.leadEmail}</span>
+                      <span className="font-medium text-landing-fog">{step.leadName}</span>
+                      <span className="text-sm text-landing-fog/50">{step.leadEmail}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-slate-700">{step.sequenceName}</TableCell>
-                  <TableCell className="text-slate-700">
+                  <TableCell className="text-landing-fog/75">{step.sequenceName}</TableCell>
+                  <TableCell className="whitespace-nowrap font-landing-mono text-[12.5px] text-landing-fog/65">
                     {formatDateTime(step.scheduledAt)}
                   </TableCell>
                 </TableRow>

@@ -30,7 +30,7 @@ export default function LeadsOverTimeAreaChart({
         {
           dataKey: "leads",
           label: "New Leads",
-          color: "#4f46e5",
+          color: "#4F9CF9",
         },
       ]}
       xAxisTickFormatter={formatDateLabel}

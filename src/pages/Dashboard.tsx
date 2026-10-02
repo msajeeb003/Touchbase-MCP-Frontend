@@ -1,15 +1,12 @@
 import {
   FileText,
-  LayoutDashboard,
   Layers3,
   LogOut,
   Shapes,
   Users2,
-  Bot,
   BookOpen,
   Home,
   Settings,
-  PlusCircle,
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -38,7 +35,8 @@ import { Separator } from "@/components/ui/separator";
 import { logout } from "@/store/features/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useCurrentUser } from "@/store/features/auth/authSlice";
-import Logo from "@/components/logo/Logo";
+import BrandMark from "@/components/landing/BrandMark";
+import { useLandingFontLink } from "@/components/landing/landingFonts";
 
 const navItems = [
   { title: "Dashboard", to: "/dashboard", icon: Home },
@@ -69,11 +67,11 @@ const breadcrumbLabelMap: Record<string, string> = {
 };
 
 export default function Dashboard() {
+  useLandingFontLink();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector(useCurrentUser);
-  const activeItem = navItems.find((item) => item.to === location.pathname);
   const pathSegments = location.pathname.split("/").filter(Boolean);
   const breadcrumbItems = pathSegments.reduce<Array<{ href: string; label: string }>>(
     (items, segment, index) => {
@@ -112,27 +110,33 @@ export default function Dashboard() {
     navigate("/");
   };
 
+  const userInitial = user?.email?.charAt(0).toUpperCase() || "U";
+
   return (
     <SidebarProvider>
-      <Sidebar collapsible="offcanvas" className="border-r bg-white">
-        <SidebarHeader className="border-b bg-slate-50/70 px-4 py-3">
-          <div className="flex items-center gap-2 text-indigo-600">
-            {/* <Bot className="h-4 w-4" /> */}
-            <Logo className="h-8 w-8"></Logo>
-            <p className="text-sm font-semibold">Touchbase AI</p>
-            {/* <p className="text-sm font-semibold">Follow-Up Agent</p> */}
-          </div>
+      {/* Steel chrome shared by every dashboard page. Page content keeps its own surface. */}
+      <Sidebar collapsible="offcanvas" className="border-r border-landing-line">
+        <SidebarHeader className="border-b border-landing-line bg-landing-steel-2 px-4 py-3 font-landing-sans">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2.5 text-landing-fog no-underline"
+          >
+            <BrandMark className="h-8 w-8" />
+            <span className="font-landing-display text-[15px] font-bold tracking-[-0.01em]">
+              Touchbase AI
+            </span>
+          </Link>
         </SidebarHeader>
-        <SidebarContent className="px-2 py-3">
+        <SidebarContent className="bg-landing-steel-2 px-2 py-3 font-landing-sans">
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
-                  className="text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 data-[active=true]:bg-indigo-100 data-[active=true]:text-indigo-700"
+                  className="text-landing-fog/60 hover:bg-white/5 hover:text-landing-fog active:bg-white/5 active:text-landing-fog data-[active=true]:bg-landing-sky-soft data-[active=true]:font-semibold data-[active=true]:text-landing-sky"
                   isActive={location.pathname === item.to}
                 >
-                  <NavLink to={item.to}>
+                  <NavLink to={item.to} end={item.to === "/dashboard"}>
                     <item.icon className="h-4 w-4" />
                     <span>{item.title}</span>
                   </NavLink>
@@ -142,21 +146,25 @@ export default function Dashboard() {
           </SidebarMenu>
         </SidebarContent>
 
-        <SidebarFooter className="border-t p-3">
-          <div className="mb-2 flex items-center gap-2 rounded-md bg-slate-50 p-2">
+        <SidebarFooter className="border-t border-landing-line bg-landing-steel-2 p-3 font-landing-sans">
+          <div className="mb-2 flex items-center gap-2 rounded-md border border-landing-line bg-landing-steel p-2">
             <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-indigo-100 text-xs font-semibold text-indigo-700">
-                U
+              <AvatarFallback className="bg-landing-sky-soft text-xs font-semibold text-landing-sky">
+                {userInitial}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <p className="text-xs font-medium text-slate-900">Email</p>
-              <p className="text-[11px] text-slate-500">{user?.email}</p>
+            <div className="min-w-0">
+              <p className="font-landing-mono text-[10px] uppercase tracking-[0.12em] text-landing-fog/45">
+                Signed in as
+              </p>
+              <p className="truncate text-[12px] text-landing-fog/80" title={user?.email}>
+                {user?.email}
+              </p>
             </div>
           </div>
           <Button
             variant="outline"
-            className="w-full justify-start gap-2 border-red-300 text-red-700 hover:bg-red-100"
+            className="w-full justify-start gap-2 border-landing-voice/40 bg-transparent text-landing-voice hover:bg-landing-voice/10 hover:text-landing-voice"
             onClick={handleLogout}
           >
             <LogOut className="h-4 w-4" />
@@ -166,18 +174,18 @@ export default function Dashboard() {
       </Sidebar>
 
       <SidebarInset className="min-w-0">
-        <header className="flex h-14 items-center gap-2 border-b px-4">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="h-4" />
+        <header className="flex h-14 items-center gap-2 border-b border-landing-line bg-landing-steel-2 px-4 font-landing-sans">
+          <SidebarTrigger className="text-landing-fog/70 hover:bg-white/5 hover:text-landing-fog" />
+          <Separator orientation="vertical" className="h-4 bg-landing-line" />
           <Breadcrumb>
-            <BreadcrumbList>
+            <BreadcrumbList className="text-landing-fog/50">
               {breadcrumbItems.map((item, index) => (
                 <div key={item.href} className="inline-flex items-center gap-1.5">
                   <BreadcrumbItem>
                     {index === breadcrumbItems.length - 1 ? (
-                      <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                      <BreadcrumbPage className="text-landing-fog">{item.label}</BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink asChild>
+                      <BreadcrumbLink asChild className="hover:text-landing-fog">
                         <Link to={item.href}>{item.label}</Link>
                       </BreadcrumbLink>
                     )}
@@ -189,7 +197,6 @@ export default function Dashboard() {
           </Breadcrumb>
         </header>
         <main className="min-w-0 p-4 md:p-6">
-          
           <Outlet />
         </main>
       </SidebarInset>
