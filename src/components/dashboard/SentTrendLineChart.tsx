@@ -2,6 +2,7 @@ import { format, parseISO } from "date-fns";
 import { Activity } from "lucide-react";
 import DashboardLineChart from "@/components/dashboard/DashboardLineChart";
 import type { DashboardSentTrendItem } from "@/types/dashboard";
+import { CHANNEL_COLORS } from "@/components/dashboard/dashboardTheme";
 
 interface SentTrendLineChartProps {
   data: DashboardSentTrendItem[];
@@ -33,22 +34,22 @@ export default function SentTrendLineChart({ data }: SentTrendLineChartProps) {
         {
           dataKey: "emails",
           label: "Emails",
-          color: "#7FB4FF",
+          color: CHANNEL_COLORS.email,
         },
         {
           dataKey: "sms",
           label: "SMS",
-          color: "#F2C86A",
+          color: CHANNEL_COLORS.sms,
         },
         {
           dataKey: "whatsapp",
           label: "WhatsApp",
-          color: "#5EDBA6",
+          color: CHANNEL_COLORS.whatsapp,
         },
         {
           dataKey: "calls",
           label: "Calls",
-          color: "#FF9A7A",
+          color: CHANNEL_COLORS.call,
         },
       ]}
       xAxisTickFormatter={formatDateLabel}

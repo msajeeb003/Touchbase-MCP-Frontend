@@ -100,6 +100,46 @@ body {
   }
 }
 
+/*
+ * Steel theme tokens, consumed by the `landing-*` Tailwind colours as RGB
+ * triplets so opacity modifiers (text-landing-fog/55) keep working.
+ * The dark values are the default everywhere; a page opts into the light
+ * variant by setting data-theme="light" on <html> (see src/lib/appTheme.ts).
+ */
+:root {
+  --landing-steel: 13 17 23;
+  --landing-steel-2: 19 26 34;
+  --landing-steel-3: 26 35 46;
+  --landing-steel-4: 35 46 59;
+  --landing-fog: 233 238 243;
+  --landing-sky: 79 156 249;
+  --landing-sky-deep: 59 132 222;
+  --landing-email: 127 180 255;
+  --landing-whatsapp: 94 219 166;
+  --landing-sms: 242 200 106;
+  --landing-voice: 255 154 122;
+  --landing-violet: 167 139 250;
+  --landing-pink: 244 114 182;
+  --landing-slate: 148 163 184;
+}
+
+:root[data-theme="light"] {
+  --landing-steel: 246 248 250;
+  --landing-steel-2: 255 255 255;
+  --landing-steel-3: 238 242 246;
+  --landing-steel-4: 227 233 240;
+  --landing-fog: 17 24 39;
+  --landing-sky: 47 127 224;
+  --landing-sky-deep: 31 102 194;
+  --landing-email: 37 99 235;
+  --landing-whatsapp: 15 157 106;
+  --landing-sms: 183 121 31;
+  --landing-voice: 217 83 47;
+  --landing-violet: 124 92 214;
+  --landing-pink: 219 39 119;
+  --landing-slate: 100 116 139;
+}
+
 @layer base {
   * {
     @apply border-border;

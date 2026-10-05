@@ -67,22 +67,56 @@ export const dashCardDesc = "text-sm text-landing-fog/55";
 export const dashEmpty =
   "rounded-xl border border-dashed border-landing-line bg-landing-steel px-6 py-10 text-center text-sm text-landing-fog/50";
 
+/**
+ * Light counterpart of steelSurfaceVars, used by the dashboard overview when
+ * the user picks the light theme.
+ */
+export const lightSurfaceVars = {
+  "--background": "210 33% 97%",
+  "--foreground": "221 39% 11%",
+  "--card": "0 0% 100%",
+  "--card-foreground": "221 39% 11%",
+  "--popover": "0 0% 100%",
+  "--popover-foreground": "221 39% 11%",
+  "--muted": "210 29% 95%",
+  "--muted-foreground": "215 16% 40%",
+  "--accent": "210 29% 95%",
+  "--accent-foreground": "221 39% 11%",
+  "--border": "214 20% 88%",
+  "--input": "214 20% 88%",
+  "--ring": "213 74% 53%",
+  "--primary": "213 74% 53%",
+  "--primary-foreground": "0 0% 100%",
+  "--secondary": "210 29% 95%",
+  "--secondary-foreground": "221 39% 11%",
+} as CSSProperties;
+
+/**
+ * Chart colours as CSS variable references, so they follow the active theme
+ * (the triplets are declared in globals.css). Recharts and the chart tooltip
+ * accept these anywhere a colour string is expected.
+ */
+const token = (name: string) => `rgb(var(--landing-${name}))`;
+
 /** Channel colours, matching the landing-email / sms / whatsapp / voice tokens. */
 export const CHANNEL_COLORS = {
-  email: "#7FB4FF",
-  sms: "#F2C86A",
-  whatsapp: "#5EDBA6",
-  call: "#FF9A7A",
+  email: token("email"),
+  sms: token("sms"),
+  whatsapp: token("whatsapp"),
+  call: token("voice"),
 } as const;
+
+/** Primary accent for single-series charts. */
+export const ACCENT_COLOR = token("sky");
 
 /** Ordered palette for categorical charts (donuts). Assigned by position. */
 export const CATEGORY_PALETTE = [
-  "#4F9CF9",
-  "#5EDBA6",
-  "#F2C86A",
-  "#FF9A7A",
-  "#A78BFA",
-  "#7FB4FF",
-  "#F472B6",
-  "#94A3B8",
+  token("sky"),
+  token("whatsapp"),
+  token("sms"),
+  token("voice"),
+  token("violet"),
+  token("email"),
+  token("pink"),
+  token("slate"),
 ] as const;

@@ -159,7 +159,7 @@ export default function UpcomingStepsSection({
               {data.map((step) => (
                 <TableRow
                   key={step.id}
-                  className="border-landing-line hover:bg-white/[0.03]"
+                  className="border-landing-line hover:bg-landing-fog/[0.03]"
                 >
                   <TableCell>
                     <StepTypeBadge stepType={step.stepType} />

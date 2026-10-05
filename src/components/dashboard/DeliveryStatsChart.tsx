@@ -2,6 +2,7 @@ import DashboardStackedBarChart from "@/components/dashboard/DashboardStackedBar
 import { STEP_TYPE, type StepType } from "@/constants/stepType";
 import { BarChart3 } from "lucide-react";
 import type { DashboardDeliveryStatsItem } from "@/types/dashboard";
+import { ACCENT_COLOR, CHANNEL_COLORS } from "@/components/dashboard/dashboardTheme";
 
 const CHANNEL_LABEL: Record<StepType, string> = {
   [STEP_TYPE.EMAIL]: "Email",
@@ -32,13 +33,13 @@ export default function DeliveryStatsChart({
         {
           dataKey: "sent",
           label: "Sent",
-          color: "#4F9CF9",
+          color: ACCENT_COLOR,
           stackId: "delivery",
         },
         {
           dataKey: "failed",
           label: "Failed",
-          color: "#FF9A7A",
+          color: CHANNEL_COLORS.call,
           stackId: "delivery",
         },
       ]}

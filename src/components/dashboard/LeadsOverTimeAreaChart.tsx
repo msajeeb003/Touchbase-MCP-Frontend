@@ -1,6 +1,7 @@
 import { format, parseISO } from "date-fns";
 import DashboardAreaChart from "@/components/dashboard/DashboardAreaChart";
 import type { DashboardLeadsOverTimeItem } from "@/types/dashboard";
+import { ACCENT_COLOR } from "@/components/dashboard/dashboardTheme";
 
 interface LeadsOverTimeAreaChartProps {
   data: DashboardLeadsOverTimeItem[];
@@ -30,7 +31,7 @@ export default function LeadsOverTimeAreaChart({
         {
           dataKey: "leads",
           label: "New Leads",
-          color: "#4F9CF9",
+          color: ACCENT_COLOR,
         },
       ]}
       xAxisTickFormatter={formatDateLabel}

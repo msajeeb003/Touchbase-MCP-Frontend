@@ -31,7 +31,7 @@ const getChartColor = (index: number) =>
   CATEGORY_PALETTE[index % CATEGORY_PALETTE.length];
 
 /** Matches the card surface, so slices read as separated rather than outlined. */
-const SLICE_GAP_COLOR = "#131a22";
+const SLICE_GAP_COLOR = "rgb(var(--landing-steel-2))";
 
 export default function DashboardDonutChart({
   title,

@@ -6,19 +6,21 @@ import DashboardSummarySection from "@/components/dashboard/DashboardSummarySect
 import SequencesByStatusDonutChart from "@/components/dashboard/SequencesByStatusDonutChart";
 import SentTrendLineChart from "@/components/dashboard/SentTrendLineChart";
 import UpcomingStepsSection from "@/components/dashboard/UpcomingStepsSection";
-import { steelSurfaceVars } from "@/components/dashboard/dashboardTheme";
+import ThemeToggle from "@/components/dashboard/ThemeToggle";
+import { lightSurfaceVars, steelSurfaceVars } from "@/components/dashboard/dashboardTheme";
+import { useScopedAppTheme, type AppTheme } from "@/lib/appTheme";
 import { useGetDashboardQuery } from "@/store/features/dashboard/dashboardApi";
 
 /**
- * Dark steel surface for this page. The negative margins cancel the layout's
- * <main> padding so the surface fills the content area edge to edge, and the
- * scoped CSS variables re-theme the shadcn primitives rendered inside it.
+ * Steel surface for this page, dark or light. The negative margins cancel the
+ * layout's <main> padding so the surface fills the content area edge to edge,
+ * and the scoped CSS variables re-theme the shadcn primitives rendered inside it.
  */
-function DashboardSurface({ children }: { children: ReactNode }) {
+function DashboardSurface({ theme, children }: { theme: AppTheme; children: ReactNode }) {
   return (
     <div
       className="-m-4 min-h-[calc(100svh-3.5rem)] bg-landing-steel p-4 font-landing-sans text-landing-fog/80 md:-m-6 md:p-6"
-      style={steelSurfaceVars}
+      style={theme === "light" ? lightSurfaceVars : steelSurfaceVars}
     >
       {children}
     </div>
@@ -26,13 +28,14 @@ function DashboardSurface({ children }: { children: ReactNode }) {
 }
 
 export default function DashboardPage() {
+  const [theme, setTheme] = useScopedAppTheme();
   const { data, isLoading, isError } = useGetDashboardQuery();
   const dashboardData = data?.data;
   const summary = dashboardData?.summary;
 
   if (isLoading) {
     return (
-      <DashboardSurface>
+      <DashboardSurface theme={theme}>
         <div className="rounded-xl border border-dashed border-landing-line bg-landing-steel-2 p-8 text-sm text-landing-fog/60">
           <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin text-landing-sky" />
@@ -45,7 +48,7 @@ export default function DashboardPage() {
 
   if (isError || !summary) {
     return (
-      <DashboardSurface>
+      <DashboardSurface theme={theme}>
         <div className="rounded-xl border border-dashed border-landing-voice/40 bg-landing-voice/10 p-8 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-landing-voice/15">
             <TrendingUp className="h-5 w-5 text-landing-voice" />
@@ -62,18 +65,21 @@ export default function DashboardPage() {
   }
 
   return (
-    <DashboardSurface>
+    <DashboardSurface theme={theme}>
       <div className="space-y-6">
-        <div>
-          <p className="font-landing-mono text-[11px] uppercase tracking-[0.18em] text-landing-sky">
-            Overview
-          </p>
-          <h2 className="mt-2 font-landing-display text-[clamp(26px,3vw,34px)] font-bold leading-tight tracking-[-0.02em] text-landing-fog">
-            Dashboard Overview
-          </h2>
-          <p className="mt-1 text-sm text-landing-fog/55">
-            A quick snapshot of leads, email/SMS/WhatsApp/call activity, sequences, and transcripts.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="font-landing-mono text-[11px] uppercase tracking-[0.18em] text-landing-sky">
+              Overview
+            </p>
+            <h2 className="mt-2 font-landing-display text-[clamp(26px,3vw,34px)] font-bold leading-tight tracking-[-0.02em] text-landing-fog">
+              Dashboard Overview
+            </h2>
+            <p className="mt-1 text-sm text-landing-fog/55">
+              A quick snapshot of leads, email/SMS/WhatsApp/call activity, sequences, and transcripts.
+            </p>
+          </div>
+          <ThemeToggle theme={theme} onChange={setTheme} className="shrink-0" />
         </div>
 
         <DashboardSummarySection summary={summary} />

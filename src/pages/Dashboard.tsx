@@ -133,7 +133,7 @@ export default function Dashboard() {
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
-                  className="text-landing-fog/60 hover:bg-white/5 hover:text-landing-fog active:bg-white/5 active:text-landing-fog data-[active=true]:bg-landing-sky-soft data-[active=true]:font-semibold data-[active=true]:text-landing-sky"
+                  className="text-landing-fog/60 hover:bg-landing-fog/5 hover:text-landing-fog active:bg-landing-fog/5 active:text-landing-fog data-[active=true]:bg-landing-sky-soft data-[active=true]:font-semibold data-[active=true]:text-landing-sky"
                   isActive={location.pathname === item.to}
                 >
                   <NavLink to={item.to} end={item.to === "/dashboard"}>
@@ -175,7 +175,7 @@ export default function Dashboard() {
 
       <SidebarInset className="min-w-0">
         <header className="flex h-14 items-center gap-2 border-b border-landing-line bg-landing-steel-2 px-4 font-landing-sans">
-          <SidebarTrigger className="text-landing-fog/70 hover:bg-white/5 hover:text-landing-fog" />
+          <SidebarTrigger className="text-landing-fog/70 hover:bg-landing-fog/5 hover:text-landing-fog" />
           <Separator orientation="vertical" className="h-4 bg-landing-line" />
           <Breadcrumb>
             <BreadcrumbList className="text-landing-fog/50">
