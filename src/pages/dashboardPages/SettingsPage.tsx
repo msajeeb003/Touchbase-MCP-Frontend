@@ -261,7 +261,7 @@ export default function SettingsPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
                 <Bot className="mt-0.5 h-4 w-4 text-landing-sky" />
                 <div>
@@ -339,9 +339,9 @@ export default function SettingsPage() {
           </section>
 
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
-                <BarChart3 className="mt-0.5 h-4 w-4 text-[#A78BFA]" />
+                <BarChart3 className="mt-0.5 h-4 w-4 text-landing-violet" />
                 <div>
                   <h3 className="font-landing-display font-bold text-landing-fog">Fathom Call Transcripts</h3>
                   <p className="text-xs text-landing-fog/55">
@@ -386,7 +386,7 @@ export default function SettingsPage() {
                     </div>
                     <FormControl>
                       <Switch
-                        className="data-[state=checked]:bg-landing-whatsapp data-[state=unchecked]:bg-white/15"
+                        className="data-[state=checked]:bg-landing-whatsapp data-[state=unchecked]:bg-landing-fog/15"
                         checked={Boolean(field.value)}
                         onCheckedChange={field.onChange}
                         aria-label="Toggle auto draft"
@@ -399,7 +399,7 @@ export default function SettingsPage() {
           </section>
 
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
                 <PhoneCall className="mt-0.5 h-4 w-4 text-landing-voice" />
                 <div>
@@ -474,7 +474,7 @@ export default function SettingsPage() {
           </section>
 
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
                 <Mail className="mt-0.5 h-4 w-4 text-landing-email" />
                 <div>
@@ -573,7 +573,7 @@ export default function SettingsPage() {
           </section>
 
           <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-white/[0.03] px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
               <div className="flex items-start gap-2">
                 <MessageSquare className="mt-0.5 h-4 w-4 text-landing-sms" />
                 <div>

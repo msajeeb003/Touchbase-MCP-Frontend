@@ -288,7 +288,7 @@ export default function LeadTranscriptsPage() {
             <Badge variant="outline" className="border-landing-sky/40 bg-landing-sky-soft text-landing-sky">
               {lead.followUpStage}
             </Badge>
-            <Badge variant="outline" className="border-landing-line bg-white/5 text-landing-fog/70">
+            <Badge variant="outline" className="border-landing-line bg-landing-fog/5 text-landing-fog/70">
               {selectedTranscripts.length} selected
             </Badge>
           </div>
@@ -367,7 +367,7 @@ export default function LeadTranscriptsPage() {
               {filteredMeetings.length === 0 ? (
                 <div className="space-y-4">
                   <div className="rounded-xl border border-dashed border-landing-line bg-landing-steel-2 px-6 py-14 text-center">
-                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-landing-fog/10">
                       <Search className="h-5 w-5 text-landing-fog/65" />
                     </div>
                     <h3 className="font-landing-display text-2xl font-bold text-landing-fog">No matching transcripts found.</h3>

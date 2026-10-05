@@ -6,7 +6,8 @@ import { useCallback, useEffect, useSyncExternalStore } from "react";
  * The `landing-*` colours resolve to CSS variables declared in globals.css:
  * dark by default, light when <html data-theme="light"> is set. The choice is
  * kept in localStorage; index.html applies it before React mounts so the
- * dashboard does not flash dark first.
+ * dashboard does not flash dark first. The dashboard layout owns the switch,
+ * so every route rendered inside it follows the choice.
  */
 export type AppTheme = "dark" | "light";
 
@@ -44,12 +45,17 @@ function subscribe(onChange: () => void) {
   };
 }
 
+/** Read-only view of the stored theme; re-renders when it changes. */
+export function useAppTheme(): AppTheme {
+  return useSyncExternalStore(subscribe, readStoredTheme, () => "dark" as AppTheme);
+}
+
 /**
- * Applies the stored theme while the calling page is mounted and restores the
- * dark default on unmount, so pages that have not opted in stay dark.
+ * Applies the stored theme while the calling layout is mounted and restores
+ * the dark default on unmount, so routes outside it (landing, auth) stay dark.
  */
 export function useScopedAppTheme(): [AppTheme, (theme: AppTheme) => void] {
-  const theme = useSyncExternalStore(subscribe, readStoredTheme, () => "dark" as AppTheme);
+  const theme = useAppTheme();
 
   useEffect(() => {
     applyTheme(theme);

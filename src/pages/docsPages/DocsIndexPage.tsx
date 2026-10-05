@@ -32,7 +32,7 @@ const docLinks: { to: string; title: string; description: string }[] = [
 ];
 
 const cardClass =
-  "block rounded-xl border border-landing-line bg-landing-steel-2 p-4 transition-colors hover:border-landing-sky/40 hover:bg-white/[0.03]";
+  "block rounded-xl border border-landing-line bg-landing-steel-2 p-4 transition-colors hover:border-landing-sky/40 hover:bg-landing-fog/[0.03]";
 
 export default function DocsIndexPage() {
   useSteelTheme();

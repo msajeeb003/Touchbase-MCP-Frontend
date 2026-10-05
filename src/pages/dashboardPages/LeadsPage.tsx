@@ -193,7 +193,7 @@ export default function LeadsPage() {
         <div className="flex items-center gap-2">
           <ImportLeadsDialog
             trigger={
-              <Button variant="outline" className="gap-2 border-landing-line bg-transparent text-landing-fog hover:bg-white/5 hover:text-landing-fog">
+              <Button variant="outline" className="gap-2 border-landing-line bg-transparent text-landing-fog hover:bg-landing-fog/5 hover:text-landing-fog">
                 <Upload className="h-4 w-4" />
                 Import CSV
               </Button>
@@ -288,7 +288,7 @@ export default function LeadsPage() {
         ) : (
           <>
             <div className="w-full max-w-full overflow-x-auto">
-              <Table className="min-w-[1240px] [&_th]:font-landing-mono [&_th]:text-[10.5px] [&_th]:font-normal [&_th]:uppercase [&_th]:tracking-[0.1em] [&_th]:text-landing-fog/45 [&_tr:hover]:bg-white/[0.03]">
+              <Table className="min-w-[1240px] [&_th]:font-landing-mono [&_th]:text-[10.5px] [&_th]:font-normal [&_th]:uppercase [&_th]:tracking-[0.1em] [&_th]:text-landing-fog/45 [&_tr:hover]:bg-landing-fog/[0.03]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12 pr-2">
@@ -371,7 +371,7 @@ export default function LeadsPage() {
                         {formatLeadAddedAt(lead.createdAt)}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button asChild variant="ghost" size="sm" className="gap-2 text-landing-sky hover:bg-white/5 hover:text-landing-sky">
+                        <Button asChild variant="ghost" size="sm" className="gap-2 text-landing-sky hover:bg-landing-fog/5 hover:text-landing-sky">
                           <Link to={`/dashboard/leads/${lead.id}/transcripts`}>
                             <FileText className="h-4 w-4" />
                             Add
@@ -382,7 +382,7 @@ export default function LeadsPage() {
                         <UpdateLeadDialog
                           leadId={lead.id}
                           trigger={
-                            <Button variant="ghost" size="icon" className="text-landing-sky hover:bg-white/5 hover:text-landing-sky">
+                            <Button variant="ghost" size="icon" className="text-landing-sky hover:bg-landing-fog/5 hover:text-landing-sky">
                               <Pencil className="h-4 w-4" />
                               <span className="sr-only">Update lead</span>
                             </Button>

@@ -37,6 +37,8 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useCurrentUser } from "@/store/features/auth/authSlice";
 import BrandMark from "@/components/landing/BrandMark";
 import { useLandingFontLink } from "@/components/landing/landingFonts";
+import ThemeToggle from "@/components/dashboard/ThemeToggle";
+import { useScopedAppTheme } from "@/lib/appTheme";
 
 const navItems = [
   { title: "Dashboard", to: "/dashboard", icon: Home },
@@ -68,6 +70,7 @@ const breadcrumbLabelMap: Record<string, string> = {
 
 export default function Dashboard() {
   useLandingFontLink();
+  const [theme, setTheme] = useScopedAppTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -195,6 +198,7 @@ export default function Dashboard() {
               ))}
             </BreadcrumbList>
           </Breadcrumb>
+          <ThemeToggle theme={theme} onChange={setTheme} className="ml-auto shrink-0" />
         </header>
         <main className="min-w-0 p-4 md:p-6">
           <Outlet />

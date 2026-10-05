@@ -91,7 +91,7 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
         </div>
 
         {/* Scrollable List */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 bg-white/[0.03]">
+        <div className="flex-1 overflow-y-auto px-6 py-4 bg-landing-fog/[0.03]">
           <div className="flex flex-col gap-3 min-h-[100px]">
             {isCreating && (
               <div className="flex flex-col gap-5 p-5 border border-landing-sky/25 rounded-xl bg-landing-steel-2 shadow-sm mb-2">
@@ -136,7 +136,7 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
                     variant="ghost" 
                     onClick={() => setIsCreating(false)} 
                     disabled={isCreatingMutation}
-                    className="text-landing-fog/65 hover:text-landing-fog hover:bg-white/[0.06]"
+                    className="text-landing-fog/65 hover:text-landing-fog hover:bg-landing-fog/[0.06]"
                   >
                     Cancel
                   </Button>
@@ -169,7 +169,7 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-landing-fog">{tpl.name}</span>
-                        <Badge variant="secondary" className="bg-white/[0.06] text-landing-fog/55 text-[10px] uppercase font-medium rounded-full px-2 py-0.5">
+                        <Badge variant="secondary" className="bg-landing-fog/[0.06] text-landing-fog/55 text-[10px] uppercase font-medium rounded-full px-2 py-0.5">
                           {tpl.followUpStage}
                         </Badge>
                       </div>
@@ -207,7 +207,7 @@ export default function ManageTemplatesDialog({ open, onOpenChange, onUseTemplat
 
         {/* Footer */}
         <div className="px-6 py-4 border-t flex justify-end bg-landing-steel-2">
-          <Button variant="secondary" onClick={() => onOpenChange(false)} className="px-6 bg-white/[0.06] hover:bg-white/10 text-landing-fog/80">Done</Button>
+          <Button variant="secondary" onClick={() => onOpenChange(false)} className="px-6 bg-landing-fog/[0.06] hover:bg-landing-fog/10 text-landing-fog/80">Done</Button>
         </div>
       </DialogContent>
     </Dialog>

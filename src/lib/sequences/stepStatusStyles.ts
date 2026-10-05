@@ -17,8 +17,8 @@ export function getSendLogStatusClass(status: string | null | undefined) {
   }
   if (value === "sending" || value === "calling") {
     return {
-      box: "border-[#A78BFA]/40 bg-[#A78BFA]/10",
-      label: "text-[#A78BFA]",
+      box: "border-landing-violet/40 bg-landing-violet/10",
+      label: "text-landing-violet",
       text: "text-landing-fog/80",
     };
   }
@@ -38,14 +38,14 @@ export function getSendLogStatusClass(status: string | null | undefined) {
   }
   if (value === "skipped") {
     return {
-      box: "border-landing-line bg-white/[0.06]",
+      box: "border-landing-line bg-landing-fog/[0.06]",
       label: "text-landing-fog/65",
       text: "text-landing-fog/80",
     };
   }
   // draft / unknown
   return {
-    box: "border-landing-line bg-white/[0.04]",
+    box: "border-landing-line bg-landing-fog/[0.04]",
     label: "text-landing-fog/55",
     text: "text-landing-fog/80",
   };

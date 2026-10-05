@@ -6,10 +6,10 @@
     <title>Touchbase AI</title>
     <script>
       // Apply the stored light theme before paint so the dashboard does not flash dark.
-      // Only the dashboard overview supports the light theme for now (see src/lib/appTheme.ts).
+      // Only routes inside the dashboard layout support it (see src/lib/appTheme.ts).
       try {
         if (
-          location.pathname.replace(/\/+$/, "") === "/dashboard" &&
+          /^\/(dashboard|docs)(\/|$)/.test(location.pathname) &&
           localStorage.getItem("touchbase-theme") === "light"
         ) {
           document.documentElement.dataset.theme = "light";

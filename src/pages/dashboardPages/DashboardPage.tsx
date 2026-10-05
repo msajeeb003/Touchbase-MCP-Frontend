@@ -6,9 +6,8 @@ import DashboardSummarySection from "@/components/dashboard/DashboardSummarySect
 import SequencesByStatusDonutChart from "@/components/dashboard/SequencesByStatusDonutChart";
 import SentTrendLineChart from "@/components/dashboard/SentTrendLineChart";
 import UpcomingStepsSection from "@/components/dashboard/UpcomingStepsSection";
-import ThemeToggle from "@/components/dashboard/ThemeToggle";
 import { lightSurfaceVars, steelSurfaceVars } from "@/components/dashboard/dashboardTheme";
-import { useScopedAppTheme, type AppTheme } from "@/lib/appTheme";
+import { useAppTheme, type AppTheme } from "@/lib/appTheme";
 import { useGetDashboardQuery } from "@/store/features/dashboard/dashboardApi";
 
 /**
@@ -28,7 +27,7 @@ function DashboardSurface({ theme, children }: { theme: AppTheme; children: Reac
 }
 
 export default function DashboardPage() {
-  const [theme, setTheme] = useScopedAppTheme();
+  const theme = useAppTheme();
   const { data, isLoading, isError } = useGetDashboardQuery();
   const dashboardData = data?.data;
   const summary = dashboardData?.summary;
@@ -67,19 +66,16 @@ export default function DashboardPage() {
   return (
     <DashboardSurface theme={theme}>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="font-landing-mono text-[11px] uppercase tracking-[0.18em] text-landing-sky">
-              Overview
-            </p>
-            <h2 className="mt-2 font-landing-display text-[clamp(26px,3vw,34px)] font-bold leading-tight tracking-[-0.02em] text-landing-fog">
-              Dashboard Overview
-            </h2>
-            <p className="mt-1 text-sm text-landing-fog/55">
-              A quick snapshot of leads, email/SMS/WhatsApp/call activity, sequences, and transcripts.
-            </p>
-          </div>
-          <ThemeToggle theme={theme} onChange={setTheme} className="shrink-0" />
+        <div>
+          <p className="font-landing-mono text-[11px] uppercase tracking-[0.18em] text-landing-sky">
+            Overview
+          </p>
+          <h2 className="mt-2 font-landing-display text-[clamp(26px,3vw,34px)] font-bold leading-tight tracking-[-0.02em] text-landing-fog">
+            Dashboard Overview
+          </h2>
+          <p className="mt-1 text-sm text-landing-fog/55">
+            A quick snapshot of leads, email/SMS/WhatsApp/call activity, sequences, and transcripts.
+          </p>
         </div>
 
         <DashboardSummarySection summary={summary} />

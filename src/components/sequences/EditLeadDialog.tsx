@@ -94,12 +94,12 @@ export default function EditLeadDialog({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t bg-white/[0.03]">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t bg-landing-fog/[0.03]">
           <Button 
             variant="ghost" 
             onClick={() => onOpenChange(false)} 
             disabled={isLoading}
-            className="text-landing-fog/80 hover:text-landing-fog hover:bg-white/[0.06]"
+            className="text-landing-fog/80 hover:text-landing-fog hover:bg-landing-fog/[0.06]"
           >
             Cancel
           </Button>

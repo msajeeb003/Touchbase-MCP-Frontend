@@ -38,12 +38,12 @@ const getStepStatusBadgeClass = (status: string) => {
   const value = status.toLowerCase();
   if (value === "sent") return "border-landing-whatsapp/40 bg-landing-whatsapp/15 text-landing-whatsapp";
   if (value === "pending") return "border-landing-sms/40 bg-landing-sms/15 text-landing-sms";
-  if (value === "draft") return "border-landing-line bg-white/[0.06] text-landing-fog/80";
+  if (value === "draft") return "border-landing-line bg-landing-fog/[0.06] text-landing-fog/80";
   if (value === "scheduled") return "border-landing-email/40 bg-landing-email/15 text-landing-email";
-  if (value === "sending" || value === "calling") return "border-[#A78BFA]/40 bg-[#A78BFA]/15 text-[#A78BFA]";
-  if (value === "skipped") return "border-landing-line bg-white/[0.06] text-landing-fog/65";
+  if (value === "sending" || value === "calling") return "border-landing-violet/40 bg-landing-violet/15 text-landing-violet";
+  if (value === "skipped") return "border-landing-line bg-landing-fog/[0.06] text-landing-fog/65";
   if (value === "failed") return "border-landing-voice/40 bg-landing-voice/15 text-landing-voice";
-  return "border-landing-line bg-white/[0.06] text-landing-fog/80";
+  return "border-landing-line bg-landing-fog/[0.06] text-landing-fog/80";
 };
 
 const formatStepStatus = (status: string) =>
@@ -118,7 +118,7 @@ function ViewStepCard({
     <div className="flex flex-col gap-3 rounded-xl border border-landing-line bg-landing-steel-2 p-4 transition-colors hover:border-landing-sky/40">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] font-landing-mono text-xs font-medium text-landing-fog/80">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-landing-fog/[0.06] font-landing-mono text-xs font-medium text-landing-fog/80">
             {step.stepOrder}
           </div>
 
@@ -233,7 +233,7 @@ export default function ViewSequenceStepsPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="border-landing-line bg-white/[0.04] text-landing-fog/80">
+            <Badge variant="outline" className="border-landing-line bg-landing-fog/[0.04] text-landing-fog/80">
               {steps.length}/{sequence?.totalSteps ?? 0} step{steps.length === 1 ? "" : "s"}
             </Badge>
             {id && (
@@ -246,14 +246,14 @@ export default function ViewSequenceStepsPage() {
       </div>
 
       {steps.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-landing-fog/20 bg-white/[0.03] px-6 py-14 text-center">
+        <div className="rounded-xl border border-dashed border-landing-fog/20 bg-landing-fog/[0.03] px-6 py-14 text-center">
           <h3 className="font-landing-display text-xl font-bold text-landing-fog">No steps found.</h3>
           <p className="mt-2 text-sm text-landing-fog/55">
             This sequence has no generated steps yet.
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3 rounded-2xl border border-landing-line bg-white/[0.02] p-4 sm:p-6">
+        <div className="flex flex-col gap-3 rounded-2xl border border-landing-line bg-landing-fog/[0.02] p-4 sm:p-6">
           {steps.map((step) => (
             <ViewStepCard key={step.id} step={step} onPreview={setPreviewStep} />
           ))}
@@ -308,7 +308,7 @@ export default function ViewSequenceStepsPage() {
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 justify-end border-t bg-white/[0.03] px-6 py-4">
+          <div className="flex shrink-0 justify-end border-t bg-landing-fog/[0.03] px-6 py-4">
             <Button variant="outline" onClick={() => setPreviewStep(null)} className="h-9">
               Close
             </Button>

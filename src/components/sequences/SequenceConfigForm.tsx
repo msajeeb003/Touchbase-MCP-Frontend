@@ -237,7 +237,7 @@ export default function SequenceConfigForm({
         className={`cursor-pointer rounded-xl border p-4 transition-all ${
           isSelected
             ? "border-landing-sky bg-landing-sky-soft shadow-sm"
-            : "border-landing-line bg-landing-steel hover:border-landing-sky/50 hover:bg-white/[0.04]"
+            : "border-landing-line bg-landing-steel hover:border-landing-sky/50 hover:bg-landing-fog/[0.04]"
         }`}
       >
         <item.icon
@@ -470,7 +470,7 @@ export default function SequenceConfigForm({
             </div>
           )}
           {situation === "Custom" && (
-            <div className="flex flex-col gap-4 rounded-xl border border-landing-sky/25 bg-white/[0.03] p-5 mt-2">
+            <div className="flex flex-col gap-4 rounded-xl border border-landing-sky/25 bg-landing-fog/[0.03] p-5 mt-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-landing-sky">
                   <Sparkles className="h-4 w-4" />
@@ -520,7 +520,7 @@ export default function SequenceConfigForm({
                     <button
                       key={tpl.id}
                       onClick={() => setCustomPrompt(tpl.promptText)}
-                      className="flex items-center gap-2 rounded-full border border-landing-line bg-landing-steel px-3 py-1.5 text-sm text-landing-fog/80 hover:border-landing-sky/40 hover:bg-white/[0.04] transition-colors"
+                      className="flex items-center gap-2 rounded-full border border-landing-line bg-landing-steel px-3 py-1.5 text-sm text-landing-fog/80 hover:border-landing-sky/40 hover:bg-landing-fog/[0.04] transition-colors"
                     >
                       <BookOpen className="h-3.5 w-3.5 text-landing-fog/40" />
                       {tpl.name}
@@ -637,7 +637,7 @@ export default function SequenceConfigForm({
                         className={`absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full transition-opacity ${
                           isSelected
                             ? "text-landing-sky opacity-100 hover:bg-landing-sky/20"
-                            : "text-landing-fog/40 opacity-0 hover:bg-white/[0.06] group-hover:opacity-100 focus:opacity-100"
+                            : "text-landing-fog/40 opacity-0 hover:bg-landing-fog/[0.06] group-hover:opacity-100 focus:opacity-100"
                         }`}
                         onClick={(e) => e.stopPropagation()}
                       >

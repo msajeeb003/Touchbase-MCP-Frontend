@@ -17,17 +17,17 @@ import { type SequenceLogItem } from "@/types/sequences";
 
 const EVENT_UI: Record<string, { icon: LucideIcon; color: string; bgColor: string }> = {
   sequence_created: { icon: PlusCircle, color: "text-landing-email", bgColor: "bg-landing-email/15" },
-  sequence_generated: { icon: Sparkles, color: "text-[#A78BFA]", bgColor: "bg-[#A78BFA]/15" },
-  sequence_regenerated: { icon: RefreshCw, color: "text-[#A78BFA]", bgColor: "bg-[#A78BFA]/15" },
+  sequence_generated: { icon: Sparkles, color: "text-landing-violet", bgColor: "bg-landing-violet/15" },
+  sequence_regenerated: { icon: RefreshCw, color: "text-landing-violet", bgColor: "bg-landing-violet/15" },
   sequence_status_changed: { icon: ArrowRight, color: "text-landing-voice", bgColor: "bg-landing-voice/15" },
-  sequence_edited: { icon: Pencil, color: "text-landing-fog/65", bgColor: "bg-white/[0.06]" },
-  step_generated: { icon: Sparkles, color: "text-[#A78BFA]", bgColor: "bg-[#A78BFA]/15" },
+  sequence_edited: { icon: Pencil, color: "text-landing-fog/65", bgColor: "bg-landing-fog/[0.06]" },
+  step_generated: { icon: Sparkles, color: "text-landing-violet", bgColor: "bg-landing-violet/15" },
   step_scheduled: { icon: Clock, color: "text-landing-email", bgColor: "bg-landing-email/15" },
   step_sent: { icon: CheckCircle, color: "text-landing-whatsapp", bgColor: "bg-landing-whatsapp/15" },
   step_sending: { icon: Loader, color: "text-landing-sms", bgColor: "bg-landing-sms/15" },
   step_delivered: { icon: CheckCheck, color: "text-landing-whatsapp", bgColor: "bg-landing-whatsapp/15" },
   step_failed: { icon: XCircle, color: "text-landing-voice", bgColor: "bg-landing-voice/15" },
-  step_edited: { icon: Pencil, color: "text-landing-fog/65", bgColor: "bg-white/[0.06]" },
+  step_edited: { icon: Pencil, color: "text-landing-fog/65", bgColor: "bg-landing-fog/[0.06]" },
 };
 
 const renderLogMessage = (log: SequenceLogItem): string => {
@@ -82,7 +82,7 @@ export default function SequenceActivityLog({ sequenceId }: SequenceActivityLogP
 
   if (logs.length === 0) {
     return (
-      <div className="text-center p-8 text-landing-fog/55 border border-dashed rounded-lg bg-white/[0.04] mt-8">
+      <div className="text-center p-8 text-landing-fog/55 border border-dashed rounded-lg bg-landing-fog/[0.04] mt-8">
         No activity recorded yet for this sequence.
       </div>
     );
@@ -93,7 +93,7 @@ export default function SequenceActivityLog({ sequenceId }: SequenceActivityLogP
       <h3 className="text-lg font-semibold text-landing-fog mb-6">Activity Log</h3>
       <div className="relative border-l border-landing-line ml-4 space-y-8">
         {logs.map((log) => {
-          const ui = EVENT_UI[log.eventType] || { icon: ArrowRight, color: "text-landing-fog/55", bgColor: "bg-white/[0.06]" };
+          const ui = EVENT_UI[log.eventType] || { icon: ArrowRight, color: "text-landing-fog/55", bgColor: "bg-landing-fog/[0.06]" };
           const IconComponent = ui.icon;
           
           return (

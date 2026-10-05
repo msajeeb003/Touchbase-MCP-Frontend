@@ -61,7 +61,7 @@ function FlowMergeConnector() {
             Lead + Template
           </span>
         </div>
-        <div className="absolute left-[18%] top-2 text-[10px] font-medium text-[#A78BFA]">
+        <div className="absolute left-[18%] top-2 text-[10px] font-medium text-landing-violet">
           Template
         </div>
         <div className="absolute right-[18%] top-2 text-[10px] font-medium text-landing-email">
@@ -307,9 +307,9 @@ export default function HowItWorksSection({
 
       <div className="mx-auto max-w-3xl">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10">
-          <div className="flex flex-col overflow-hidden rounded-xl border border-[#A78BFA]/40 bg-landing-steel-2 shadow-sm">
-            <div className="border-b border-[#A78BFA]/25 bg-[#A78BFA]/10 px-4 py-2.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#A78BFA]">
+          <div className="flex flex-col overflow-hidden rounded-xl border border-landing-violet/40 bg-landing-steel-2 shadow-sm">
+            <div className="border-b border-landing-violet/25 bg-landing-violet/10 px-4 py-2.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-landing-violet">
                 Templates
               </span>
             </div>
@@ -325,7 +325,7 @@ export default function HowItWorksSection({
                     key={tpl.name}
                     className={`rounded-md border px-2.5 py-1.5 text-xs ${
                       tpl.active
-                        ? "border-[#A78BFA]/50 bg-[#A78BFA]/10 font-medium text-landing-fog"
+                        ? "border-landing-violet/50 bg-landing-violet/10 font-medium text-landing-fog"
                         : "border-landing-line text-landing-fog/55"
                     }`}
                   >
@@ -335,7 +335,7 @@ export default function HowItWorksSection({
               </div>
               <button
                 type="button"
-                className="mb-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#A78BFA]/50 bg-[#A78BFA]/10 px-3 py-2 text-xs font-medium text-[#A78BFA]"
+                className="mb-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-landing-violet/50 bg-landing-violet/10 px-3 py-2 text-xs font-medium text-landing-violet"
               >
                 <Sparkles className="h-3.5 w-3.5" aria-hidden />
                 Generate with AI

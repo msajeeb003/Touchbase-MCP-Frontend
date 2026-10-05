@@ -54,7 +54,7 @@ export default function AiCredentialsDocsPage() {
       <section className="space-y-3 rounded-2xl border border-landing-line bg-landing-steel-2 p-5">
         <h2 className="font-landing-display text-lg font-bold text-landing-fog">OpenAI</h2>
         <p className="text-sm text-landing-fog/65">
-          Compatible with GPT-family models referenced in Settings (e.g. <code className="rounded bg-white/10 px-1 font-landing-mono text-xs text-landing-fog">gpt-4o-mini</code> — confirm the exact identifier in current docs).
+          Compatible with GPT-family models referenced in Settings (e.g. <code className="rounded bg-landing-fog/10 px-1 font-landing-mono text-xs text-landing-fog">gpt-4o-mini</code> — confirm the exact identifier in current docs).
         </p>
         <ul className="list-inside list-disc space-y-2 text-sm text-landing-fog/80">
           <li>
@@ -76,7 +76,7 @@ export default function AiCredentialsDocsPage() {
         <h2 className="font-landing-display text-lg font-bold text-landing-fog">Google · Gemini API</h2>
         <p className="text-sm text-landing-fog/65">
           Gemini model IDs (for example&nbsp;
-          <code className="rounded bg-white/10 px-1 font-landing-mono text-xs text-landing-fog">gemini-2.0-flash</code>) update — check the Gemini API docs for naming and quotas.
+          <code className="rounded bg-landing-fog/10 px-1 font-landing-mono text-xs text-landing-fog">gemini-2.0-flash</code>) update — check the Gemini API docs for naming and quotas.
         </p>
         <ul className="list-inside list-disc space-y-2 text-sm text-landing-fog/80">
           <li>

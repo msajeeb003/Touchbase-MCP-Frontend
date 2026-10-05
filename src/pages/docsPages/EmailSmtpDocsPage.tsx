@@ -55,7 +55,7 @@ export default function EmailSmtpDocsPage() {
             <dt className="font-medium text-landing-fog">SMTP Host</dt>
             <dd className="mt-1 text-landing-fog/65">
               Outbound mail server hostname from your provider (e.g.&nbsp;
-              <code className="rounded bg-white/10 px-1 font-landing-mono text-xs text-landing-fog">smtp.office365.com</code> or your company&apos;s
+              <code className="rounded bg-landing-fog/10 px-1 font-landing-mono text-xs text-landing-fog">smtp.office365.com</code> or your company&apos;s
               relay).
             </dd>
           </div>
@@ -71,7 +71,7 @@ export default function EmailSmtpDocsPage() {
             <dt className="font-medium text-landing-fog">SMTP Username</dt>
             <dd className="mt-1 text-landing-fog/65">
               Usually the full mailbox address you authenticate with (for example{" "}
-              <code className="rounded bg-white/10 px-1 font-landing-mono text-xs text-landing-fog">you@company.com</code>).
+              <code className="rounded bg-landing-fog/10 px-1 font-landing-mono text-xs text-landing-fog">you@company.com</code>).
             </dd>
           </div>
           <div>

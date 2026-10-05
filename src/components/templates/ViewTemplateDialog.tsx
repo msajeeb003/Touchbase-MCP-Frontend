@@ -17,9 +17,9 @@ interface ViewTemplateDialogProps {
 const getStageBadgeClass = (stage: string) => {
   const value = stage.toLowerCase();
   if (value.includes("no")) return "bg-landing-sky/20 text-landing-sky border-landing-sky/40";
-  if (value.includes("after")) return "bg-[#A78BFA]/15 text-[#A78BFA] border-[#A78BFA]/40";
+  if (value.includes("after")) return "bg-landing-violet/15 text-landing-violet border-landing-violet/40";
   if (value.includes("cancel")) return "bg-landing-voice/15 text-landing-voice border-landing-voice/40";
-  return "bg-white/[0.06] text-landing-fog/80 border-landing-line";
+  return "bg-landing-fog/[0.06] text-landing-fog/80 border-landing-line";
 };
 
 export default function ViewTemplateDialog({ templateId, trigger }: ViewTemplateDialogProps) {

@@ -26,7 +26,7 @@ export default function WizardProgress({ currentStep }: WizardProgressProps) {
             Step {boundedStep} of {steps.length}
           </span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-landing-fog/[0.06]">
           <div
             className="h-full rounded-full bg-landing-sky transition-all"
             style={{ width: `${progress}%` }}
@@ -46,7 +46,7 @@ export default function WizardProgress({ currentStep }: WizardProgressProps) {
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium ${
                   isActive || isCompleted
                     ? "bg-landing-sky text-landing-steel"
-                    : "bg-white/[0.06] text-landing-fog/55"
+                    : "bg-landing-fog/[0.06] text-landing-fog/55"
                 }`}
               >
                 {isCompleted ? <Check className="h-4 w-4" /> : step.num}
@@ -66,7 +66,7 @@ export default function WizardProgress({ currentStep }: WizardProgressProps) {
               {index < steps.length - 1 && (
                 <div
                   className={`ml-1 hidden h-[1px] flex-1 md:block xl:ml-4 ${
-                    isCompleted ? "bg-landing-sky" : "bg-white/10"
+                    isCompleted ? "bg-landing-sky" : "bg-landing-fog/10"
                   }`}
                 />
               )}

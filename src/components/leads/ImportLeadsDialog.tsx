@@ -195,7 +195,7 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
             className={`rounded-2xl border-2 border-dashed p-6 text-center transition-colors sm:p-10 ${
               isDragging
                 ? "border-landing-sky bg-landing-sky-soft"
-                : "border-landing-line bg-landing-steel hover:border-landing-sky/50 hover:bg-white/[0.03]"
+                : "border-landing-line bg-landing-steel hover:border-landing-sky/50 hover:bg-landing-fog/[0.03]"
             }`}
           >
             <input
@@ -238,7 +238,7 @@ export default function ImportLeadsDialog({ trigger }: ImportLeadsDialogProps) {
             ) : null}
           </div>
 
-          <div className="rounded-2xl border border-landing-line bg-white/[0.03] p-5">
+          <div className="rounded-2xl border border-landing-line bg-landing-fog/[0.03] p-5">
             <div className="flex items-center gap-2 text-sm font-medium text-landing-fog">
               <Info className="h-4 w-4 text-landing-sky" />
               What your CSV should include

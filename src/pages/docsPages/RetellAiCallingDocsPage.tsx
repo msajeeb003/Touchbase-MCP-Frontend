@@ -88,7 +88,7 @@ export default function RetellAiCallingDocsPage() {
           your sequences place a call. In the Retell dashboard, open{" "}
           <strong className="font-medium text-landing-fog">Agents</strong>, select the agent you want, and copy its
           identifier — it often starts with{" "}
-          <code className="rounded bg-white/10 px-1 font-landing-mono text-xs text-landing-fog">agent_</code>.
+          <code className="rounded bg-landing-fog/10 px-1 font-landing-mono text-xs text-landing-fog">agent_</code>.
         </p>
         <p className="text-sm text-landing-fog/65">
           If you cannot find it, search &quot;agent&quot; in&nbsp;
@@ -102,7 +102,7 @@ export default function RetellAiCallingDocsPage() {
           Enter the phone number Retell uses for{" "}
           <strong className="font-medium text-landing-fog">outbound caller ID</strong>, in{" "}
           <strong className="font-medium text-landing-fog">E.164</strong> format (for example{" "}
-          <code className="rounded bg-white/10 px-1 font-landing-mono text-xs text-landing-fog">+14155552671</code>). This must match numbers you have
+          <code className="rounded bg-landing-fog/10 px-1 font-landing-mono text-xs text-landing-fog">+14155552671</code>). This must match numbers you have
           set up or purchased in Retell.
         </p>
         <p className="text-sm text-landing-fog/65">

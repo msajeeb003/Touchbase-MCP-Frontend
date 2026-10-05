@@ -1,4 +1,5 @@
 import { useEffect, type CSSProperties } from "react";
+import { useAppTheme } from "@/lib/appTheme";
 
 /**
  * Steel theme for the dashboard overview.
@@ -28,17 +29,21 @@ export const steelSurfaceVars = {
 } as CSSProperties;
 
 /**
- * Applies the steel variables to <body> while the calling page is mounted.
+ * Applies the steel surface variables (dark or light, following the user's
+ * theme) to <body> while the calling page is mounted.
  *
  * Use this on pages that open dialogs, selects or tooltips: those render in
  * portals outside the page's DOM, so variables scoped to a wrapper element
  * never reach them. Previous values are restored on unmount, so pages that
- * have not been restyled keep the light theme.
+ * have not been restyled keep the default shadcn theme.
  */
 export function useSteelTheme() {
+  const theme = useAppTheme();
+
   useEffect(() => {
     const body = document.body;
-    const entries = Object.entries(steelSurfaceVars) as [string, string][];
+    const vars = theme === "light" ? lightSurfaceVars : steelSurfaceVars;
+    const entries = Object.entries(vars) as [string, string][];
     const previous = entries.map(
       ([name]) => [name, body.style.getPropertyValue(name)] as const,
     );
@@ -51,7 +56,7 @@ export function useSteelTheme() {
         else body.style.removeProperty(name);
       });
     };
-  }, []);
+  }, [theme]);
 }
 
 export const dashCard =

@@ -133,7 +133,7 @@ export default function LeadSelectorDialog({
                   className={`flex cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors ${
                     isSelected
                       ? "border border-landing-sky/40 bg-landing-sky-soft"
-                      : "border border-transparent hover:bg-white/[0.04]"
+                      : "border border-transparent hover:bg-landing-fog/[0.04]"
                   }`}
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-landing-sky text-sm font-semibold text-landing-steel">

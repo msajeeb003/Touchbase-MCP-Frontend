@@ -84,7 +84,7 @@ export default function SmsSettingsDocsPage() {
           <strong className="font-medium text-landing-fog">Account SID</strong> and{" "}
           <strong className="font-medium text-landing-fog">Auth Token</strong> from the Twilio Console. Enter phone
           numbers you have provisioned there, in <strong className="font-medium text-landing-fog">E.164</strong> format
-          (start with <code className="rounded bg-white/10 px-1 font-landing-mono text-xs text-landing-fog">+</code> and the country code).
+          (start with <code className="rounded bg-landing-fog/10 px-1 font-landing-mono text-xs text-landing-fog">+</code> and the country code).
         </p>
         <ol className="list-inside list-decimal space-y-2 text-sm text-landing-fog/80">
           <li>

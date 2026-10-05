@@ -68,7 +68,7 @@ function FieldLabel({
         )}
       </span>
       {optional && (
-        <span className="rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-landing-fog/55">
+        <span className="rounded-full bg-landing-fog/[0.06] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-landing-fog/55">
           Optional
         </span>
       )}
@@ -374,7 +374,7 @@ export default function CreateTemplatePage() {
             <Button
               variant="ghost"
               onClick={() => setStep("editor")}
-              className="text-landing-fog/80 hover:bg-white/[0.06] hover:text-landing-fog"
+              className="text-landing-fog/80 hover:bg-landing-fog/[0.06] hover:text-landing-fog"
             >
               Write it myself
             </Button>
@@ -502,7 +502,7 @@ export default function CreateTemplatePage() {
                   key={row.variable}
                   type="button"
                   onClick={() => insertVariable(row.variable)}
-                  className="inline-flex items-center gap-1 rounded-full border border-landing-line bg-white/[0.04] px-2.5 py-1 font-landing-mono text-[11px] text-landing-fog/65 transition-colors hover:border-landing-sky/40 hover:bg-landing-sky-soft hover:text-landing-sky"
+                  className="inline-flex items-center gap-1 rounded-full border border-landing-line bg-landing-fog/[0.04] px-2.5 py-1 font-landing-mono text-[11px] text-landing-fog/65 transition-colors hover:border-landing-sky/40 hover:bg-landing-sky-soft hover:text-landing-sky"
                 >
                   <Plus className="h-3 w-3" />
                   {row.variable}
@@ -532,7 +532,7 @@ export default function CreateTemplatePage() {
             <Button
               variant="ghost"
               onClick={handleCancel}
-              className="text-landing-fog/80 hover:bg-white/[0.06] hover:text-landing-fog"
+              className="text-landing-fog/80 hover:bg-landing-fog/[0.06] hover:text-landing-fog"
             >
               Cancel
             </Button>

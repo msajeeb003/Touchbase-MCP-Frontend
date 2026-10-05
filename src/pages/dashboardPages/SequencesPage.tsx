@@ -60,7 +60,7 @@ const getStatusBadgeClass = (status: SequenceStatus | string) => {
   if (status === "completed") return "border-landing-sky/40 bg-landing-sky-soft text-landing-sky";
   if (status === "cancelled") return "border-landing-voice/40 bg-landing-voice/15 text-landing-voice";
   if (status === "paused") return "border-landing-email/40 bg-landing-email/15 text-landing-email";
-  return "border-landing-line bg-white/5 text-landing-fog/70";
+  return "border-landing-line bg-landing-fog/5 text-landing-fog/70";
 };
 
 const getStatusLabel = (status: SequenceStatus | string) =>
@@ -308,7 +308,7 @@ export default function SequencesPage() {
           </div>
         ) : (
           <div className="w-full max-w-full overflow-x-auto">
-            <Table className="min-w-[1320px] [&_th]:font-landing-mono [&_th]:text-[10.5px] [&_th]:font-normal [&_th]:uppercase [&_th]:tracking-[0.1em] [&_th]:text-landing-fog/45 [&_tr:hover]:bg-white/[0.03]">
+            <Table className="min-w-[1320px] [&_th]:font-landing-mono [&_th]:text-[10.5px] [&_th]:font-normal [&_th]:uppercase [&_th]:tracking-[0.1em] [&_th]:text-landing-fog/45 [&_tr:hover]:bg-landing-fog/[0.03]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -345,7 +345,7 @@ export default function SequencesPage() {
                               <span>{sentCount}/{totalForProgress} sent</span>
                               <span>{Math.round(progressValue)}%</span>
                             </div>
-                            <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                            <div className="h-2 overflow-hidden rounded-full bg-landing-fog/10">
                               <div
                                 className="h-full rounded-full bg-landing-sky transition-all duration-500"
                                 style={{ width: `${progressValue}%` }}
@@ -375,7 +375,7 @@ export default function SequencesPage() {
                       })()}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button asChild variant="ghost" className="gap-1 text-landing-sky hover:bg-white/5 hover:text-landing-sky">
+                      <Button asChild variant="ghost" className="gap-1 text-landing-sky hover:bg-landing-fog/5 hover:text-landing-sky">
                         <Link to={`/dashboard/sequences/${sequence.id}/view`}>
                           View
                           <ChevronRight className="h-4 w-4" />
@@ -422,7 +422,7 @@ export default function SequencesPage() {
                           Paused
                         </span>
                         <Switch
-                          className="data-[state=checked]:bg-landing-whatsapp data-[state=unchecked]:bg-white/15"
+                          className="data-[state=checked]:bg-landing-whatsapp data-[state=unchecked]:bg-landing-fog/15"
                           checked={sequence.status === "active"}
                           disabled={
                             updatingStatusId === sequence.id || sequence.status === "completed"
@@ -452,7 +452,7 @@ export default function SequencesPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button asChild variant="ghost" size="icon" className="text-landing-sky hover:bg-white/5 hover:text-landing-sky">
+                      <Button asChild variant="ghost" size="icon" className="text-landing-sky hover:bg-landing-fog/5 hover:text-landing-sky">
                         <Link to={`/dashboard/sequences/${sequence.id}/steps`}>
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Update sequence</span>

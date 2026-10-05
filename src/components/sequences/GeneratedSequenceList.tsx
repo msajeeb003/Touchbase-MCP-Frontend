@@ -97,12 +97,12 @@ const getStepStatusBadgeClass = (status: string) => {
   const value = status.toLowerCase();
   if (value === "sent") return "border-landing-whatsapp/40 bg-landing-whatsapp/15 text-landing-whatsapp";
   if (value === "pending") return "border-landing-sms/40 bg-landing-sms/15 text-landing-sms";
-  if (value === "draft") return "border-landing-line bg-white/[0.06] text-landing-fog/80";
+  if (value === "draft") return "border-landing-line bg-landing-fog/[0.06] text-landing-fog/80";
   if (value === "scheduled") return "border-landing-email/40 bg-landing-email/15 text-landing-email";
-  if (value === "sending" || value === "calling") return "border-[#A78BFA]/40 bg-[#A78BFA]/15 text-[#A78BFA]";
-  if (value === "skipped") return "border-landing-line bg-white/[0.06] text-landing-fog/65";
+  if (value === "sending" || value === "calling") return "border-landing-violet/40 bg-landing-violet/15 text-landing-violet";
+  if (value === "skipped") return "border-landing-line bg-landing-fog/[0.06] text-landing-fog/65";
   if (value === "failed") return "border-landing-voice/40 bg-landing-voice/15 text-landing-voice";
-  return "border-landing-line bg-white/[0.06] text-landing-fog/80";
+  return "border-landing-line bg-landing-fog/[0.06] text-landing-fog/80";
 };
 
 const getSequenceStatusBadgeClass = (status: string) => {
@@ -112,7 +112,7 @@ const getSequenceStatusBadgeClass = (status: string) => {
   if (value === "completed") return "border-landing-sky/40 bg-landing-sky-soft text-landing-sky";
   if (value === "cancelled") return "border-landing-voice/40 bg-landing-voice/15 text-landing-voice";
   if (value === "paused") return "border-landing-email/40 bg-landing-email/15 text-landing-email";
-  return "border-landing-line bg-white/[0.06] text-landing-fog/80";
+  return "border-landing-line bg-landing-fog/[0.06] text-landing-fog/80";
 };
 
 const formatStepStatus = (status: string) =>
@@ -238,12 +238,12 @@ function SortableStep({
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab rounded p-1 text-landing-fog/25 outline-none hover:bg-white/[0.04] hover:text-landing-fog/55"
+            className="cursor-grab rounded p-1 text-landing-fog/25 outline-none hover:bg-landing-fog/[0.04] hover:text-landing-fog/55"
           >
             <GripVertical className="h-4 w-4" />
           </div>
 
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-xs font-semibold text-landing-fog/80">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-landing-fog/[0.06] text-xs font-semibold text-landing-fog/80">
             {step.stepOrder}
           </div>
 
@@ -800,7 +800,7 @@ export default function GeneratedSequenceList({
               Your Generated Sequence
             </h2>
             {isGenerated && (
-              <Badge variant="secondary" className="bg-white/[0.06] text-landing-fog/65 font-normal hover:bg-white/[0.06] rounded-md">
+              <Badge variant="secondary" className="bg-landing-fog/[0.06] text-landing-fog/65 font-normal hover:bg-landing-fog/[0.06] rounded-md">
                 {steps.length} steps
               </Badge>
             )}
@@ -837,7 +837,7 @@ export default function GeneratedSequenceList({
             </div>
           )}
         </CardHeader>
-        <CardContent className={`flex flex-col gap-3 p-4 sm:p-6 ${isGenerated ? "bg-white/[0.03]" : ""}`}>
+        <CardContent className={`flex flex-col gap-3 p-4 sm:p-6 ${isGenerated ? "bg-landing-fog/[0.03]" : ""}`}>
           {!isGenerated ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
               <div className="h-12 w-12 rounded-full bg-landing-sky-soft flex items-center justify-center mb-4">
@@ -885,7 +885,7 @@ export default function GeneratedSequenceList({
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="gap-2 text-landing-fog/65 rounded-full h-8 px-4 border-dashed border-landing-fog/20 bg-landing-steel hover:bg-white/[0.04]"
+                        className="gap-2 text-landing-fog/65 rounded-full h-8 px-4 border-dashed border-landing-fog/20 bg-landing-steel hover:bg-landing-fog/[0.04]"
                       >
                         <Plus className="h-3.5 w-3.5" />
                         Add Step
@@ -962,7 +962,7 @@ export default function GeneratedSequenceList({
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 justify-end border-t bg-white/[0.03] px-6 py-4">
+          <div className="flex shrink-0 justify-end border-t bg-landing-fog/[0.03] px-6 py-4">
             <Button variant="outline" onClick={() => setPreviewStep(null)} className="h-9">
               Close
             </Button>
@@ -1014,12 +1014,12 @@ export default function GeneratedSequenceList({
               />
             </div>
           </div>
-          <div className="flex shrink-0 justify-end gap-3 border-t bg-white/[0.03] px-6 py-4">
+          <div className="flex shrink-0 justify-end gap-3 border-t bg-landing-fog/[0.03] px-6 py-4">
             <Button 
               variant="ghost" 
               onClick={() => setEditStep(null)} 
               disabled={isSavingStep}
-              className="text-landing-fog/80 hover:text-landing-fog hover:bg-white/[0.06] h-9"
+              className="text-landing-fog/80 hover:text-landing-fog hover:bg-landing-fog/[0.06] h-9"
             >
               Cancel
             </Button>
@@ -1060,7 +1060,7 @@ export default function GeneratedSequenceList({
               <Input
                 value={String(addStepOrder)}
                 disabled
-                className="h-10 bg-white/[0.04] text-sm"
+                className="h-10 bg-landing-fog/[0.04] text-sm"
               />
               <p className="text-xs text-landing-fog/55">
                 Automatically set to the next available order.
@@ -1071,7 +1071,7 @@ export default function GeneratedSequenceList({
               <Input
                 value={addStepChannel ?? ""}
                 disabled
-                className="h-10 bg-white/[0.04] text-sm"
+                className="h-10 bg-landing-fog/[0.04] text-sm"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -1088,12 +1088,12 @@ export default function GeneratedSequenceList({
               </p> */}
             </div>
           </div>
-          <div className="flex shrink-0 justify-end gap-3 border-t bg-white/[0.03] px-6 py-4">
+          <div className="flex shrink-0 justify-end gap-3 border-t bg-landing-fog/[0.03] px-6 py-4">
             <Button
               variant="ghost"
               onClick={handleCloseAddStep}
               disabled={isCreatingStep}
-              className="h-9 text-landing-fog/80 hover:bg-white/[0.06] hover:text-landing-fog"
+              className="h-9 text-landing-fog/80 hover:bg-landing-fog/[0.06] hover:text-landing-fog"
             >
               Cancel
             </Button>
