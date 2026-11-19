@@ -31,6 +31,10 @@ export const baseApi = createApi({
         "Sequences",
         "SequenceGoals",
         "Dashboard",
+        // AI harness: what Claude did, Claude access tokens, the activity log.
+        "Runs",
+        "McpTokens",
+        "Activity",
     ],
     // overrideExisting: false,
 });

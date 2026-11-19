@@ -30,6 +30,11 @@ export interface SettingsItem {
   retellApiKey: string | null;
   retellAgentId: string | null;
   retellCallerNumber: string | null;
+  /** AI harness send window: "HH:MM" 24-hour times and an IANA timezone. */
+  sendWindowStart?: string | null;
+  sendWindowEnd?: string | null;
+  sendOnWeekends?: boolean;
+  sendTimezone?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -62,6 +67,10 @@ export interface UpdateSettingsRequestBody {
   retellApiKey?: string | null;
   retellAgentId?: string | null;
   retellCallerNumber?: string | null;
+  sendWindowStart?: string;
+  sendWindowEnd?: string;
+  sendOnWeekends?: boolean;
+  sendTimezone?: string | null;
 }
 
 export interface UpdateSettingsResponse {

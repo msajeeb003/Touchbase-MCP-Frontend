@@ -6,6 +6,7 @@ import DashboardSummarySection from "@/components/dashboard/DashboardSummarySect
 import SequencesByStatusDonutChart from "@/components/dashboard/SequencesByStatusDonutChart";
 import SentTrendLineChart from "@/components/dashboard/SentTrendLineChart";
 import UpcomingStepsSection from "@/components/dashboard/UpcomingStepsSection";
+import HarnessDashboardStrip from "@/components/harness/HarnessDashboardStrip";
 import { lightSurfaceVars, steelSurfaceVars } from "@/components/dashboard/dashboardTheme";
 import { useAppTheme, type AppTheme } from "@/lib/appTheme";
 import { useGetDashboardQuery } from "@/store/features/dashboard/dashboardApi";
@@ -78,6 +79,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        <HarnessDashboardStrip />
         <DashboardSummarySection summary={summary} />
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <LeadsByStageDonutChart data={dashboardData.leadsByStage} />

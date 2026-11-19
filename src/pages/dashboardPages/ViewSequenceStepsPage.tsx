@@ -131,6 +131,15 @@ function ViewStepCard({
             <Badge variant="outline" className={getStepStatusBadgeClass(step.status)}>
               {formatStepStatus(step.status)}
             </Badge>
+            {step.deliveryMode === "mock" ? (
+              <Badge
+                variant="outline"
+                title="Recorded as sent, but not handed to the email or SMS provider"
+                className="border-landing-sms/40 bg-landing-sms/10 text-landing-sms"
+              >
+                Mock: not really sent
+              </Badge>
+            ) : null}
           </div>
         </div>
 

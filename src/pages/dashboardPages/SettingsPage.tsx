@@ -33,6 +33,7 @@ import {
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { AI_PROVIDER, type SettingsItem, type UpdateSettingsRequestBody } from "@/types/settings";
 import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
+import { ClaudeAccessCard, SafetyRulesCard, SendWindowCard } from "@/components/harness/SettingsCards";
 
 const sectionCardClass = "overflow-hidden rounded-2xl border border-landing-line bg-landing-steel-2";
 const generalSettingsKeys = [
@@ -756,6 +757,20 @@ export default function SettingsPage() {
           </div>
         </form>
       </Form>
+
+      {/* AI harness: these save on their own, separately from the form above. */}
+      <div className="space-y-4 pt-4">
+        <div>
+          <p className="font-landing-mono text-[11px] uppercase tracking-[0.18em] text-landing-sky">AI Harness</p>
+          <h3 className="mt-1 font-landing-display text-xl font-bold text-landing-fog">Claude</h3>
+          <p className="text-sm text-landing-fog/55">
+            Connect Claude, choose when its follow-ups may go out, and see the rules that keep it safe.
+          </p>
+        </div>
+        <ClaudeAccessCard />
+        <SendWindowCard />
+        <SafetyRulesCard />
+      </div>
     </div>
   );
 }

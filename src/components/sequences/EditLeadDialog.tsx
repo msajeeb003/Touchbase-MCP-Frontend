@@ -42,7 +42,8 @@ export default function EditLeadDialog({
     try {
       const response = await updateLead({
         id: lead.id,
-        body: { name, email, phone },
+        // An empty box clears the field: the backend expects null for that, not "".
+        body: { name, email: email.trim() || null, phone: phone.trim() || null },
       }).unwrap();
       
       onSave(response.data);

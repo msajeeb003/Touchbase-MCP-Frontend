@@ -88,6 +88,8 @@ export interface SequenceStepItem {
   sentAt: string | null;
   sendLog: string | null;
   externalMessageId: string | null;
+  /** "mock" when the step was recorded as sent but not handed to a provider. */
+  deliveryMode?: "mock" | "live" | null;
   callLog?: SequenceStepCallLog | null;
   createdAt: string;
   updatedAt: string;

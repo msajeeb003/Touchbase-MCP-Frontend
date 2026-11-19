@@ -114,7 +114,7 @@ export const sequencesApi = baseApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["Sequences"],
+      invalidatesTags: ["Sequences", "Runs", "Activity", "Dashboard"],
     }),
     reorderSequenceSteps: builder.mutation<
       ReorderSequenceStepsResponse,
@@ -144,7 +144,7 @@ export const sequencesApi = baseApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["Sequences"],
+      invalidatesTags: ["Sequences", "Runs", "Activity", "Dashboard"],
     }),
     deleteSequence: builder.mutation<DeleteSequenceResponse, string>({
       query: (id) => ({

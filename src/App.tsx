@@ -17,6 +17,9 @@ import CreateTemplatePage from "./pages/dashboardPages/CreateTemplatePage";
 import CreateTemplateDemoPage from "./pages/dashboardPages/CreateTemplateDemoPage";
 import EditTemplatePage from "./pages/dashboardPages/EditTemplatePage";
 import SettingsPage from "./pages/dashboardPages/SettingsPage";
+import AiTasksPage from "./pages/dashboardPages/AiTasksPage";
+import ReviewQueuePage from "./pages/dashboardPages/ReviewQueuePage";
+import ActivityLogPage from "./pages/dashboardPages/ActivityLogPage";
 import HowToConfigurePage from "./pages/dashboardPages/HowToConfigurePage";
 import AiCredentialsDocsPage from "./pages/docsPages/AiCredentialsDocsPage";
 import DocsIndexPage from "./pages/docsPages/DocsIndexPage";
@@ -57,6 +60,11 @@ const App = () => (
                 <Route path="templates/new" element={<CreateTemplatePage />} />
                 <Route path="templates/new-demo" element={<CreateTemplateDemoPage />} />
                 <Route path="templates/:id/edit" element={<EditTemplatePage />} />
+                <Route path="ai-tasks" element={<AiTasksPage />} />
+                <Route path="ai-tasks/:id" element={<AiTasksPage />} />
+                <Route path="review" element={<ReviewQueuePage />} />
+                <Route path="review/:id" element={<ReviewQueuePage />} />
+                <Route path="activity" element={<ActivityLogPage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="how-to-configure" element={<HowToConfigurePage />} />
               </Route>

@@ -11,6 +11,11 @@ import {
   Loader,
   CheckCheck,
   XCircle,
+  SkipForward,
+  Trash2,
+  ArrowUpDown,
+  CalendarClock,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 import { type SequenceLogItem } from "@/types/sequences";
@@ -28,7 +33,18 @@ const EVENT_UI: Record<string, { icon: LucideIcon; color: string; bgColor: strin
   step_delivered: { icon: CheckCheck, color: "text-landing-whatsapp", bgColor: "bg-landing-whatsapp/15" },
   step_failed: { icon: XCircle, color: "text-landing-voice", bgColor: "bg-landing-voice/15" },
   step_edited: { icon: Pencil, color: "text-landing-fog/65", bgColor: "bg-landing-fog/[0.06]" },
+  // AI harness events
+  step_skipped: { icon: SkipForward, color: "text-landing-fog/65", bgColor: "bg-landing-fog/[0.06]" },
+  step_removed: { icon: Trash2, color: "text-landing-voice", bgColor: "bg-landing-voice/15" },
+  steps_reordered: { icon: ArrowUpDown, color: "text-landing-violet", bgColor: "bg-landing-violet/15" },
+  step_rescheduled: { icon: CalendarClock, color: "text-landing-email", bgColor: "bg-landing-email/15" },
+  approval_requested: { icon: Inbox, color: "text-landing-sms", bgColor: "bg-landing-sms/15" },
 };
+
+const ACTOR_LABEL: Record<string, string> = { claude: "Claude", user: "You", system: "Touchbase", lead: "Lead" };
+
+const stepNo = (meta: Record<string, unknown>) =>
+  meta.stepOrder ?? meta.step_number ?? meta.stepNumber ?? "";
 
 const renderLogMessage = (log: SequenceLogItem): string => {
   const { eventType, meta } = log;
@@ -43,7 +59,7 @@ const renderLogMessage = (log: SequenceLogItem): string => {
     case "sequence_status_changed":
       return `Status changed from ${meta.from} to ${meta.to}.`;
     case "sequence_edited":
-      return `Sequence settings edited: updated ${meta.fields?.join(", ") || "fields"}.`;
+      return `Sequence settings edited: updated ${(Array.isArray(meta.fields) ? meta.fields.join(", ") : "") || "fields"}.`;
     case "step_generated":
       return `Step ${meta.stepOrder} (${meta.stepType}) content generated with AI.`;
     case "step_scheduled":
@@ -58,6 +74,16 @@ const renderLogMessage = (log: SequenceLogItem): string => {
       return `Step ${meta.stepOrder} failed to send. Reason: ${meta.reason || "Unknown"}`;
     case "step_edited":
       return `Step ${meta.stepOrder} content manually edited.`;
+    case "step_skipped":
+      return `Step ${stepNo(meta)} skipped${meta.reason ? `: ${meta.reason}` : "."}`;
+    case "step_removed":
+      return `Step ${stepNo(meta)} removed from the draft.`;
+    case "steps_reordered":
+      return "Steps reordered.";
+    case "step_rescheduled":
+      return `Step ${stepNo(meta)} moved to a new time.`;
+    case "approval_requested":
+      return "Sent to the Review Queue: waiting for your approval.";
     default:
       return `Unknown event: ${eventType}`;
   }
@@ -108,6 +134,11 @@ export default function SequenceActivityLog({ sequenceId }: SequenceActivityLogP
                   {renderLogMessage(log)}
                 </p>
                 <span className="text-xs text-landing-fog/40 mt-1">
+                  {ACTOR_LABEL[log.actor] ? (
+                    <span className={log.actor === "claude" ? "font-medium text-landing-violet" : ""}>
+                      {ACTOR_LABEL[log.actor]} ·{" "}
+                    </span>
+                  ) : null}
                   {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
                 </span>
               </div>

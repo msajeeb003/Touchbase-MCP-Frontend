@@ -71,6 +71,7 @@ import {
 import { useDeleteLeadMutation, useGetLeadsQuery } from "@/store/features/leads/leadsApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
+import DoNotContactControl from "@/components/harness/DoNotContactControl";
 
 export default function LeadsPage() {
   const [page, setPage] = useState(1);
@@ -288,7 +289,7 @@ export default function LeadsPage() {
         ) : (
           <>
             <div className="w-full max-w-full overflow-x-auto">
-              <Table className="min-w-[1240px] [&_th]:font-landing-mono [&_th]:text-[10.5px] [&_th]:font-normal [&_th]:uppercase [&_th]:tracking-[0.1em] [&_th]:text-landing-fog/45 [&_tr:hover]:bg-landing-fog/[0.03]">
+              <Table className="min-w-[1340px] [&_th]:font-landing-mono [&_th]:text-[10.5px] [&_th]:font-normal [&_th]:uppercase [&_th]:tracking-[0.1em] [&_th]:text-landing-fog/45 [&_tr:hover]:bg-landing-fog/[0.03]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12 pr-2">
@@ -305,6 +306,7 @@ export default function LeadsPage() {
                     <TableHead>Notes</TableHead>
                     <TableHead>FollowUp Stage</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Contact</TableHead>
                     <TableHead>Added</TableHead>
                     <TableHead className="text-center">Add Transcript</TableHead>
                     <TableHead className="text-center">Update</TableHead>
@@ -323,7 +325,7 @@ export default function LeadsPage() {
                       </TableCell>
                       <TableCell className="">
                         <div className="flex flex-col gap-y-0.5">
-                          <h3 className="font-medium text-landing-fog">{lead.name}</h3>
+                          <h3 className={`font-medium ${lead.doNotContact ? "text-landing-fog/55 line-through decoration-landing-voice/60" : "text-landing-fog"}`}>{lead.name}</h3>
                             <span className="flex items-center gap-x-1 text-sm text-landing-fog/60"><Building2 className="h-3 w-3" /> {lead.company || "---"}</span>
                         </div>
 
@@ -366,6 +368,9 @@ export default function LeadsPage() {
                         <Badge variant="outline" className={getStatusBadgeClass(lead.status)}>
                           {lead.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DoNotContactControl lead={lead} />
                       </TableCell>
                       <TableCell className="whitespace-nowrap font-landing-mono text-[12.5px] text-landing-fog/60">
                         {formatLeadAddedAt(lead.createdAt)}

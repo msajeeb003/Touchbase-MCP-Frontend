@@ -9,6 +9,11 @@ export interface LeadItem {
   status: string;
   followUpStage: string | null;
   notes?: string;
+  /** Set by a person, by Claude, or by the system. Only a person can clear it. */
+  doNotContact?: boolean;
+  doNotContactAt?: string | null;
+  doNotContactReason?: string | null;
+  doNotContactSource?: string | null;
   createdAt: string;
   updatedAt: string;
 }
