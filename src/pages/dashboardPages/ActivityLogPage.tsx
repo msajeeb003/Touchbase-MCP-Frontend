@@ -8,18 +8,20 @@ import {
   Download,
   History,
   Inbox,
-  Loader2,
+  Info,
   MessageSquareReply,
   PauseCircle,
   PencilLine,
   Play,
   Search,
   Send,
+  Server,
   Settings2,
   ShieldCheck,
   Trash2,
   Sparkles,
   StopCircle,
+  UserRound,
   XCircle,
   type LucideIcon,
 } from "lucide-react";
@@ -30,7 +32,13 @@ import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { dayGroup, hm, rel, type Tone } from "@/lib/harness/labels";
 import { useGetActivityQuery, useGetRunsQuery } from "@/store/features/harness/harnessApi";
 import type { ActivityEvent, RunItem } from "@/types/harness";
-import { Chip, Empty, IconCircle, NoteBox, PageHead, Panel, outlineBtn } from "@/components/harness/ui";
+import { PageHead, outlineBtn } from "@/components/harness/ui";
+
+/*
+ * Activity Log: a journal. Day headings that stay in view, times in a left
+ * column, a thin rail of icon nodes, and who did it in words. The data,
+ * filters, search, links and CSV export are unchanged.
+ */
 
 /** One row of the log, from a sequence event, a reply, or a Claude task. */
 type Row = {
@@ -161,6 +169,19 @@ function fromRuns(runs: RunItem[]): Row[] {
   return rows;
 }
 
+const ACTOR_ICON: Record<Row["actor"], LucideIcon> = {
+  claude: Sparkles,
+  you: UserRound,
+  system: Server,
+  lead: MessageSquareReply,
+};
+
+/* Node colour by tone: only problems and Claude's own tasks get colour; the rest stay neutral. */
+const NODE_TONE: Partial<Record<Tone, string>> = {
+  bad: "bg-landing-voice/[0.10] text-landing-voice",
+  warn: "bg-landing-sms/[0.10] text-landing-sms",
+};
+
 export default function ActivityLogPage() {
   useSteelTheme();
   const [filter, setFilter] = useState("all");
@@ -214,11 +235,11 @@ export default function ActivityLogPage() {
   const total = activity.data?.data.total ?? 0;
 
   return (
-    <div className="w-full min-w-0 space-y-4 font-landing-sans text-landing-fog/80">
+    <div className="mx-auto w-full min-w-0 max-w-[980px] space-y-5 font-landing-sans">
       <PageHead
         title="Activity Log"
         icon={History}
-        sub="A record of the last 30 days: what Claude did, what you approved, what was sent, what failed and what was stopped. Click a row to open it."
+        sub="Last 30 days"
         actions={
           <Button variant="outline" className={outlineBtn} onClick={exportCsv} disabled={!shown.length}>
             <Download className="h-4 w-4" />
@@ -227,89 +248,155 @@ export default function ActivityLogPage() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-2.5">
-        <div className="relative w-full max-w-xs">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-landing-fog/40" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the log" className="pl-10" />
+      {/* Search and filters on one line */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+        <div className="relative w-full md:max-w-[260px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-tb-ink-3" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search the log"
+            aria-label="Search the log"
+            className="pl-9"
+          />
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {FILTERS.map((x) => (
-            <button
-              key={x.key}
-              type="button"
-              onClick={() => setFilter(x.key)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] transition-colors",
-                filter === x.key
-                  ? "border-landing-sky/50 bg-landing-sky/10 text-landing-sky"
-                  : "border-landing-line text-landing-fog/65 hover:text-landing-fog",
-              )}
-            >
-              {x.label}
-              <span className="font-landing-mono text-[11px] opacity-70">{rows.filter(x.match).length}</span>
-            </button>
-          ))}
+        <div role="group" aria-label="Filter the log" className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5 md:pb-0">
+          {FILTERS.map((x) => {
+            const on = filter === x.key;
+            return (
+              <button
+                key={x.key}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setFilter(x.key)}
+                className={cn(
+                  "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors",
+                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--tb-accent))]",
+                  on ? "bg-tb-ink text-[rgb(var(--tb-surface-strong))]" : "text-tb-ink-3 hover:bg-tb-ink/[0.05] hover:text-tb-ink",
+                )}
+              >
+                {x.label}
+                <span className={cn("font-landing-mono text-[11px] tabular-nums", on ? "opacity-80" : "")}>{rows.filter(x.match).length}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {(activity.data?.data.notes ?? []).map((n) => (
-        <NoteBox key={n} tone="mute" icon={History}>
+        <p key={n} className="flex items-start gap-2 text-[13px] text-tb-ink-3">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {n}
-        </NoteBox>
+        </p>
       ))}
 
       {loading ? (
-        <Panel className="p-8 text-sm text-landing-fog/55">
-          <Loader2 className="mr-2 inline h-4 w-4 animate-spin text-landing-sky" />
-          Loading the log…
-        </Panel>
+        <div className="tb-card space-y-3 p-5" role="status" aria-label="Loading the log">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="grid grid-cols-[48px_minmax(0,1fr)] gap-4">
+              <div className="h-3 animate-pulse rounded bg-tb-ink/[0.06]" />
+              <div className="h-3.5 animate-pulse rounded bg-tb-ink/[0.07]" style={{ width: `${55 + ((i * 13) % 35)}%` }} />
+            </div>
+          ))}
+        </div>
       ) : activity.isError ? (
-        <Panel className="border-landing-voice/40 p-8 text-sm text-landing-voice">Could not load the activity log.</Panel>
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-landing-voice/35 bg-landing-voice/[0.07] px-4 py-3.5">
+          <XCircle className="h-[18px] w-[18px] shrink-0 text-landing-voice" />
+          <p className="min-w-0 flex-1 text-sm text-tb-ink">Could not load the activity log.</p>
+          <button type="button" className="tb-btn-quiet tb-btn-sm" onClick={() => activity.refetch()}>
+            Try again
+          </button>
+        </div>
       ) : !shown.length ? (
-        <Panel>
-          <Empty icon={History}>Nothing matches.</Empty>
-        </Panel>
+        <div className="tb-card px-6 py-12 text-center">
+          <p className="text-sm text-tb-ink">Nothing matches.</p>
+          {q || filter !== "all" ? (
+            <button
+              type="button"
+              className="mt-1 text-[13px] font-medium text-tb-accent hover:underline"
+              onClick={() => {
+                setQ("");
+                setFilter("all");
+              }}
+            >
+              Show everything
+            </button>
+          ) : null}
+        </div>
       ) : (
-        Object.entries(groups).map(([day, list]) => (
-          <div key={day}>
-            <p className="mb-2 mt-4 font-landing-mono text-[10.5px] uppercase tracking-[0.12em] text-landing-fog/45">{day}</p>
-            <Panel>
-              <div className="divide-y divide-landing-line">
-                {list.map((r) => {
+        <div className="space-y-6">
+          {Object.entries(groups).map(([day, list]) => (
+            <section key={day} aria-label={day}>
+              {/* Day heading stays in view while its events scroll */}
+              <h2 className="sticky top-14 z-[5] -mx-1 mb-1 flex items-baseline gap-2 bg-[rgb(var(--tb-canvas)/0.85)] px-1 py-2 backdrop-blur-sm">
+                <span className="font-landing-display text-[15px] font-bold text-tb-ink">{day}</span>
+                <span className="text-[12px] text-tb-ink-3">
+                  {list.length} event{list.length === 1 ? "" : "s"}
+                </span>
+              </h2>
+              <ol className="tb-card px-2 py-1.5">
+                {list.map((r, i) => {
                   const [Icon, tone] = TYPE_UI[r.type] ?? [History, "mute"];
-                  const [who, whoTone] = ACTOR[r.actor];
+                  const [who] = ACTOR[r.actor];
+                  const WhoIcon = ACTOR_ICON[r.actor];
+                  const node = NODE_TONE[tone] ?? (tone === "claude" && r.type.startsWith("task") ? "bg-landing-violet/[0.10] text-landing-violet" : "bg-tb-ink/[0.05] text-tb-ink-3");
                   const body = (
                     <>
-                      <IconCircle tone={tone} icon={Icon} size="sm" />
-                      <div className="min-w-0 flex-1">
-                        <div className="break-words text-[13.5px] text-landing-fog/90">{r.text}</div>
-                        <div className="mt-1 flex items-center gap-2">
-                          <Chip tone={whoTone}>{who}</Chip>
-                          <span className="font-landing-mono text-[11px] text-landing-fog/40" title={new Date(r.at).toLocaleString()}>
-                            {hm(r.at)} · {rel(r.at)}
-                          </span>
-                        </div>
-                      </div>
-                      {r.to ? <ChevronRight className="h-4 w-4 shrink-0 text-landing-fog/35" /> : null}
+                      <time
+                        dateTime={r.at}
+                        title={new Date(r.at).toLocaleString()}
+                        className="pt-[3px] text-right font-landing-mono text-[11.5px] tabular-nums text-tb-ink-3"
+                      >
+                        {hm(r.at)}
+                      </time>
+                      <span className="relative flex justify-center">
+                        {i < list.length - 1 ? <span aria-hidden className="absolute bottom-[-14px] top-7 w-px bg-tb-ink/[0.10]" /> : null}
+                        <span className={cn("relative z-[1] grid h-6 w-6 place-items-center rounded-full", node)}>
+                          <Icon className="h-3 w-3" />
+                        </span>
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block break-words text-[14px] leading-5 text-tb-ink">{r.text}</span>
+                        <span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-tb-ink-3">
+                          <WhoIcon className="h-3 w-3" />
+                          {who}
+                          <span aria-hidden>·</span>
+                          {rel(r.at)}
+                        </span>
+                      </span>
+                      {r.to ? (
+                        <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-tb-ink-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                      ) : (
+                        <span />
+                      )}
                     </>
                   );
-                  return r.to ? (
-                    <Link key={r.key} to={r.to} className="flex items-center gap-3 px-4 py-3 hover:bg-landing-fog/[0.03]">
-                      {body}
-                    </Link>
-                  ) : (
-                    <div key={r.key} className="flex items-center gap-3 px-4 py-3">
-                      {body}
-                    </div>
+                  const cls = "grid grid-cols-[44px_24px_minmax(0,1fr)_16px] gap-x-3 rounded-xl px-2 py-2.5";
+                  return (
+                    <li key={r.key}>
+                      {r.to ? (
+                        <Link
+                          to={r.to}
+                          className={cn(
+                            cls,
+                            "group transition-colors hover:bg-tb-ink/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[rgb(var(--tb-accent))]",
+                          )}
+                        >
+                          {body}
+                        </Link>
+                      ) : (
+                        <div className={cls}>{body}</div>
+                      )}
+                    </li>
                   );
                 })}
-              </div>
-            </Panel>
-          </div>
-        ))
+              </ol>
+            </section>
+          ))}
+        </div>
       )}
       {total > 50 ? (
-        <p className="text-xs text-landing-fog/45">Showing the newest 50 of {total} follow-up events from the last 30 days.</p>
+        <p className="text-xs text-tb-ink-3">Showing the newest 50 of {total} follow-up events from the last 30 days.</p>
       ) : null}
     </div>
   );
