@@ -6,6 +6,8 @@ import type {
   CreateLeadResponse,
   DeleteLeadResponse,
   GetSingleLeadResponse,
+  GetDeletedLeadsResponse,
+  GetLeadRepliesResponse,
   GetLeadsQueryParams,
   GetLeadsResponse,
   ImportLeadsCsvResponse,
@@ -69,6 +71,22 @@ export const leadsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Leads"],
     }),
+    getDeletedLeads: builder.query<GetDeletedLeadsResponse, void>({
+      query: () => ({ url: "/leads/deleted", method: "GET" }),
+      providesTags: ["Leads"],
+    }),
+    restoreLead: builder.mutation<GetSingleLeadResponse, string>({
+      query: (id) => ({ url: `/leads/${id}/restore`, method: "POST" }),
+      invalidatesTags: ["Leads", "Activity"],
+    }),
+    getLeadReplies: builder.query<GetLeadRepliesResponse, { leadId: string; page?: number; limit?: number }>({
+      query: ({ leadId, page = 1, limit = 20 }) => ({
+        url: `/leads/${leadId}/inbound-emails`,
+        method: "GET",
+        params: { page, limit },
+      }),
+      providesTags: ["Leads"],
+    }),
     importLeadsCsv: builder.mutation<ImportLeadsCsvResponse, FormData>({
       query: (body) => ({
         url: "/leads/import-csv",
@@ -89,4 +107,7 @@ export const {
   useDeleteLeadMutation,
   useBulkDeleteLeadsMutation,
   useImportLeadsCsvMutation,
+  useGetDeletedLeadsQuery,
+  useRestoreLeadMutation,
+  useGetLeadRepliesQuery,
 } = leadsApi;

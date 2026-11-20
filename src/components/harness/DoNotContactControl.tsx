@@ -10,7 +10,12 @@ import type { LeadItem } from "@/types/leads";
 import { showError, showSuccess } from "@/utils/toast";
 import { Chip, NoteBox, dangerBtn, outlineBtn } from "./ui";
 
-const SOURCE: Record<string, string> = { mcp: "by Claude", user: "by you", system: "by Touchbase" };
+const SOURCE: Record<string, string> = {
+  mcp: "by Claude",
+  user: "by you",
+  system: "by Touchbase",
+  lead_opt_out: "the lead asked to stop (SMS STOP or a reply)",
+};
 
 /**
  * Do-not-contact on a lead: a badge, a button to set it and a button to clear it.

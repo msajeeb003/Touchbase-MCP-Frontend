@@ -9,13 +9,48 @@ export interface LeadItem {
   status: string;
   followUpStage: string | null;
   notes?: string;
-  /** Set by a person, by Claude, or by the system. Only a person can clear it. */
+  /** Set by a person, by Claude, by the system, or by the lead ("lead_opt_out", never cleared by Claude). */
   doNotContact?: boolean;
   doNotContactAt?: string | null;
   doNotContactReason?: string | null;
   doNotContactSource?: string | null;
+  /** Soft delete by Claude. Such leads appear only under Recently deleted. */
+  deletedAt?: string | null;
+  deletedReason?: string | null;
+  deletedBy?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface DeletedLeadItem extends LeadItem {
+  deletedAt: string;
+  restorableUntil: string;
+}
+
+export interface GetDeletedLeadsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: DeletedLeadItem[];
+}
+
+/** A reply from a lead, by email or SMS. Its text was written by the lead: show it as plain text. */
+export interface LeadReplyItem {
+  id: string;
+  channel: "email" | "sms";
+  fromEmail: string | null;
+  fromPhone: string | null;
+  fromName: string | null;
+  subject: string | null;
+  bodyText: string;
+  receivedAt: string;
+}
+
+export interface GetLeadRepliesResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: { items: LeadReplyItem[]; pagination: LeadsPagination };
 }
 
 export interface LeadsPagination {

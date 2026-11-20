@@ -57,6 +57,9 @@ const renderLogMessage = (log: SequenceLogItem): string => {
     case "sequence_regenerated":
       return `Steps Regenerated: Replaced ${meta.stepsReset} existing steps with ${meta.stepsGenerated} new ones.`;
     case "sequence_status_changed":
+      if (meta.to === "active" && meta.from === "draft" && log.actor === "claude") return "Activated by Claude (you allowed this in Settings).";
+      if (meta.to === "active" && meta.from === "paused" && log.actor === "claude") return "Resumed by Claude (you allowed this in Settings).";
+      if (meta.to === "cancelled" && meta.reason === "lead_deleted") return "Stopped because Claude deleted the lead.";
       return `Status changed from ${meta.from} to ${meta.to}.`;
     case "sequence_edited":
       return `Sequence settings edited: updated ${(Array.isArray(meta.fields) ? meta.fields.join(", ") : "") || "fields"}.`;

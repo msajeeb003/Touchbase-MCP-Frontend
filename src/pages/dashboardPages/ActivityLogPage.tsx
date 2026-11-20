@@ -15,6 +15,9 @@ import {
   Play,
   Search,
   Send,
+  Settings2,
+  ShieldCheck,
+  Trash2,
   Sparkles,
   StopCircle,
   XCircle,
@@ -56,6 +59,9 @@ const TYPE_UI: Record<string, [LucideIcon, Tone]> = {
   stopped: [StopCircle, "bad"],
   completed: [CheckCircle2, "ok"],
   scheduled: [CalendarClock, "blue"],
+  lead_deleted: [Trash2, "bad"],
+  do_not_contact_cleared: [ShieldCheck, "warn"],
+  settings_changed: [Settings2, "blue"],
 };
 
 const ACTOR: Record<Row["actor"], [string, Tone]> = {
@@ -77,7 +83,7 @@ const FILTERS: { key: string; label: string; match: (r: Row) => boolean }[] = [
 const channelWord = (c: string | null) => (c === "sms" ? "SMS" : c === "email" ? "email" : c ?? "message");
 
 function describe(e: ActivityEvent): string {
-  const name = e.untrusted.lead_name;
+  const name = e.untrusted.lead_name ?? "a lead";
   const step = e.step_number ? `step ${e.step_number}` : "a step";
   const d = e.untrusted_details as Record<string, unknown>;
   switch (e.type) {
@@ -88,15 +94,27 @@ function describe(e: ActivityEvent): string {
     case "skipped":
       return `${step} for ${name} was skipped`;
     case "replied":
-      return `${name} replied${typeof d.subject === "string" && d.subject ? `: “${d.subject}”` : ""}`;
+      return e.channel === "sms"
+        ? `${name} replied by SMS`
+        : `${name} replied${typeof d.subject === "string" && d.subject ? `: “${d.subject}”` : ""}`;
+    case "lead_deleted":
+      return `${name} was deleted by Claude${typeof d.reason === "string" ? `: ${d.reason}` : ""} (restorable for 30 days)`;
+    case "do_not_contact_cleared":
+      return `Do-not-contact for ${name} was cleared by Claude${typeof d.reason === "string" ? `: ${d.reason}` : ""}`;
+    case "settings_changed": {
+      const fields = Array.isArray(d.changed_fields) ? (d.changed_fields as string[]).join(", ").replace(/_/g, " ") : "";
+      return `Settings changed by Claude${fields ? `: ${fields}` : ""}`;
+    }
     case "paused":
       return `Follow-up for ${name} paused`;
     case "resumed":
-      return `Follow-up for ${name} resumed`;
+      return e.actor === "claude" ? `Follow-up for ${name} resumed by Claude` : `Follow-up for ${name} resumed`;
     case "stopped":
       return `Follow-up for ${name} was rejected or stopped`;
     case "approved":
-      return `Follow-up for ${name} approved and scheduled`;
+      return e.actor === "claude"
+        ? `Follow-up for ${name} activated by Claude and scheduled`
+        : `Follow-up for ${name} approved and scheduled`;
     case "completed":
       return `Follow-up for ${name} finished`;
     case "created":
@@ -159,7 +177,15 @@ export default function ActivityLogPage() {
       actor: actorOf(e.actor),
       type: e.type,
       text: (() => { const t = describe(e); return t.charAt(0).toUpperCase() + t.slice(1); })(),
-      to: e.sequence_id ? `/dashboard/review/${e.sequence_id}` : `/dashboard/leads/${e.lead_id}/transcripts`,
+      to: e.sequence_id
+        ? `/dashboard/review/${e.sequence_id}`
+        : e.type === "lead_deleted"
+          ? "/dashboard/leads/deleted"
+          : e.type === "settings_changed"
+            ? "/dashboard/settings#claude-permissions"
+            : e.lead_id
+              ? `/dashboard/leads/${e.lead_id}/transcripts`
+              : null,
     }));
     const oldest = events.length ? events[events.length - 1].at : since;
     list.push(...fromRuns((runs.data?.data.items ?? []).filter((r) => r.started_at >= oldest || events.length < 50)));
