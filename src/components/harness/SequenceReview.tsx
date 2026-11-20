@@ -50,7 +50,7 @@ import { useUpdateSequenceMutation, useUpdateSequenceStepMutation } from "@/stor
 import { useGetSettingsQuery } from "@/store/features/settings/settingsApi";
 import type { HarnessSequence, RunStep } from "@/types/harness";
 import { showError, showSuccess } from "@/utils/toast";
-import { Chip, NoteBox, StatusChip, dangerBtn, outlineBtn, primaryBtn } from "./ui";
+import { NoteBox, StatusChip, dangerBtn, outlineBtn, primaryBtn } from "./ui";
 
 /** Shows {{placeholders}} highlighted. The text is rendered as text, never as markup. */
 export function Highlighted({ text }: { text: string }) {
@@ -191,136 +191,166 @@ export default function SequenceReview({ seq }: { seq: HarnessSequence }) {
     },
   };
 
+  const notices: { tone: "bad" | "warn" | "ok" | "blue" | "mute"; icon: typeof Ban; title: string; text: ReactNode }[] = [];
+  if (lastError) notices.push({ tone: "bad", icon: XCircle, title: "Not done.", text: lastError });
+  if (seq.lead.do_not_contact)
+    notices.push({ tone: "bad", icon: Ban, title: "This lead is do-not-contact.", text: "Touchbase refuses to approve or send this follow-up. Only a person can clear it, on the Leads page." });
+  if (placeholder)
+    notices.push({ tone: "warn", icon: AlertTriangle, title: "A placeholder is left in the text", text: "(highlighted below). Nothing fills it at send time, so the lead would see it. Edit the message before approving." });
+  if (seq.transcript_added_since)
+    notices.push({ tone: "blue", icon: BookOpen, title: "New call transcript.", text: "A call transcript was added for this lead after Claude wrote this draft. You may want Claude to write it again." });
+  if (seq.status === "paused" && seq.paused_reason)
+    notices.push({
+      tone: seq.paused_reason === "lead_replied" ? "ok" : "mute",
+      icon: seq.paused_reason === "lead_replied" ? MessageSquareReply : PauseCircle,
+      title: "Paused.",
+      text: PAUSED_REASON[seq.paused_reason] ?? seq.paused_reason,
+    });
+  if (seq.status === "cancelled") notices.push({ tone: "bad", icon: XCircle, title: "Rejected or stopped.", text: "Nothing more will be sent." });
+  if (seq.status === "active" && seq.approved_at)
+    notices.push({
+      tone: "blue",
+      icon: CalendarClock,
+      title: `Approved ${rel(seq.approved_at)}.`,
+      text: nextStep?.scheduled_for ? `Next message ${future(nextStep.scheduled_for)}, inside your send window.` : "The messages go out inside your send window.",
+    });
+
   return (
-    <div className="flex min-h-0 flex-col">
-      <div className="px-5 pt-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="min-w-0 break-words font-landing-display text-xl font-bold tracking-[-0.01em] text-landing-fog">
-            {seq.lead.untrusted.name}
-          </h3>
-          <StatusChip look={look} className="ml-auto" />
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* Who it is for, and where it came from */}
+      <div className="space-y-2 px-5 pt-5 md:px-6">
+        <div className="flex flex-wrap items-start gap-x-3 gap-y-1.5">
+          <div className="min-w-0 flex-1">
+            <h3 className="break-words font-landing-display text-[22px] font-bold leading-7 tracking-[-0.015em] text-tb-ink">
+              {seq.lead.untrusted.name}
+            </h3>
+            <p className="text-sm text-tb-ink-3">{seq.lead.untrusted.company || "No company"}</p>
+          </div>
+          <StatusChip look={look} />
         </div>
-        <div className="mt-0.5 text-sm text-landing-fog/55">{seq.lead.untrusted.company || "No company"}</div>
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
-          <Link to={`/dashboard/leads/${seq.lead.lead_id}/transcripts`} className="inline-flex items-center gap-1 text-landing-sky hover:underline">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
+          <Link to={`/dashboard/leads/${seq.lead.lead_id}/transcripts`} className="inline-flex items-center gap-1 font-medium text-tb-accent hover:underline">
             <History className="h-3.5 w-3.5" />
             Lead and calls
           </Link>
-          <Link to={`/dashboard/sequences/${seq.sequence_id}/view`} className="inline-flex items-center gap-1 text-landing-sky hover:underline">
+          <Link to={`/dashboard/sequences/${seq.sequence_id}/view`} className="inline-flex items-center gap-1 font-medium text-tb-accent hover:underline">
             <Mail className="h-3.5 w-3.5" />
             Open in Sequences
           </Link>
+          <Link
+            to={`/dashboard/ai-tasks/${seq.run.run_id}`}
+            className="inline-flex min-w-0 max-w-full items-center gap-1 text-tb-ink-3 hover:text-tb-ink hover:underline"
+          >
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-landing-violet" />
+            <span className="truncate">Prepared by Claude in the task “{seq.run.instruction}”</span>
+          </Link>
         </div>
-        <Link
-          to={`/dashboard/ai-tasks/${seq.run.run_id}`}
-          className="mt-2 inline-flex max-w-full items-center gap-1 text-[12.5px] text-landing-violet hover:underline"
-        >
-          <Sparkles className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">Prepared by Claude in the task “{seq.run.instruction}”</span>
-        </Link>
       </div>
 
-      <div className="space-y-3 px-5 py-4">
-        {lastError ? (
-          <NoteBox tone="bad" icon={XCircle}>
-            <b>Not done.</b> {lastError}
-          </NoteBox>
-        ) : null}
-        {seq.lead.do_not_contact ? (
-          <NoteBox tone="bad" icon={Ban}>
-            <b>This lead is do-not-contact.</b> Touchbase refuses to approve or send this follow-up. Only a person can clear it, on the Leads page.
-          </NoteBox>
-        ) : null}
-        {placeholder ? (
-          <NoteBox tone="warn" icon={AlertTriangle}>
-            <b>A placeholder is left in the text</b> (highlighted below). Nothing fills it at send time, so the lead would see it. Edit the message before approving.
-          </NoteBox>
-        ) : null}
-        {seq.transcript_added_since ? (
-          <NoteBox tone="blue" icon={BookOpen}>
-            A call transcript was added for this lead after Claude wrote this draft. You may want Claude to write it again.
-          </NoteBox>
-        ) : null}
-        {seq.status === "paused" && seq.paused_reason ? (
-          <NoteBox tone={seq.paused_reason === "lead_replied" ? "ok" : "mute"} icon={seq.paused_reason === "lead_replied" ? MessageSquareReply : PauseCircle}>
-            <b>Paused.</b> {PAUSED_REASON[seq.paused_reason] ?? seq.paused_reason}
-          </NoteBox>
-        ) : null}
-        {seq.status === "cancelled" ? (
-          <NoteBox tone="bad" icon={XCircle}>
-            <b>Rejected or stopped.</b> Nothing more will be sent.
-          </NoteBox>
-        ) : null}
-        {seq.status === "active" && seq.approved_at ? (
-          <NoteBox tone="blue" icon={CalendarClock}>
-            <b>Approved {rel(seq.approved_at)}.</b>{" "}
-            {nextStep?.scheduled_for ? `Next message ${future(nextStep.scheduled_for)}, inside your send window.` : "The messages go out inside your send window."}
-          </NoteBox>
+      <div className="space-y-5 px-5 py-5 md:px-6">
+        {notices.length ? (
+          <ul className="space-y-2">
+            {notices.map((n) => (
+              <li
+                key={n.title}
+                className={cn(
+                  "flex items-start gap-2.5 rounded-xl px-3.5 py-2.5 text-[13.5px] leading-5 text-tb-ink-2",
+                  n.tone === "bad" ? "bg-landing-voice/[0.07]" : n.tone === "warn" ? "bg-landing-sms/[0.08]" : "bg-tb-ink/[0.04]",
+                )}
+              >
+                <n.icon
+                  className={cn(
+                    "mt-0.5 h-4 w-4 shrink-0",
+                    n.tone === "bad"
+                      ? "text-landing-voice"
+                      : n.tone === "warn"
+                        ? "text-landing-sms"
+                        : n.tone === "ok"
+                          ? "text-landing-whatsapp"
+                          : n.tone === "blue"
+                            ? "text-tb-accent"
+                            : "text-tb-ink-3",
+                  )}
+                />
+                <span className="min-w-0">
+                  <b className="font-semibold text-tb-ink">{n.title}</b> {n.text}
+                </span>
+              </li>
+            ))}
+          </ul>
         ) : null}
 
-        <div className="rounded-xl border border-landing-sky/25 bg-landing-sky/[0.06] p-3.5">
-          <div className="flex items-center gap-1.5 font-landing-mono text-[10.5px] uppercase tracking-[0.12em] text-landing-sky">
-            <Sparkles className="h-3 w-3" />
-            Why Claude wrote it this way
-          </div>
-          {note ? <p className="mt-1.5 whitespace-pre-wrap text-sm text-landing-fog/85">{note}</p> : null}
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+        {/* Why Claude wrote it this way */}
+        <div className="space-y-1.5 border-l-2 border-tb-ink/[0.14] pl-3.5">
+          <p className="tb-label">Why Claude wrote it this way</p>
+          {note ? <p className="whitespace-pre-wrap text-[14.5px] leading-6 text-tb-ink">{note}</p> : null}
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12.5px]">
             {seq.no_call_transcript ? (
               <>
-                <Chip tone="warn" icon={BookOpen}>No call transcript</Chip>
-                <span className="text-[12.5px] text-landing-fog/55">Written from the lead's notes and stage.</span>
-                <Link to={`/dashboard/leads/${seq.lead.lead_id}/transcripts`} className="text-[12.5px] text-landing-sky hover:underline">
+                <span className="inline-flex items-center gap-1 font-medium text-landing-sms">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  No call transcript
+                </span>
+                <span className="text-tb-ink-3">Written from the lead's notes and stage.</span>
+                <Link to={`/dashboard/leads/${seq.lead.lead_id}/transcripts`} className="font-medium text-tb-accent hover:underline">
                   Add a call transcript
                 </Link>
               </>
             ) : firstTranscript ? (
               <>
-                <Chip tone="blue" icon={BookOpen}>
+                <span className="inline-flex items-center gap-1 font-medium text-tb-ink-2">
+                  <BookOpen className="h-3.5 w-3.5" />
                   Based on: call of {firstTranscript.meeting_date}
                   {firstTranscript.untrusted_meeting_title ? ` · ${firstTranscript.untrusted_meeting_title}` : ""}
-                </Chip>
-                <span className="text-[12px] text-landing-fog/45">Claude had to read this call before it could write.</span>
+                </span>
+                <span className="text-tb-ink-3">Claude had to read this call before it could write.</span>
               </>
             ) : (
-              <Chip tone="mute">Basis not stated</Chip>
+              <span className="text-tb-ink-3">Basis not stated</span>
             )}
-          </div>
+          </p>
         </div>
 
-        <p className="pt-1 font-landing-mono text-[10.5px] uppercase tracking-[0.12em] text-landing-fog/45">
-          The messages ({seq.steps.length} step{seq.steps.length === 1 ? "" : "s"})
-        </p>
-        <div className="space-y-2.5">
-          {seq.steps.map((st, idx) => (
-            <StepBox key={st.step_id} step={st} idx={idx} editable={awaiting} onEdit={() => setEditing(st)} />
-          ))}
+        {/* The messages, as a thread on a rail */}
+        <div>
+          <p className="tb-label mb-3">
+            The messages ({seq.steps.length} step{seq.steps.length === 1 ? "" : "s"})
+          </p>
+          <ol className="relative space-y-4">
+            {seq.steps.map((st, idx) => (
+              <StepBox
+                key={st.step_id}
+                step={st}
+                idx={idx}
+                last={idx === seq.steps.length - 1}
+                editable={awaiting}
+                onEdit={() => setEditing(st)}
+              />
+            ))}
+          </ol>
         </div>
       </div>
 
       {actions ? (
-        <div className="sticky bottom-0 mt-auto flex flex-wrap gap-2 border-t border-landing-line bg-landing-steel-2/95 px-5 py-3 backdrop-blur">
+        <div className="sticky bottom-0 z-10 mt-auto flex flex-wrap items-center gap-2 rounded-b-2xl border-t border-tb-ink/[0.08] bg-[rgb(var(--tb-surface-strong)/0.92)] px-5 py-3 backdrop-blur-md md:px-6">
           {actions}
-          {awaiting && placeholder ? (
-            <span className="self-center text-xs text-landing-sms">Remove the placeholder to approve.</span>
-          ) : null}
+          {awaiting && placeholder ? <span className="text-xs font-medium text-landing-sms">Remove the placeholder to approve.</span> : null}
         </div>
       ) : null}
 
-      {editing ? (
-        <EditStepDialog sequenceId={seq.sequence_id} step={editing} onClose={() => setEditing(null)} />
-      ) : null}
+      {editing ? <EditStepDialog sequenceId={seq.sequence_id} step={editing} onClose={() => setEditing(null)} /> : null}
 
       <AlertDialog open={confirm !== null} onOpenChange={(o) => !o && setConfirm(null)}>
         {confirm ? (
           <AlertDialogContent className="font-landing-sans">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-landing-fog">{confirmText[confirm].title}</AlertDialogTitle>
+              <AlertDialogTitle className="text-tb-ink">{confirmText[confirm].title}</AlertDialogTitle>
               <AlertDialogDescription>{confirmText[confirm].body}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className={cn(confirm === "reject" || confirm === "stop" ? "bg-landing-voice text-landing-steel hover:bg-landing-voice/90" : primaryBtn)}
+                className={cn(confirm === "reject" || confirm === "stop" ? "bg-landing-voice text-white hover:bg-landing-voice/90" : primaryBtn)}
                 onClick={(e) => {
                   e.preventDefault();
                   confirmText[confirm].run();
@@ -338,7 +368,19 @@ export default function SequenceReview({ seq }: { seq: HarnessSequence }) {
   );
 }
 
-function StepBox({ step, idx, editable, onEdit }: { step: RunStep; idx: number; editable: boolean; onEdit: () => void }) {
+function StepBox({
+  step,
+  idx,
+  last,
+  editable,
+  onEdit,
+}: {
+  step: RunStep;
+  idx: number;
+  last: boolean;
+  editable: boolean;
+  onEdit: () => void;
+}) {
   const look = stepLook(step.status);
   const sms = step.channel === "sms";
   const when =
@@ -346,48 +388,62 @@ function StepBox({ step, idx, editable, onEdit }: { step: RunStep; idx: number; 
       ? "First message"
       : `${step.delay_days ?? 0} day${step.delay_days === 1 ? "" : "s"} after step ${idx}`;
   const date = step.sent_at ? `sent ${rel(step.sent_at)}` : step.scheduled_for ? future(step.scheduled_for) : null;
+  const Icon = sms ? MessageSquare : Mail;
+  const basisTone = step.based_on.kind === "notes_and_stage" ? "text-landing-sms" : "text-tb-ink-3";
 
   return (
-    <div className="overflow-hidden rounded-xl border border-landing-line bg-landing-steel">
-      <div className="flex flex-wrap items-center gap-2 border-b border-landing-line px-3.5 py-2">
-        {sms ? <MessageSquare className="h-4 w-4 text-landing-sms" /> : <Mail className="h-4 w-4 text-landing-email" />}
-        <b className="text-[13px] text-landing-fog">
-          {sms ? "SMS" : step.channel === "email" ? "Email" : step.channel} {step.step_number}
-        </b>
-        <span className="text-[12.5px] text-landing-fog/50">{when}</span>
-        {date ? <span className="text-[12.5px] text-landing-fog/50">· {date}</span> : null}
-        <span className="ml-auto flex items-center gap-1.5">
-          {step.delivery_mode === "mock" ? (
-            <Chip tone="warn" title="Recorded as sent, but not handed to the email or SMS provider">
-              Mock: not really sent
-            </Chip>
-          ) : null}
-          <Chip tone={step.based_on.kind === "transcript" ? "blue" : step.based_on.kind === "notes_and_stage" ? "warn" : "mute"} icon={BookOpen}>
-            {basedOnLabel(step)}
-          </Chip>
-          <StatusChip look={look} />
-          {editable ? (
-            <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-landing-sky hover:bg-landing-fog/5 hover:text-landing-sky" onClick={onEdit}>
-              <PencilLine className="h-3.5 w-3.5" />
-              Edit
-            </Button>
-          ) : null}
-        </span>
-      </div>
-      {step.subject ? (
-        <div className="border-b border-landing-line px-3.5 py-2 text-sm font-semibold text-landing-fog">
-          <Highlighted text={step.subject} />
+    <li className="relative grid grid-cols-[28px_minmax(0,1fr)] gap-3">
+      {!last ? <span aria-hidden className="absolute bottom-[-16px] left-[13.5px] top-8 w-px bg-tb-ink/[0.12]" /> : null}
+      <span className="relative z-[1] mt-1 grid h-7 w-7 place-items-center rounded-full bg-tb-ink/[0.06] text-tb-ink-2">
+        <Icon className="h-3.5 w-3.5" />
+      </span>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pb-1.5 text-[12.5px] text-tb-ink-3">
+          <b className="text-[13px] font-semibold text-tb-ink">
+            {sms ? "SMS" : step.channel === "email" ? "Email" : step.channel} {step.step_number}
+          </b>
+          <span>{when}</span>
+          {date ? <span>· {date}</span> : null}
+          <span className="ml-auto flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            {step.delivery_mode === "mock" ? (
+              <span className="font-medium text-landing-sms" title="Recorded as sent, but not handed to the email or SMS provider">
+                Mock: not really sent
+              </span>
+            ) : null}
+            <span className={cn("inline-flex items-center gap-1", basisTone)}>
+              <BookOpen className="h-3 w-3" />
+              {basedOnLabel(step)}
+            </span>
+            <StatusChip look={look} />
+            {editable ? (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex h-7 items-center gap-1 rounded-md px-2 font-medium text-tb-accent hover:bg-tb-ink/[0.05] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[rgb(var(--tb-accent))]"
+              >
+                <PencilLine className="h-3.5 w-3.5" />
+                Edit
+              </button>
+            ) : null}
+          </span>
         </div>
-      ) : null}
-      <div className="whitespace-pre-wrap break-words px-3.5 py-3 text-sm leading-relaxed text-landing-fog/85">
-        <Highlighted text={step.body || ""} />
-      </div>
-      {step.status === "failed" && step.send_log ? (
-        <div className="mx-3.5 mb-3 rounded-lg border border-landing-voice/35 bg-landing-voice/[0.07] px-3 py-2 text-[12.5px] text-landing-fog/80">
-          <b className="text-landing-voice">Failed:</b> {step.send_log}
+        <div className="rounded-xl border border-tb-ink/[0.08] bg-[rgb(var(--tb-surface-strong)/0.7)]">
+          {step.subject ? (
+            <p className="border-b border-tb-ink/[0.07] px-4 py-2.5 text-sm font-semibold text-tb-ink">
+              <Highlighted text={step.subject} />
+            </p>
+          ) : null}
+          <p className="max-w-[68ch] whitespace-pre-wrap break-words px-4 py-3 text-[14.5px] leading-[1.7] text-tb-ink-2">
+            <Highlighted text={step.body || ""} />
+          </p>
+          {step.status === "failed" && step.send_log ? (
+            <p className="mx-4 mb-3 rounded-lg bg-landing-voice/[0.07] px-3 py-2 text-[12.5px] text-tb-ink-2">
+              <b className="text-landing-voice">Failed:</b> {step.send_log}
+            </p>
+          ) : null}
         </div>
-      ) : null}
-    </div>
+      </div>
+    </li>
   );
 }
 
@@ -416,8 +472,8 @@ function EditStepDialog({ sequenceId, step, onClose }: { sequenceId: string; ste
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl font-landing-sans">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-landing-display text-landing-fog">
-            <PencilLine className="h-5 w-5 text-landing-sky" />
+          <DialogTitle className="flex items-center gap-2 font-landing-display text-tb-ink">
+            <PencilLine className="h-5 w-5 text-tb-accent" />
             Edit {sms ? "SMS" : "email"} {step.step_number}
           </DialogTitle>
         </DialogHeader>
@@ -430,7 +486,7 @@ function EditStepDialog({ sequenceId, step, onClose }: { sequenceId: string; ste
         <div className="space-y-1.5">
           <Label htmlFor="step-body">Message</Label>
           <Textarea id="step-body" rows={sms ? 4 : 10} value={body} onChange={(e) => setBody(e.target.value)} />
-          {sms ? <p className="text-xs text-landing-fog/50">{body.length} characters</p> : null}
+          {sms ? <p className="text-xs text-tb-ink-3">{body.length} characters</p> : null}
         </div>
         {leftover ? (
           <NoteBox tone="warn" icon={AlertTriangle}>
