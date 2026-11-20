@@ -19,16 +19,53 @@ const needsAttention = (s: HarnessSequence) =>
 const initials = (name: string) =>
   name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 
+const Bar = ({ className }: { className: string }) => (
+  <div className={cn("animate-pulse rounded-md bg-tb-ink/[0.07]", className)} />
+);
+
+/** Same layout and size as the loaded section, without data. */
+function StripPlaceholder() {
+  return (
+    <section className="space-y-4" aria-label="Claude" aria-busy="true">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="tb-card min-h-[179px] p-5">
+          <Bar className="h-3 w-36" />
+          <Bar className="mt-4 h-12 w-20" />
+          <Bar className="mt-6 h-3 w-48" />
+        </div>
+        <div className="tb-card min-h-[179px] p-5">
+          <Bar className="h-3 w-24" />
+          <Bar className="mt-4 h-4 w-4/5" />
+          <Bar className="mt-2 h-4 w-3/5" />
+          <Bar className="mt-6 h-3 w-40" />
+        </div>
+      </div>
+      <div className="tb-card p-5 lg:min-h-[294px]">
+        <Bar className="h-5 w-28" />
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="tb-well h-16 p-3 lg:h-auto lg:min-h-[212px]">
+              <Bar className="h-3 w-24" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /**
  * The Claude part of the dashboard: what waits for approval, the latest task,
  * and where each follow-up Claude prepared stands now.
  */
 export default function HarnessDashboardStrip() {
   const { data: seqs = [], isLoading } = useGetAllRunSequencesQuery(undefined, { pollingInterval: 30000 });
-  const { data: runsData } = useGetRunsQuery({ limit: 1 }, { pollingInterval: 15000 });
+  const { data: runsData, isLoading: runsLoading } = useGetRunsQuery({ limit: 1 }, { pollingInterval: 15000 });
   const latest = runsData?.data.items[0];
 
-  if (isLoading) return null;
+  // Hold the section's space while loading, so it does not pop in above the
+  // charts and push the page down.
+  if (isLoading || runsLoading) return <StripPlaceholder />;
 
   if (!latest) {
     return (

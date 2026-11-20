@@ -60,22 +60,27 @@ export const harnessApi = baseApi.injectEndpoints({
           (r) => (r.counts?.sequences ?? 0) > 0,
         );
 
-        const all: HarnessSequence[] = [];
-        for (const run of runs) {
-          let page = 1;
-          for (;;) {
-            const res = await baseQuery({
-              url: `/runs/${run.run_id}/sequences`,
-              params: { page, limit: 50 },
-            });
-            if (res.error) return { error: res.error };
-            const data = (res.data as ApiEnvelope<RunSequencesPage>).data;
-            for (const item of data.items) all.push({ ...item, run });
-            if (page >= data.pagination.total_pages) break;
-            page++;
-          }
-        }
-        return { data: all };
+        // All tasks at once (one task after another made the dashboard wait
+        // for each request in turn). Pages within one task are read in order.
+        const perRun = await Promise.all(
+          runs.map(async (run) => {
+            const items: HarnessSequence[] = [];
+            for (let page = 1; ; page++) {
+              const res = await baseQuery({
+                url: `/runs/${run.run_id}/sequences`,
+                params: { page, limit: 50 },
+              });
+              if (res.error) return { error: res.error };
+              const data = (res.data as ApiEnvelope<RunSequencesPage>).data;
+              for (const item of data.items) items.push({ ...item, run });
+              if (page >= data.pagination.total_pages) break;
+            }
+            return { items };
+          }),
+        );
+        const failed = perRun.find((r) => "error" in r);
+        if (failed && "error" in failed) return { error: failed.error };
+        return { data: perRun.flatMap((r) => ("items" in r ? r.items : [])) };
       },
       providesTags: ["Runs"],
     }),
