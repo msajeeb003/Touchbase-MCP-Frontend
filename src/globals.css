@@ -8,6 +8,16 @@ html {
   scrollbar-gutter: stable;
 }
 
+/*
+ * Dropdowns, dialogs and menus (Radix) lock page scrolling while open and add a
+ * right margin to <body> to make up for the hidden scrollbar. The gutter above
+ * already keeps that space, so the extra margin pushed the whole page sideways
+ * on every open ("the page blinks"). Keep the margin at zero.
+ */
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
+
 body {
   font-family: "Roboto", sans-serif;
   font-optical-sizing: auto;
