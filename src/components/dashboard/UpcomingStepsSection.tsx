@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/table";
 import {
   dashCard,
-  dashCardDesc,
   dashCardIcon,
   dashCardTitle,
   dashEmpty,
@@ -84,11 +83,11 @@ export default function UpcomingStepsSection({
         <CardHeader className="pb-2">
           <CardTitle className={dashCardTitle}>
             <Clock3 className={dashCardIcon} />
-            Upcoming Activity
+            Upcoming steps
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={dashEmpty}>No upcoming steps scheduled yet.</div>
+          <div className={dashEmpty}>Nothing scheduled.</div>
         </CardContent>
       </Card>
     );
@@ -99,11 +98,8 @@ export default function UpcomingStepsSection({
       <CardHeader className="pb-2">
         <CardTitle className={dashCardTitle}>
           <Clock3 className={dashCardIcon} />
-          Upcoming Activity
+          Upcoming steps
         </CardTitle>
-        <p className={dashCardDesc}>
-          Next scheduled sequence steps for your leads.
-        </p>
       </CardHeader>
 
       <CardContent className="space-y-4">

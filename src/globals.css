@@ -123,21 +123,194 @@ body {
   --landing-slate: 148 163 184;
 }
 
+/*
+ * Light values. Accent and status colours are deep enough to pass WCAG AA
+ * (4.5:1) as small text on white, on the glass surfaces, and inside their own
+ * tinted status chips.
+ */
 :root[data-theme="light"] {
-  --landing-steel: 246 248 250;
+  --landing-steel: 241 244 249;
   --landing-steel-2: 255 255 255;
-  --landing-steel-3: 238 242 246;
-  --landing-steel-4: 227 233 240;
-  --landing-fog: 17 24 39;
-  --landing-sky: 47 127 224;
-  --landing-sky-deep: 31 102 194;
-  --landing-email: 37 99 235;
-  --landing-whatsapp: 15 157 106;
-  --landing-sms: 183 121 31;
-  --landing-voice: 217 83 47;
-  --landing-violet: 124 92 214;
-  --landing-pink: 219 39 119;
-  --landing-slate: 100 116 139;
+  --landing-steel-3: 236 240 246;
+  --landing-steel-4: 225 231 239;
+  --landing-fog: 12 18 34;
+  --landing-sky: 29 99 216;
+  --landing-sky-deep: 23 80 180;
+  --landing-email: 29 78 216;
+  --landing-whatsapp: 4 120 87;
+  --landing-sms: 146 84 6;
+  --landing-voice: 178 56 26;
+  --landing-violet: 109 74 206;
+  --landing-pink: 190 24 93;
+  --landing-slate: 85 99 120;
+}
+
+/*
+ * Touchbase design system ("tb-*"). One set of names, two themes.
+ * Text: ink (headings, numbers) > ink-2 (body) > ink-3 (labels, meta).
+ * Surfaces: canvas (page) < glass (cards, sidebar, top bar).
+ * See DESIGN-SYSTEM.md at the repo root.
+ */
+:root {
+  --tb-canvas: 11 15 21;
+  --tb-glow-1: 79 156 249;
+  --tb-glow-2: 139 120 250;
+  --tb-glow-3: 45 212 191;
+  --tb-glow-a1: 0.11;
+  --tb-glow-a2: 0.08;
+  --tb-glow-a3: 0.05;
+
+  --tb-surface: 22 30 41;
+  --tb-surface-a: 0.62;
+  --tb-surface-strong: 26 35 47;
+  --tb-stroke: 233 238 243;
+  --tb-stroke-a: 0.08;
+  --tb-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 12px 32px -18px rgb(0 0 0 / 0.7);
+  --tb-shadow-lift: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 18px 40px -18px rgb(0 0 0 / 0.8);
+
+  --tb-ink: 236 241 246;
+  --tb-ink-2: 196 206 217;
+  --tb-ink-3: 148 163 180;
+
+  --tb-accent: 90 160 250;
+  --tb-accent-2: 129 140 248;
+  --tb-on-accent: 9 14 22;
+
+  --tb-radius-card: 1rem;
+  --tb-blur: 18px;
+}
+
+:root[data-theme="light"] {
+  --tb-canvas: 237 241 247;
+  --tb-glow-1: 59 130 246;
+  --tb-glow-2: 139 92 246;
+  --tb-glow-3: 20 184 166;
+  --tb-glow-a1: 0.2;
+  --tb-glow-a2: 0.14;
+  --tb-glow-a3: 0.1;
+
+  --tb-surface: 255 255 255;
+  --tb-surface-a: 0.55;
+  --tb-surface-strong: 255 255 255;
+  --tb-stroke: 255 255 255;
+  --tb-stroke-a: 0.7;
+  --tb-shadow: 0 0 0 1px rgb(15 23 42 / 0.05), 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -16px rgb(30 41 90 / 0.22);
+  --tb-shadow-lift: 0 0 0 1px rgb(29 99 216 / 0.18), 0 2px 4px rgb(15 23 42 / 0.05), 0 18px 40px -16px rgb(30 41 90 / 0.3);
+
+  --tb-ink: 12 18 34;
+  --tb-ink-2: 51 65 85;
+  --tb-ink-3: 85 99 120;
+
+  --tb-accent: 29 99 216;
+  --tb-accent-2: 79 70 229;
+  --tb-on-accent: 255 255 255;
+}
+
+@layer components {
+  /* Page background: a calm base with three soft colour glows, fixed so it does not scroll. */
+  .tb-canvas {
+    background-color: rgb(var(--tb-canvas));
+    background-image:
+      radial-gradient(56rem 34rem at -8% -12%, rgb(var(--tb-glow-1) / var(--tb-glow-a1)), transparent 62%),
+      radial-gradient(46rem 30rem at 108% -6%, rgb(var(--tb-glow-2) / var(--tb-glow-a2)), transparent 60%),
+      radial-gradient(52rem 32rem at 38% 118%, rgb(var(--tb-glow-3) / var(--tb-glow-a3)), transparent 62%);
+    background-attachment: fixed;
+  }
+
+  /* Frosted surface. Base for cards, the sidebar and the top bar. */
+  .tb-glass {
+    background-color: rgb(var(--tb-surface) / var(--tb-surface-a));
+    border: 1px solid rgb(var(--tb-stroke) / var(--tb-stroke-a));
+    box-shadow: var(--tb-shadow);
+    -webkit-backdrop-filter: blur(var(--tb-blur)) saturate(1.6);
+    backdrop-filter: blur(var(--tb-blur)) saturate(1.6);
+  }
+
+  .tb-card {
+    @apply tb-glass;
+    border-radius: var(--tb-radius-card);
+    color: rgb(var(--tb-ink-2));
+  }
+
+  /* Cards that are links or buttons lift slightly on hover. */
+  .tb-card-link {
+    @apply tb-card block transition-[box-shadow,transform] duration-200;
+  }
+  .tb-card-link:hover {
+    box-shadow: var(--tb-shadow-lift);
+    transform: translateY(-1px);
+  }
+  .tb-card-link:focus-visible {
+    outline: 2px solid rgb(var(--tb-accent));
+    outline-offset: 2px;
+  }
+
+  /* Inner well inside a card (pipeline columns, list rows). */
+  .tb-well {
+    border-radius: 0.75rem;
+    background-color: rgb(var(--tb-ink) / 0.035);
+    border: 1px solid rgb(var(--tb-ink) / 0.06);
+  }
+
+  /* Typography scale */
+  .tb-title { @apply font-landing-display text-[28px] font-bold leading-[1.15] tracking-[-0.02em]; color: rgb(var(--tb-ink)); }
+  .tb-h2 { @apply font-landing-display text-lg font-bold leading-6 tracking-[-0.01em]; color: rgb(var(--tb-ink)); }
+  .tb-h3 { @apply text-[15px] font-semibold leading-5; color: rgb(var(--tb-ink)); }
+  .tb-body { @apply text-sm leading-5; color: rgb(var(--tb-ink-2)); }
+  .tb-meta { @apply text-[12.5px] leading-[18px]; color: rgb(var(--tb-ink-3)); }
+  .tb-label { @apply font-landing-mono text-[10.5px] font-medium uppercase leading-4 tracking-[0.12em]; color: rgb(var(--tb-ink-3)); }
+  .tb-num { @apply font-landing-display font-bold leading-none tracking-[-0.02em] tabular-nums; color: rgb(var(--tb-ink)); }
+
+  /* Buttons: one primary action per area, quiet for the rest. */
+  .tb-btn {
+    @apply inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] px-3.5 text-sm font-semibold transition-[filter,background-color,box-shadow] duration-150;
+  }
+  .tb-btn:focus-visible { outline: 2px solid rgb(var(--tb-accent)); outline-offset: 2px; }
+  .tb-btn:disabled { @apply pointer-events-none opacity-50; }
+  .tb-btn-primary {
+    @apply tb-btn;
+    color: rgb(var(--tb-on-accent));
+    background-image: linear-gradient(135deg, rgb(var(--tb-accent)), rgb(var(--tb-accent-2)));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 8px 18px -10px rgb(var(--tb-accent) / 0.9);
+  }
+  .tb-btn-primary:hover { filter: brightness(1.07) saturate(1.05); }
+  .tb-btn-quiet {
+    @apply tb-btn;
+    color: rgb(var(--tb-ink));
+    background-color: rgb(var(--tb-surface) / var(--tb-surface-a));
+    border: 1px solid rgb(var(--tb-ink) / 0.1);
+  }
+  .tb-btn-quiet:hover { background-color: rgb(var(--tb-ink) / 0.06); }
+  .tb-btn-danger {
+    @apply tb-btn;
+    color: rgb(var(--landing-voice));
+    border: 1px solid rgb(var(--landing-voice) / 0.35);
+  }
+  .tb-btn-danger:hover { background-color: rgb(var(--landing-voice) / 0.08); }
+  .tb-btn-sm { @apply h-8 rounded-lg px-2.5 text-[13px]; }
+
+  /* Sidebar navigation */
+  .tb-nav-item {
+    @apply relative flex h-9 items-center gap-2.5 rounded-[10px] px-2.5 text-sm font-medium transition-colors;
+    color: rgb(var(--tb-ink-3));
+  }
+  .tb-nav-item:hover { color: rgb(var(--tb-ink)); background-color: rgb(var(--tb-ink) / 0.05); }
+  .tb-nav-item[data-active="true"] {
+    color: rgb(var(--tb-ink));
+    background-color: rgb(var(--tb-surface-strong) / 0.9);
+    box-shadow: 0 0 0 1px rgb(var(--tb-ink) / 0.07), 0 4px 12px -8px rgb(15 23 42 / 0.35);
+  }
+  .tb-nav-item[data-active="true"] svg { color: rgb(var(--tb-accent)); }
+  .tb-nav-item[data-active="true"]::before {
+    content: "";
+    position: absolute;
+    left: -8px;
+    top: 9px;
+    bottom: 9px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background-image: linear-gradient(rgb(var(--tb-accent)), rgb(var(--tb-accent-2)));
+  }
 }
 
 @layer base {

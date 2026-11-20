@@ -22,7 +22,6 @@ export default function DeliveryStatsChart({
     <DashboardStackedBarChart
       title="Delivery Stats"
       titleIcon={BarChart3}
-      description="Sent vs failed by channel — email, SMS, WhatsApp, and AI calls."
       emptyMessage="No delivery stats available yet."
       data={data.map((item) => ({
         label: CHANNEL_LABEL[item.type],

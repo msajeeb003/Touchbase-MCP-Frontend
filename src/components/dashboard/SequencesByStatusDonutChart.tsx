@@ -13,7 +13,6 @@ export default function SequencesByStatusDonutChart({
     <DashboardDonutChart
       title="Sequences by Status"
       titleIcon={Layers3}
-      description="Current status distribution across your sequences."
       emptyMessage="No sequence status data available yet."
       centerLabel="Total Sequences"
       valueLabel="Sequences"

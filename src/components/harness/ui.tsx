@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight, ShieldCheck, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { btnDanger, btnPrimary, btnQuiet, glassCard } from "@/lib/ds";
+import { useGetSettingsQuery } from "@/store/features/settings/settingsApi";
 import { TONE_CLASS, type StatusLook, type Tone } from "@/lib/harness/labels";
 
 /**
@@ -17,19 +19,18 @@ export function PageHead({
   actions,
 }: {
   title: string;
-  sub: string;
+  sub?: string;
   icon: LucideIcon;
   actions?: ReactNode;
 }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0 max-w-3xl">
-        <p className="font-landing-mono text-[11px] uppercase tracking-[0.18em] text-landing-sky">AI Harness</p>
-        <h2 className="mt-1 flex items-center gap-2 font-landing-display text-[clamp(26px,3vw,34px)] font-bold leading-tight tracking-[-0.02em] text-landing-fog">
-          <Icon className="h-7 w-7 text-landing-sky" />
+        <h2 className="tb-title flex items-center gap-2.5">
+          <Icon className="h-6 w-6 text-tb-accent" />
           {title}
         </h2>
-        <p className="mt-1 text-sm text-landing-fog/55">{sub}</p>
+        {sub ? <p className="tb-body mt-1.5">{sub}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
@@ -116,7 +117,7 @@ export function NoteBox({
 
 export function Panel({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn("min-w-0 overflow-hidden rounded-2xl border border-landing-line bg-landing-steel-2", className)}>
+    <div className={cn("min-w-0 overflow-hidden", glassCard, className)}>
       {children}
     </div>
   );
@@ -124,9 +125,9 @@ export function Panel({ children, className }: { children: ReactNode; className?
 
 export function PanelHead({ title, icon: Icon, right }: { title: string; icon?: LucideIcon; right?: ReactNode }) {
   return (
-    <div className="flex items-center gap-2 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
-      {Icon ? <Icon className="h-4 w-4 text-landing-sky" /> : null}
-      <h3 className="font-landing-display font-bold text-landing-fog">{title}</h3>
+    <div className="flex items-center gap-2 border-b border-tb-ink/[0.07] px-4 py-3">
+      {Icon ? <Icon className="h-4 w-4 text-tb-accent" /> : null}
+      <h3 className="tb-h3">{title}</h3>
       {right ? <div className="ml-auto flex items-center gap-2">{right}</div> : null}
     </div>
   );
@@ -134,7 +135,7 @@ export function PanelHead({ title, icon: Icon, right }: { title: string; icon?: 
 
 export function Empty({ icon: Icon, tone = "mute", children }: { icon: LucideIcon; tone?: Tone; children: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 px-6 py-10 text-center text-sm text-landing-fog/55">
+    <div className="flex flex-col items-center gap-2 px-6 py-10 text-center text-sm text-tb-ink-3">
       <IconCircle tone={tone} icon={Icon} />
       <div>{children}</div>
     </div>
@@ -164,16 +165,16 @@ export function Kpi({
   const body = (
     <>
       <div className="flex items-center justify-between gap-2">
-        <span className="font-landing-mono text-[10.5px] uppercase tracking-[0.1em] text-landing-fog/50">{label}</span>
+        <span className="tb-label">{label}</span>
         <Icon className={cn("h-4 w-4", TONE_CLASS[tone].text)} />
       </div>
-      <div className="mt-1 font-landing-display text-[28px] font-bold leading-none text-landing-fog">{value}</div>
-      {hint ? <div className="mt-1 text-xs text-landing-fog/50">{hint}</div> : null}
+      <div className="tb-num mt-2 text-[28px]">{value}</div>
+      {hint ? <div className="tb-meta mt-1">{hint}</div> : null}
     </>
   );
   const cls = cn(
-    "block rounded-xl border bg-landing-steel-2 p-3.5 text-left transition-colors hover:bg-landing-fog/[0.04]",
-    active ? cn(TONE_CLASS[tone].border, "ring-1 ring-inset", TONE_CLASS[tone].border.replace("border-", "ring-")) : "border-landing-line",
+    "tb-card-link p-4 text-left",
+    active ? cn("ring-2 ring-inset", TONE_CLASS[tone].border.replace("border-", "ring-")) : "",
   );
   if (to) return <Link to={to} className={cls}>{body}</Link>;
   return (
@@ -183,26 +184,46 @@ export function Kpi({
   );
 }
 
-/** "Claude prepares, you release." Shown at the top of the harness screens. */
-export function SafetyBanner({ mock = false }: { mock?: boolean }) {
+const PERMISSION_LABELS = [
+  ["claudeCanActivate", "activate"],
+  ["claudeCanResume", "resume"],
+  ["claudeCanEditSettings", "change settings"],
+  ["claudeCanDeleteLeads", "delete leads"],
+  ["claudeCanClearDoNotContact", "clear do-not-contact"],
+] as const;
+
+/**
+ * What Claude may do in this workspace, in one line. Green while every Claude
+ * permission is off (Claude drafts, you approve); amber once any is on.
+ * Links to the settings that control it.
+ */
+export function SafetyBanner({ mock = false, className }: { mock?: boolean; className?: string }) {
+  const { data } = useGetSettingsQuery();
+  const settings = (data?.data ?? {}) as Record<string, unknown>;
+  const allowed = PERMISSION_LABELS.filter(([key]) => Boolean(settings[key])).map(([, label]) => label);
+  const open = allowed.length > 0;
   return (
     <Link
-      to="/dashboard/settings#claude-safety"
-      className="flex items-center gap-3 rounded-xl border border-landing-whatsapp/30 bg-landing-whatsapp/[0.06] px-4 py-3 text-sm transition-colors hover:bg-landing-whatsapp/10"
+      to={open ? "/dashboard/settings#claude-permissions" : "/dashboard/settings#claude-safety"}
+      title={mock ? "Mock mode: messages are recorded, nothing reaches a real person." : undefined}
+      className={cn(
+        "inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12.5px] font-medium transition-colors",
+        open
+          ? "border-landing-sms/35 bg-landing-sms/[0.08] text-landing-sms hover:bg-landing-sms/[0.14]"
+          : "border-landing-whatsapp/30 bg-landing-whatsapp/[0.07] text-landing-whatsapp hover:bg-landing-whatsapp/[0.13]",
+        className,
+      )}
     >
-      <IconCircle tone="ok" icon={ShieldCheck} />
-      <div className="min-w-0 flex-1 text-landing-fog/80">
-        <b className="text-landing-fog">Claude prepares, you release.</b>{" "}
-        Claude can find leads and write drafts, but it cannot send or switch anything on.
-        {mock ? " On this computer messages are recorded as mock sends, so nothing reaches a real person." : null}
-      </div>
-      <span className="hidden items-center gap-1 text-landing-sky sm:inline-flex">
-        Why it is safe <ChevronRight className="h-3.5 w-3.5" />
+      <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+      <span className="truncate">
+        {open ? `Claude can also ${allowed.join(", ")}` : "Claude drafts, you approve"}
+        {mock ? " · mock mode" : ""}
       </span>
+      <ChevronRight className="h-3 w-3 shrink-0 opacity-70" />
     </Link>
   );
 }
 
-export const primaryBtn = "gap-2 bg-landing-sky font-semibold text-landing-steel hover:bg-landing-sky-deep";
-export const outlineBtn = "gap-2 border-landing-line bg-transparent text-landing-fog hover:bg-landing-fog/5 hover:text-landing-fog";
-export const dangerBtn = "gap-2 border-landing-voice/40 bg-transparent text-landing-voice hover:bg-landing-voice/10 hover:text-landing-voice";
+export const primaryBtn = btnPrimary;
+export const outlineBtn = btnQuiet;
+export const dangerBtn = btnDanger;

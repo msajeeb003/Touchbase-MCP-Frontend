@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,7 +28,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
@@ -42,20 +40,34 @@ import BrandMark from "@/components/landing/BrandMark";
 import { useLandingFontLink } from "@/components/landing/landingFonts";
 import ThemeToggle from "@/components/dashboard/ThemeToggle";
 import { useScopedAppTheme } from "@/lib/appTheme";
+import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
+import { cn } from "@/lib/utils";
+import { rel } from "@/lib/harness/labels";
 import { useGetMcpTokensQuery, useGetRunsQuery } from "@/store/features/harness/harnessApi";
 
-const navItems = [
-  { title: "Dashboard", to: "/dashboard", icon: Home },
-  { title: "Leads", to: "/dashboard/leads", icon: Users2 },
-  // AI harness: what Claude prepared, and what waits for a person.
-  { title: "AI Tasks", to: "/dashboard/ai-tasks", icon: Sparkles },
-  { title: "Review Queue", to: "/dashboard/review", icon: Inbox },
-  { title: "Activity Log", to: "/dashboard/activity", icon: History },
-  { title: "Sequences", to: "/dashboard/sequences", icon: Layers3 },
-  { title: "Transcripts", to: "/dashboard/transcripts", icon: FileText },
-  { title: "Templates", to: "/dashboard/templates", icon: Shapes },
-  { title: "Settings", to: "/dashboard/settings", icon: Settings },
-  { title: "How to configure", to: "/dashboard/how-to-configure", icon: BookOpen },
+// Daily work first; set-up pages in a second group.
+const navGroups = [
+  {
+    label: null,
+    items: [
+      { title: "Dashboard", to: "/dashboard", icon: Home },
+      { title: "Leads", to: "/dashboard/leads", icon: Users2 },
+      // AI harness: what Claude prepared, and what waits for a person.
+      { title: "AI Tasks", to: "/dashboard/ai-tasks", icon: Sparkles },
+      { title: "Review Queue", to: "/dashboard/review", icon: Inbox },
+      { title: "Activity Log", to: "/dashboard/activity", icon: History },
+    ],
+  },
+  {
+    label: "Manage",
+    items: [
+      { title: "Sequences", to: "/dashboard/sequences", icon: Layers3 },
+      { title: "Transcripts", to: "/dashboard/transcripts", icon: FileText },
+      { title: "Templates", to: "/dashboard/templates", icon: Shapes },
+      { title: "Settings", to: "/dashboard/settings", icon: Settings },
+      { title: "How to configure", to: "/dashboard/how-to-configure", icon: BookOpen },
+    ],
+  },
 ];
 
 const breadcrumbLabelMap: Record<string, string> = {
@@ -83,6 +95,8 @@ const breadcrumbLabelMap: Record<string, string> = {
 export default function Dashboard() {
   useLandingFontLink();
   const [theme, setTheme] = useScopedAppTheme();
+  // Steel surface variables on <body> for every dashboard page and its dialogs.
+  useSteelTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -138,114 +152,119 @@ export default function Dashboard() {
   );
   const lastUsed = activeTokens.map((t) => t.lastUsedAt).filter(Boolean).sort().pop();
 
+  const isActive = (to: string) =>
+    location.pathname === to ||
+    (to !== "/dashboard" &&
+      location.pathname.startsWith(`${to}/`) &&
+      ["/dashboard/ai-tasks", "/dashboard/review"].includes(to));
+
+  // Sidebar sections are transparent over the glass on desktop; the mobile sheet needs a solid fill.
+  const sideSection = "bg-transparent font-landing-sans max-md:bg-[rgb(var(--tb-surface-strong))]";
+
   return (
-    <SidebarProvider>
-      {/* Steel chrome shared by every dashboard page. Page content keeps its own surface. */}
-      <Sidebar collapsible="offcanvas" className="border-r border-landing-line">
-        <SidebarHeader className="border-b border-landing-line bg-landing-steel-2 px-4 py-3 font-landing-sans">
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-2.5 text-landing-fog no-underline"
-          >
+    <SidebarProvider className="tb-canvas">
+      <Sidebar
+        collapsible="offcanvas"
+        className="tb-glass border-y-0 border-l-0 shadow-none [&>[data-sidebar=sidebar]]:bg-transparent"
+      >
+        <SidebarHeader className={cn(sideSection, "px-4 pb-2 pt-4")}>
+          <Link to="/dashboard" className="flex items-center gap-2.5 text-tb-ink no-underline">
             <BrandMark className="h-8 w-8" />
-            <span className="font-landing-display text-[15px] font-bold tracking-[-0.01em]">
-              Touchbase AI
-            </span>
+            <span className="font-landing-display text-[15px] font-bold tracking-[-0.01em]">Touchbase AI</span>
           </Link>
         </SidebarHeader>
-        <SidebarContent className="bg-landing-steel-2 px-2 py-3 font-landing-sans">
-          <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  className="text-landing-fog/60 hover:bg-landing-fog/5 hover:text-landing-fog active:bg-landing-fog/5 active:text-landing-fog data-[active=true]:bg-landing-sky-soft data-[active=true]:font-semibold data-[active=true]:text-landing-sky"
-                  isActive={
-                    location.pathname === item.to ||
-                    (item.to !== "/dashboard" && location.pathname.startsWith(`${item.to}/`) &&
-                      ["/dashboard/ai-tasks", "/dashboard/review"].includes(item.to))
-                  }
-                >
-                  <NavLink to={item.to} end={item.to === "/dashboard"}>
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
-                    {item.to === "/dashboard/review" && waitingCount > 0 ? (
-                      <span className="ml-auto rounded-full bg-landing-sms px-1.5 py-px font-landing-mono text-[10.5px] font-bold text-landing-steel">
-                        {waitingCount}
-                      </span>
-                    ) : null}
-                    {item.to === "/dashboard/ai-tasks" && claudeWorking ? (
-                      <span className="ml-auto h-2 w-2 animate-pulse rounded-full bg-landing-violet" title="Claude is working" />
-                    ) : null}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+
+        <SidebarContent className={cn(sideSection, "gap-5 px-3 py-3")}>
+          {navGroups.map((group) => (
+            <div key={group.label ?? "main"}>
+              {group.label ? <p className="tb-label mb-1.5 px-2.5">{group.label}</p> : null}
+              <SidebarMenu className="gap-0.5">
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <NavLink
+                      to={item.to}
+                      end={item.to === "/dashboard"}
+                      data-active={isActive(item.to)}
+                      className="tb-nav-item"
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{item.title}</span>
+                      {item.to === "/dashboard/review" && waitingCount > 0 ? (
+                        <span className="ml-auto rounded-full bg-landing-sms px-1.5 py-px font-landing-mono text-[10.5px] font-bold text-[rgb(var(--tb-on-accent))]">
+                          {waitingCount}
+                        </span>
+                      ) : null}
+                      {item.to === "/dashboard/ai-tasks" && claudeWorking ? (
+                        <span className="ml-auto h-2 w-2 animate-pulse rounded-full bg-landing-violet" title="Claude is working" />
+                      ) : null}
+                    </NavLink>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </div>
+          ))}
         </SidebarContent>
 
-        <SidebarFooter className="border-t border-landing-line bg-landing-steel-2 p-3 font-landing-sans">
+        <SidebarFooter className={cn(sideSection, "gap-2 p-3")}>
           <Link
             to="/dashboard/settings#claude-access"
-            className="mb-2 flex items-center gap-2 rounded-md border border-landing-line bg-landing-steel p-2 no-underline hover:bg-landing-fog/[0.04]"
+            className="tb-well flex items-center gap-2.5 px-3 py-2 no-underline transition-colors hover:bg-tb-ink/[0.06]"
           >
             <span
-              className={`h-2 w-2 shrink-0 rounded-full ${activeTokens.length ? "bg-landing-whatsapp" : "bg-landing-fog/30"} ${claudeWorking ? "animate-pulse" : ""}`}
+              className={cn(
+                "h-2 w-2 shrink-0 rounded-full",
+                activeTokens.length ? "bg-landing-whatsapp" : "bg-tb-ink-3",
+                claudeWorking && "animate-pulse",
+              )}
             />
             <div className="min-w-0">
-              <p className="text-[12.5px] font-semibold text-landing-fog/85">
-                {activeTokens.length ? "Claude connected" : "Claude not connected"}
+              <p className="text-[13px] font-semibold text-tb-ink">
+                {activeTokens.length ? "Claude connected" : "Connect Claude"}
               </p>
-              <p className="truncate text-[11px] text-landing-fog/45">
+              <p className="truncate text-[11.5px] text-tb-ink-3">
                 {!activeTokens.length
-                  ? "Create an access token"
+                  ? "No access token"
                   : claudeWorking
-                    ? "Working on a task now"
+                    ? "Working now"
                     : lastUsed
-                      ? `Last used ${new Date(lastUsed).toLocaleString()}`
-                      : "Token ready, not used yet"}
+                      ? `Used ${rel(lastUsed)}`
+                      : "Not used yet"}
               </p>
             </div>
           </Link>
-          <div className="mb-2 flex items-center gap-2 rounded-md border border-landing-line bg-landing-steel p-2">
+          <div className="flex items-center gap-2.5 px-1 py-1">
             <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-landing-sky-soft text-xs font-semibold text-landing-sky">
-                {userInitial}
-              </AvatarFallback>
+              <AvatarFallback className="bg-tb-accent/15 text-xs font-semibold text-tb-accent">{userInitial}</AvatarFallback>
             </Avatar>
-            <div className="min-w-0">
-              <p className="font-landing-mono text-[10px] uppercase tracking-[0.12em] text-landing-fog/45">
-                Signed in as
-              </p>
-              <p className="truncate text-[12px] text-landing-fog/80" title={user?.email}>
-                {user?.email}
-              </p>
-            </div>
+            <p className="min-w-0 flex-1 truncate text-[13px] text-tb-ink-2" title={user?.email}>
+              {user?.email}
+            </p>
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="Log out"
+              title="Log out"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-tb-ink-3 transition-colors hover:bg-landing-voice/10 hover:text-landing-voice"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2 border-landing-voice/40 bg-transparent text-landing-voice hover:bg-landing-voice/10 hover:text-landing-voice"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
         </SidebarFooter>
       </Sidebar>
 
-      <SidebarInset className="min-w-0">
-        <header className="flex h-14 items-center gap-2 border-b border-landing-line bg-landing-steel-2 px-4 font-landing-sans">
-          <SidebarTrigger className="text-landing-fog/70 hover:bg-landing-fog/5 hover:text-landing-fog" />
-          <Separator orientation="vertical" className="h-4 bg-landing-line" />
+      <SidebarInset className="min-w-0 bg-transparent">
+        <header className="tb-glass sticky top-0 z-20 flex h-14 items-center gap-2 border-x-0 border-t-0 px-4 font-landing-sans shadow-none">
+          <SidebarTrigger className="text-tb-ink-3 hover:bg-tb-ink/5 hover:text-tb-ink" />
+          <Separator orientation="vertical" className="h-4 bg-tb-ink/10" />
           <Breadcrumb>
-            <BreadcrumbList className="text-landing-fog/50">
+            <BreadcrumbList className="text-tb-ink-3">
               {breadcrumbItems.map((item, index) => (
                 <div key={item.href} className="inline-flex items-center gap-1.5">
                   <BreadcrumbItem>
                     {index === breadcrumbItems.length - 1 ? (
-                      <BreadcrumbPage className="text-landing-fog">{item.label}</BreadcrumbPage>
+                      <BreadcrumbPage className="font-medium text-tb-ink">{item.label}</BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink asChild className="hover:text-landing-fog">
+                      <BreadcrumbLink asChild className="hover:text-tb-ink">
                         <Link to={item.href}>{item.label}</Link>
                       </BreadcrumbLink>
                     )}

@@ -80,6 +80,14 @@ export default {
 				voice: 'rgb(var(--landing-voice) / <alpha-value>)',
 				violet: 'rgb(var(--landing-violet) / <alpha-value>)',
 			},
+			// Design system text and accent colours (src/globals.css, DESIGN-SYSTEM.md).
+			tb: {
+				ink: 'rgb(var(--tb-ink) / <alpha-value>)',
+				'ink-2': 'rgb(var(--tb-ink-2) / <alpha-value>)',
+				'ink-3': 'rgb(var(--tb-ink-3) / <alpha-value>)',
+				accent: 'rgb(var(--tb-accent) / <alpha-value>)',
+				canvas: 'rgb(var(--tb-canvas) / <alpha-value>)',
+			},
 		},
 		fontFamily: {
 			'landing-display': ['"Red Hat Display"', 'system-ui', 'sans-serif'],

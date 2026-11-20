@@ -13,7 +13,6 @@ export default function LeadsByStageDonutChart({
     <DashboardDonutChart
       title="Leads by Stage"
       titleIcon={Users2}
-      description="Distribution of your leads across follow-up stages."
       emptyMessage="No stage data available yet."
       centerLabel="Total Leads"
       valueLabel="Leads"

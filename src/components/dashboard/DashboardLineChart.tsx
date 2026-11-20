@@ -1,3 +1,4 @@
+import { dashCard, dashCardIcon, dashCardTitle, dashEmpty } from "@/components/dashboard/dashboardTheme";
 import {
   CartesianGrid,
   Line,
@@ -30,7 +31,8 @@ export interface DashboardLineChartDataPoint {
 interface DashboardLineChartProps {
   title: string;
   titleIcon?: LucideIcon;
-  description: string;
+  /** Optional; not shown (the title is enough). */
+  description?: string;
   emptyMessage: string;
   data: DashboardLineChartDataPoint[];
   series: DashboardLineChartSeries[];
@@ -41,7 +43,6 @@ interface DashboardLineChartProps {
 export default function DashboardLineChart({
   title,
   titleIcon: TitleIcon,
-  description,
   emptyMessage,
   data,
   series,
@@ -50,15 +51,15 @@ export default function DashboardLineChart({
 }: DashboardLineChartProps) {
   if (data.length === 0 || series.length === 0) {
     return (
-      <Card className="border-landing-line bg-landing-steel-2 shadow-none">
+      <Card className={dashCard}>
         <CardHeader className="pb-2">
-          <CardTitle className="inline-flex items-center gap-2 font-landing-display text-lg font-bold tracking-[-0.01em] text-landing-fog">
-            {TitleIcon ? <TitleIcon className="h-5 w-5 text-landing-sky" /> : null}
+          <CardTitle className={dashCardTitle}>
+            {TitleIcon ? <TitleIcon className={dashCardIcon} /> : null}
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-xl border border-dashed border-landing-line bg-landing-steel px-6 py-10 text-center text-sm text-landing-fog/55">
+          <div className={dashEmpty}>
             {emptyMessage}
           </div>
         </CardContent>
@@ -76,13 +77,12 @@ export default function DashboardLineChart({
   }, {});
 
   return (
-    <Card className="border-landing-line bg-landing-steel-2 shadow-none">
+    <Card className={dashCard}>
       <CardHeader className="pb-2">
-        <CardTitle className="inline-flex items-center gap-2 font-landing-display text-lg font-bold tracking-[-0.01em] text-landing-fog">
-          {TitleIcon ? <TitleIcon className="h-5 w-5 text-landing-sky" /> : null}
+        <CardTitle className={dashCardTitle}>
+          {TitleIcon ? <TitleIcon className={dashCardIcon} /> : null}
           {title}
         </CardTitle>
-        <p className="text-sm text-landing-fog/55">{description}</p>
       </CardHeader>
 
       <CardContent className="space-y-4">

@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   CATEGORY_PALETTE,
   dashCard,
-  dashCardDesc,
   dashCardIcon,
   dashCardTitle,
   dashEmpty,
@@ -19,7 +18,8 @@ export interface DashboardDonutChartItem {
 interface DashboardDonutChartProps {
   title: string;
   titleIcon?: LucideIcon;
-  description: string;
+  /** Optional; not shown (the title is enough). */
+  description?: string;
   emptyMessage: string;
   centerLabel: string;
   valueLabel: string;
@@ -31,12 +31,11 @@ const getChartColor = (index: number) =>
   CATEGORY_PALETTE[index % CATEGORY_PALETTE.length];
 
 /** Matches the card surface, so slices read as separated rather than outlined. */
-const SLICE_GAP_COLOR = "rgb(var(--landing-steel-2))";
+const SLICE_GAP_COLOR = "rgb(var(--tb-surface))";
 
 export default function DashboardDonutChart({
   title,
   titleIcon: TitleIcon,
-  description,
   emptyMessage,
   centerLabel,
   valueLabel,
@@ -72,11 +71,10 @@ export default function DashboardDonutChart({
           {TitleIcon ? <TitleIcon className={dashCardIcon} /> : null}
           {title}
         </CardTitle>
-        <p className={dashCardDesc}>{description}</p>
       </CardHeader>
 
       <CardContent className="space-y-5">
-        <div className="rounded-2xl border border-landing-line bg-landing-steel p-3 sm:p-4">
+        <div className="p-1">
           <ChartContainer
             config={{ count: { label: valueLabel } }}
             className="mx-auto aspect-square h-[240px] w-full max-w-[240px] sm:h-[280px] sm:max-w-[280px]"
@@ -96,11 +94,11 @@ export default function DashboardDonutChart({
                       return (
                         <div className="grid min-w-[11rem] gap-1">
                           <span className="font-medium text-landing-fog">{payload.label}</span>
-                          <div className="flex items-center justify-between gap-4 text-landing-fog/60">
+                          <div className="flex items-center justify-between gap-4 text-tb-ink-3">
                             <span>{valueLabel}</span>
                             <span className="font-medium text-landing-fog">{value}</span>
                           </div>
-                          <div className="flex items-center justify-between gap-4 text-landing-fog/60">
+                          <div className="flex items-center justify-between gap-4 text-tb-ink-3">
                             <span>Percent</span>
                             <span className="font-medium text-landing-fog">{payload.percent}%</span>
                           </div>
@@ -136,14 +134,14 @@ export default function DashboardDonutChart({
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy - 6}
-                          className="fill-landing-fog font-landing-display text-2xl font-bold"
+                          className="fill-tb-ink font-landing-display text-2xl font-bold"
                         >
                           {totalCount}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy + 18}
-                          className="fill-landing-fog/55 text-xs"
+                          className="fill-tb-ink-3 text-xs"
                         >
                           {centerLabel}
                         </tspan>
@@ -160,11 +158,11 @@ export default function DashboardDonutChart({
           {chartData.map((item) => (
             <li
               key={`${item.label}-${item.count}`}
-              className="inline-flex items-center gap-2 text-sm text-landing-fog/70"
+              className="inline-flex items-center gap-2 text-sm text-tb-ink-2"
             >
               <span className="h-2.5 w-2.5 flex-none rounded-sm" style={{ backgroundColor: item.fill }} />
               <span>{item.label}</span>
-              <span className="font-landing-mono text-[12px] tabular-nums text-landing-fog/45">
+              <span className="font-landing-mono text-[12px] tabular-nums text-tb-ink-3">
                 {item.count} · {item.percent}%
               </span>
             </li>

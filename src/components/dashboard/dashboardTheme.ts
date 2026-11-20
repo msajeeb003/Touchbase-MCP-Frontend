@@ -1,5 +1,6 @@
 import { useEffect, type CSSProperties } from "react";
 import { useAppTheme } from "@/lib/appTheme";
+import { glassCard } from "@/lib/ds";
 
 /**
  * Steel theme for the dashboard overview.
@@ -59,18 +60,19 @@ export function useSteelTheme() {
   }, [theme]);
 }
 
-export const dashCard =
-  "border-landing-line bg-landing-steel-2 text-landing-fog shadow-none";
+/* Card recipes for the dashboard charts and tables. They use the design-system
+ * classes from globals.css, so they follow the light and dark theme. */
+export const dashCard = glassCard;
 
 export const dashCardTitle =
-  "inline-flex items-center gap-2 font-landing-display text-lg font-bold tracking-[-0.01em] text-landing-fog";
+  "inline-flex items-center gap-2 font-landing-display text-base font-bold tracking-[-0.01em] text-tb-ink";
 
-export const dashCardIcon = "h-5 w-5 text-landing-sky";
+export const dashCardIcon = "h-4 w-4 text-tb-accent";
 
-export const dashCardDesc = "text-sm text-landing-fog/55";
+export const dashCardDesc = "text-[12.5px] text-tb-ink-3";
 
 export const dashEmpty =
-  "rounded-xl border border-dashed border-landing-line bg-landing-steel px-6 py-10 text-center text-sm text-landing-fog/50";
+  "tb-well px-6 py-8 text-center text-sm text-tb-ink-3";
 
 /**
  * Light counterpart of steelSurfaceVars, used by the dashboard overview when

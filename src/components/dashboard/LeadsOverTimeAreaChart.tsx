@@ -21,7 +21,6 @@ export default function LeadsOverTimeAreaChart({
   return (
     <DashboardAreaChart
       title="New Leads Trend"
-      description="How many new leads were added over the last 30 days."
       emptyMessage="No lead trend data available yet."
       data={data.map((item) => ({
         label: item.date,

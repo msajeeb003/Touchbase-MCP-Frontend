@@ -1,3 +1,4 @@
+import { dashCard, dashCardIcon, dashCardTitle, dashEmpty } from "@/components/dashboard/dashboardTheme";
 import {
   Area,
   AreaChart,
@@ -26,7 +27,8 @@ export interface DashboardAreaChartDataPoint {
 
 interface DashboardAreaChartProps {
   title: string;
-  description: string;
+  /** Optional; not shown (the title is enough). */
+  description?: string;
   emptyMessage: string;
   data: DashboardAreaChartDataPoint[];
   series: DashboardAreaChartSeries[];
@@ -36,7 +38,6 @@ interface DashboardAreaChartProps {
 
 export default function DashboardAreaChart({
   title,
-  description,
   emptyMessage,
   data,
   series,
@@ -45,12 +46,12 @@ export default function DashboardAreaChart({
 }: DashboardAreaChartProps) {
   if (data.length === 0 || series.length === 0) {
     return (
-      <Card className="border-landing-line bg-landing-steel-2 shadow-none">
+      <Card className={dashCard}>
         <CardHeader className="pb-2">
-          <CardTitle className="font-landing-display text-lg font-bold tracking-[-0.01em] text-landing-fog">{title}</CardTitle>
+          <CardTitle className={dashCardTitle}>{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-xl border border-dashed border-landing-line bg-landing-steel px-6 py-10 text-center text-sm text-landing-fog/55">
+          <div className={dashEmpty}>
             {emptyMessage}
           </div>
         </CardContent>
@@ -68,10 +69,9 @@ export default function DashboardAreaChart({
   }, {});
 
   return (
-    <Card className="border-landing-line bg-landing-steel-2 shadow-none">
+    <Card className={dashCard}>
       <CardHeader className="pb-2">
-        <CardTitle className="font-landing-display text-lg font-bold tracking-[-0.01em] text-landing-fog">{title}</CardTitle>
-        <p className="text-sm text-landing-fog/55">{description}</p>
+        <CardTitle className={dashCardTitle}>{title}</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-4">

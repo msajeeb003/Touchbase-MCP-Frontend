@@ -21,7 +21,6 @@ export default function SentTrendLineChart({ data }: SentTrendLineChartProps) {
     <DashboardLineChart
       title="Sent Trend"
       titleIcon={Activity}
-      description="Email, SMS, WhatsApp, and AI call volume over time."
       emptyMessage="No sent trend data available yet."
       data={data.map((item) => ({
         label: item.date,
