@@ -39,6 +39,7 @@ import { useCurrentUser } from "@/store/features/auth/authSlice";
 import BrandMark from "@/components/landing/BrandMark";
 import { useLandingFontLink } from "@/components/landing/landingFonts";
 import ThemeToggle from "@/components/dashboard/ThemeToggle";
+import { ClaudeLogo } from "@/components/harness/ClaudeLogo";
 import { useScopedAppTheme } from "@/lib/appTheme";
 import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { cn } from "@/lib/utils";
@@ -210,13 +211,22 @@ export default function Dashboard() {
             to="/dashboard/settings#claude-access"
             className="tb-well flex items-center gap-2.5 px-3 py-2 no-underline transition-colors hover:bg-tb-ink/[0.06]"
           >
+            {/* Claude's mark, with a status dot: green when connected, grey when not. */}
             <span
               className={cn(
-                "h-2 w-2 shrink-0 rounded-full",
-                activeTokens.length ? "bg-landing-whatsapp" : "bg-tb-ink-3",
-                claudeWorking && "animate-pulse",
+                "relative grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#D97757]/[0.12]",
+                !activeTokens.length && "opacity-60 grayscale",
               )}
-            />
+            >
+              <ClaudeLogo className={cn("h-[18px] w-[18px]", claudeWorking && "animate-pulse")} />
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[rgb(var(--tb-surface-strong))]",
+                  activeTokens.length ? "bg-landing-whatsapp" : "bg-tb-ink-3",
+                )}
+              />
+            </span>
             <div className="min-w-0">
               <p className="text-[13px] font-semibold text-tb-ink">
                 {activeTokens.length ? "Claude connected" : "Connect Claude"}
