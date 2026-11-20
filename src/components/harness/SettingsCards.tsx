@@ -1,26 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
-import {
-  AlertTriangle,
-  Ban,
-  BookOpen,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Clock,
-  Copy,
-  Eye,
-  KeyRound,
-  Loader2,
-  Mail,
-  MessageSquareReply,
-  Plus,
-  RefreshCw,
-  Server,
-  ShieldCheck,
-  Terminal,
-  Trash2,
-} from "lucide-react";
+import { Check, ChevronRight, Copy, Eye, KeyRound, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +17,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { apiErrorMessage, dayLabel, rel, type Tone } from "@/lib/harness/labels";
+import { SectionActions, SettingsSection } from "@/components/settings/SettingsLayout";
+import { apiErrorMessage, dayLabel, rel } from "@/lib/harness/labels";
+import { btnSm } from "@/lib/ds";
+import { cn } from "@/lib/utils";
 import {
   useCreateMcpTokenMutation,
   useGetMcpTokensQuery,
@@ -47,30 +29,12 @@ import {
 import { useGetSettingsQuery, useUpdateSettingsMutation } from "@/store/features/settings/settingsApi";
 import type { McpTokenCreated } from "@/types/harness";
 import { showError, showSuccess } from "@/utils/toast";
-import { Chip, IconCircle, NoteBox, dangerBtn, outlineBtn, primaryBtn } from "./ui";
+import { dangerBtn, outlineBtn, primaryBtn } from "./ui";
 
-const sectionCardClass = "overflow-hidden rounded-2xl border border-landing-line bg-landing-steel-2";
-
-function SectionHead({ icon: Icon, title, sub, right, iconClass = "text-landing-sky" }: {
-  icon: typeof KeyRound;
-  title: string;
-  sub: string;
-  right?: React.ReactNode;
-  iconClass?: string;
-}) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
-      <div className="flex items-start gap-2">
-        <Icon className={`mt-0.5 h-4 w-4 ${iconClass}`} />
-        <div>
-          <h3 className="font-landing-display font-bold text-landing-fog">{title}</h3>
-          <p className="text-xs text-landing-fog/55">{sub}</p>
-        </div>
-      </div>
-      {right}
-    </div>
-  );
-}
+/*
+ * The Claude group of the Settings page. Each part is a SettingsSection and
+ * saves on its own (tokens immediately, the others with their own button).
+ */
 
 /** Where Claude connects: the backend's origin plus /mcp. */
 const mcpUrl = () => {
@@ -102,14 +66,12 @@ function CodeBlock({ text }: { text: string }) {
   const [done, setDone] = useState(false);
   return (
     <div className="relative">
-      <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-landing-line bg-landing-steel px-3 py-2.5 pr-20 font-landing-mono text-[11.5px] leading-relaxed text-landing-fog/85">
+      <pre className="tb-well overflow-x-auto whitespace-pre-wrap break-all px-3 py-2.5 pr-20 font-landing-mono text-[11.5px] leading-relaxed text-tb-ink-2">
         {text}
       </pre>
-      <Button
+      <button
         type="button"
-        size="sm"
-        variant="ghost"
-        className="absolute right-1.5 top-1.5 h-7 gap-1 px-2 text-landing-sky hover:bg-landing-fog/5 hover:text-landing-sky"
+        className="absolute right-1.5 top-1.5 inline-flex h-7 items-center gap-1 rounded-md px-2 text-[12.5px] font-medium text-tb-accent hover:bg-tb-ink/[0.05]"
         onClick={async () => {
           await copyText(text);
           setDone(true);
@@ -118,7 +80,7 @@ function CodeBlock({ text }: { text: string }) {
       >
         {done ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
         {done ? "Copied" : "Copy"}
-      </Button>
+      </button>
     </div>
   );
 }
@@ -135,16 +97,6 @@ export function ClaudeAccessCard() {
   const [name, setName] = useState("My Claude");
   const [days, setDays] = useState("90");
   const [made, setMade] = useState<McpTokenCreated | null>(null);
-  const [help, setHelp] = useState(false);
-  const location = useLocation();
-
-  // Links such as /dashboard/settings#claude-access scroll to their section.
-  useEffect(() => {
-    const id = location.hash.slice(1);
-    if (!id) return;
-    const t = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 250);
-    return () => window.clearTimeout(t);
-  }, [location.hash]);
 
   const now = Date.now();
   const tokens = (data?.data ?? []).filter((t) => !t.revokedAt && (!t.expiresAt || new Date(t.expiresAt).getTime() > now));
@@ -169,121 +121,108 @@ export function ClaudeAccessCard() {
   };
 
   return (
-    <section id="claude-access" className={sectionCardClass}>
-      <SectionHead
-        icon={KeyRound}
-        title="Connect Claude"
-        sub="Claude reaches Touchbase through an access token made for you. Revoke it at any time."
-        right={connected ? <Chip tone="ok" icon={Check}>Connected</Chip> : <Chip tone="bad">Not connected</Chip>}
-      />
-      <div className="space-y-3 p-4">
-        {isLoading ? (
-          <p className="text-sm text-landing-fog/55">Loading tokens…</p>
-        ) : tokens.length ? (
-          tokens.map((t) => (
-            <div key={t.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-landing-line px-3 py-2.5">
-              <IconCircle tone="ok" icon={KeyRound} size="sm" />
+    <SettingsSection
+      id="claude-access"
+      title="Connect Claude"
+      desc="Access tokens Claude uses to reach Touchbase."
+      status={isLoading ? undefined : connected ? { text: "Connected", tone: "ok" } : { text: "Not connected", tone: "warn" }}
+    >
+      {tokens.length ? (
+        <ul className="divide-y divide-tb-ink/[0.07] rounded-xl border border-tb-ink/[0.08]">
+          {tokens.map((t) => (
+            <li key={t.id} className="flex flex-wrap items-center gap-3 px-3.5 py-2.5">
+              <KeyRound className="h-4 w-4 shrink-0 text-tb-ink-3" />
               <div className="min-w-0 flex-1">
-                <b className="text-sm text-landing-fog">{t.name}</b>
-                <div className="font-landing-mono text-[11.5px] text-landing-fog/50">
-                  {t.prefix}… · last used {rel(t.lastUsedAt)}
+                <p className="text-sm font-medium text-tb-ink">{t.name}</p>
+                <p className="font-landing-mono text-[11.5px] text-tb-ink-3">
+                  {t.prefix}… · used {rel(t.lastUsedAt)}
                   {t.expiresAt ? ` · expires ${dayLabel(t.expiresAt)}` : ""}
-                </div>
+                </p>
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button type="button" variant="outline" size="sm" className={dangerBtn} disabled={revoking}>
+                  <Button type="button" variant="outline" className={cn(dangerBtn, btnSm)} disabled={revoking}>
                     <Trash2 className="h-3.5 w-3.5" />
                     Revoke
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="font-landing-sans">
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-landing-fog">Revoke “{t.name}”?</AlertDialogTitle>
+                    <AlertDialogTitle className="text-tb-ink">Revoke “{t.name}”?</AlertDialogTitle>
                     <AlertDialogDescription>
                       Claude stops working with Touchbase right away for anyone using this token. Drafts it already made stay in the Review Queue.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-landing-voice text-landing-steel hover:bg-landing-voice/90" onClick={() => revoke(t.id)}>
+                    <AlertDialogAction className="bg-landing-voice text-white hover:bg-landing-voice/90" onClick={() => revoke(t.id)}>
                       Revoke
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </div>
-          ))
-        ) : (
-          <NoteBox tone="warn" icon={AlertTriangle}>
-            No token. Claude cannot reach Touchbase until you create one.
-          </NoteBox>
-        )}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_160px_auto] md:items-end">
-          <div className="space-y-1.5">
-            <Label htmlFor="token-name">Name</Label>
-            <Input id="token-name" value={name} maxLength={100} onChange={(e) => setName(e.target.value)} placeholder="My Claude" />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Valid for</Label>
-            <Select value={days} onValueChange={setDays}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">7 days</SelectItem>
-                <SelectItem value="30">30 days</SelectItem>
-                <SelectItem value="90">90 days</SelectItem>
-                <SelectItem value="365">1 year</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button type="button" className={primaryBtn} onClick={create} disabled={creating}>
-            {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Create access token
-          </Button>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_140px_auto] sm:items-end">
+        <div className="space-y-1.5">
+          <Label htmlFor="token-name">New token name</Label>
+          <Input id="token-name" value={name} maxLength={100} onChange={(e) => setName(e.target.value)} placeholder="My Claude" />
         </div>
-
-        <button
-          type="button"
-          onClick={() => setHelp((h) => !h)}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-landing-sky hover:underline"
-        >
-          {help ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          <Terminal className="h-4 w-4" />
-          How to connect
-        </button>
-        {help ? (
-          <div className="space-y-2.5 rounded-xl border border-landing-line bg-landing-fog/[0.02] p-3.5 text-[13px] text-landing-fog/75">
-            <p>
-              <b className="text-landing-fog">Claude Code:</b> create a token above, then run this in a terminal (the token dialog fills in your token):
-            </p>
-            <CodeBlock text={connectCommand("PASTE_TOKEN_HERE")} />
-            <p>
-              <b className="text-landing-fog">Claude desktop app:</b> Settings → Developer → Edit Config, and add the Touchbase server as described in the hand-over guide. Restart the app afterwards.
-            </p>
-            <p className="text-landing-fog/55">
-              The token works only on the Touchbase MCP server ({mcpUrl()}), never for signing in to this app.
-            </p>
-          </div>
-        ) : null}
+        <div className="space-y-1.5">
+          <Label htmlFor="token-days">Valid for</Label>
+          <Select value={days} onValueChange={setDays}>
+            <SelectTrigger id="token-days">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">7 days</SelectItem>
+              <SelectItem value="30">30 days</SelectItem>
+              <SelectItem value="90">90 days</SelectItem>
+              <SelectItem value="365">1 year</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button type="button" variant="outline" className={outlineBtn} onClick={create} disabled={creating}>
+          {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+          Create token
+        </Button>
       </div>
+
+      <details className="group">
+        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-[13px] font-medium text-tb-accent [&::-webkit-details-marker]:hidden">
+          <ChevronRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
+          How to connect
+        </summary>
+        <div className="mt-2.5 space-y-2.5 text-[13px] text-tb-ink-2">
+          <p>
+            <b className="text-tb-ink">Claude Code:</b> create a token, then run this in a terminal. The token dialog fills in your token.
+          </p>
+          <CodeBlock text={connectCommand("PASTE_TOKEN_HERE")} />
+          <p>
+            <b className="text-tb-ink">Claude desktop app:</b> Settings → Developer → Edit Config, add the Touchbase server as in the hand-over guide, then restart the app.
+          </p>
+          <p className="text-tb-ink-3">The token works only on the Touchbase MCP server ({mcpUrl()}), never for signing in.</p>
+        </div>
+      </details>
 
       <Dialog open={made !== null} onOpenChange={(o) => !o && setMade(null)}>
         {made ? (
           <DialogContent className="max-w-xl font-landing-sans">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 font-landing-display text-landing-fog">
-                <KeyRound className="h-5 w-5 text-landing-whatsapp" />
+              <DialogTitle className="flex items-center gap-2 font-landing-display text-tb-ink">
+                <KeyRound className="h-5 w-5 text-tb-accent" />
                 Copy your token now
               </DialogTitle>
             </DialogHeader>
-            <NoteBox tone="warn" icon={Eye}>
-              It is shown only this once. Touchbase keeps a fingerprint of it, not the token itself, so it cannot be shown again.
-            </NoteBox>
+            <p className="flex items-start gap-2 text-[13px] text-landing-sms">
+              <Eye className="mt-0.5 h-4 w-4 shrink-0" />
+              It is shown only this once. Touchbase keeps a fingerprint, not the token, so it cannot be shown again.
+            </p>
             <CodeBlock text={made.token} />
-            <p className="text-[13px] text-landing-fog/70">To connect Claude Code, run:</p>
+            <p className="text-[13px] text-tb-ink-2">To connect Claude Code, run:</p>
             <CodeBlock text={connectCommand(made.token)} />
             <div className="flex justify-end">
               <Button className={primaryBtn} onClick={() => setMade(null)}>
@@ -294,7 +233,7 @@ export function ClaudeAccessCard() {
           </DialogContent>
         ) : null}
       </Dialog>
-    </section>
+    </SettingsSection>
   );
 }
 
@@ -317,10 +256,16 @@ export function SendWindowCard() {
   const { data } = useGetSettingsQuery();
   const [updateSettings, { isLoading }] = useUpdateSettingsMutation();
   const s = data?.data;
-  const [start, setStart] = useState("09:00");
-  const [end, setEnd] = useState("18:00");
-  const [weekends, setWeekends] = useState(false);
-  const [tz, setTz] = useState<string>("");
+  const saved = {
+    start: s?.sendWindowStart ?? "09:00",
+    end: s?.sendWindowEnd ?? "18:00",
+    weekends: Boolean(s?.sendOnWeekends),
+    tz: s?.sendTimezone ?? "",
+  };
+  const [start, setStart] = useState(saved.start);
+  const [end, setEnd] = useState(saved.end);
+  const [weekends, setWeekends] = useState(saved.weekends);
+  const [tz, setTz] = useState<string>(saved.tz);
 
   useEffect(() => {
     if (!s) return;
@@ -341,6 +286,7 @@ export function SendWindowCard() {
     [start, end].forEach((v) => v && set.add(v));
     return [...set].sort();
   }, [start, end]);
+  const changed = start !== saved.start || end !== saved.end || weekends !== saved.weekends || tz !== saved.tz;
 
   const save = async () => {
     if (start >= end) {
@@ -361,18 +307,21 @@ export function SendWindowCard() {
   };
 
   return (
-    <section id="send-window" className={sectionCardClass}>
-      <SectionHead
-        icon={Clock}
-        title="Send window"
-        sub="Follow-ups Claude prepared go out only between these hours. Applied when you approve, checked again just before sending."
-        right={<Chip>Only you can change this</Chip>}
-      />
-      <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
+    <SettingsSection
+      id="send-window"
+      title="Send window"
+      desc="When Claude's follow-ups may go out. Sequences you build yourself are not affected."
+      status={
+        saved.tz
+          ? { text: `${saved.start}–${saved.end}, ${saved.weekends ? "every day" : "weekdays"}`, tone: "ok" }
+          : { text: "No timezone", tone: "warn" }
+      }
+    >
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-[120px_120px_minmax(0,1fr)]">
         <div className="space-y-1.5">
-          <Label>From</Label>
+          <Label htmlFor="sw-start">From</Label>
           <Select value={start} onValueChange={setStart}>
-            <SelectTrigger>
+            <SelectTrigger id="sw-start">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -385,9 +334,9 @@ export function SendWindowCard() {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label>Until</Label>
+          <Label htmlFor="sw-end">Until</Label>
           <Select value={end} onValueChange={setEnd}>
-            <SelectTrigger>
+            <SelectTrigger id="sw-end">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -399,10 +348,10 @@ export function SendWindowCard() {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-1.5 md:col-span-2">
-          <Label>Timezone</Label>
+        <div className="col-span-2 space-y-1.5 sm:col-span-1">
+          <Label htmlFor="sw-tz">Timezone</Label>
           <Select value={tz || "none"} onValueChange={(v) => setTz(v === "none" ? "" : v)}>
-            <SelectTrigger>
+            <SelectTrigger id="sw-tz">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="max-h-72">
@@ -414,33 +363,31 @@ export function SendWindowCard() {
               ))}
             </SelectContent>
           </Select>
-          {!tz ? (
-            <NoteBox tone="warn" icon={AlertTriangle} className="mt-2">
-              Without a timezone, no follow-up Claude prepared can be approved.{" "}
-              {browserZone ? (
-                <button type="button" className="text-landing-sky hover:underline" onClick={() => setTz(browserZone)}>
-                  Use {browserZone}
-                </button>
-              ) : null}
-            </NoteBox>
-          ) : null}
-        </div>
-        <label className="flex items-center gap-3 md:col-span-2">
-          <Switch checked={weekends} onCheckedChange={setWeekends} />
-          <span className="text-sm">Also send on Saturdays and Sundays</span>
-        </label>
-        <div className="flex flex-wrap items-center gap-3 md:col-span-2">
-          <Button type="button" className={primaryBtn} onClick={save} disabled={isLoading}>
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-            Save send window
-          </Button>
-          <span className="text-xs text-landing-fog/50">Follow-ups you build yourself in Sequences are not affected.</span>
         </div>
       </div>
-    </section>
+      {!tz ? (
+        <p className="text-[13px] text-landing-sms">
+          Without a timezone, nothing Claude prepared can be approved.{" "}
+          {browserZone ? (
+            <button type="button" className="font-medium text-tb-accent hover:underline" onClick={() => setTz(browserZone)}>
+              Use {browserZone}
+            </button>
+          ) : null}
+        </p>
+      ) : null}
+      <label className="flex items-center gap-3 text-sm text-tb-ink-2">
+        <Switch checked={weekends} onCheckedChange={setWeekends} />
+        Also send on Saturdays and Sundays
+      </label>
+      <SectionActions>
+        <Button type="button" className={cn(primaryBtn, btnSm)} onClick={save} disabled={isLoading || !changed}>
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          Save
+        </Button>
+      </SectionActions>
+    </SettingsSection>
   );
 }
-
 
 // ── Claude permissions ────────────────────────────────────────────────
 
@@ -455,27 +402,27 @@ type PermissionKey =
 const PERMISSIONS: { key: PermissionKey; label: string; risk: string }[] = [
   {
     key: "claudeCanActivate",
-    label: "Claude can activate sequences",
+    label: "Activate sequences",
     risk: "Real messages go out without you opening the Review Queue. Checks, send window and the daily limit still apply.",
   },
   {
     key: "claudeCanResume",
-    label: "Claude can resume sequences",
+    label: "Resume sequences",
     risk: "A paused follow-up starts sending again. Never one paused because the lead replied.",
   },
   {
     key: "claudeCanEditSettings",
-    label: "Claude can change settings",
+    label: "Change settings",
     risk: "Timezone, send hours, sender details, booking link and AutoDraft. Never keys, passwords or email/SMS setup.",
   },
   {
     key: "claudeCanDeleteLeads",
-    label: "Claude can delete leads",
+    label: "Delete leads",
     risk: "The lead is hidden and its follow-ups stop. You can restore it for 30 days under Leads → Recently deleted.",
   },
   {
     key: "claudeCanClearDoNotContact",
-    label: "Claude can clear do-not-contact",
+    label: "Clear do-not-contact",
     risk: "A lead blocked by you or Claude can be contacted again. A lead who asked to stop (STOP, unsubscribe) can never be cleared.",
   },
 ];
@@ -484,26 +431,27 @@ export function ClaudePermissionsCard() {
   const { data } = useGetSettingsQuery();
   const [updateSettings, { isLoading }] = useUpdateSettingsMutation();
   const s = data?.data;
-  const [values, setValues] = useState<Record<PermissionKey, boolean>>({
-    claudeCanActivate: false,
-    claudeCanResume: false,
-    claudeCanEditSettings: false,
-    claudeCanDeleteLeads: false,
-    claudeCanClearDoNotContact: false,
-  });
-  const [cap, setCap] = useState("50");
+  const savedValues = useMemo<Record<PermissionKey, boolean>>(
+    () => ({
+      claudeCanActivate: Boolean(s?.claudeCanActivate),
+      claudeCanResume: Boolean(s?.claudeCanResume),
+      claudeCanEditSettings: Boolean(s?.claudeCanEditSettings),
+      claudeCanDeleteLeads: Boolean(s?.claudeCanDeleteLeads),
+      claudeCanClearDoNotContact: Boolean(s?.claudeCanClearDoNotContact),
+    }),
+    [s],
+  );
+  const savedCap = String(s?.claudeDailyActivationCap ?? 50);
+  const [values, setValues] = useState(savedValues);
+  const [cap, setCap] = useState(savedCap);
 
   useEffect(() => {
-    if (!s) return;
-    setValues({
-      claudeCanActivate: Boolean(s.claudeCanActivate),
-      claudeCanResume: Boolean(s.claudeCanResume),
-      claudeCanEditSettings: Boolean(s.claudeCanEditSettings),
-      claudeCanDeleteLeads: Boolean(s.claudeCanDeleteLeads),
-      claudeCanClearDoNotContact: Boolean(s.claudeCanClearDoNotContact),
-    });
-    setCap(String(s.claudeDailyActivationCap ?? 50));
-  }, [s]);
+    setValues(savedValues);
+    setCap(savedCap);
+  }, [savedValues, savedCap]);
+
+  const changed = cap !== savedCap || PERMISSIONS.some((p) => values[p.key] !== savedValues[p.key]);
+  const onCount = PERMISSIONS.filter((p) => savedValues[p.key]).length;
 
   const save = async () => {
     const capNumber = Number(cap);
@@ -519,32 +467,33 @@ export function ClaudePermissionsCard() {
     }
   };
 
-  const anyOn = Object.values(values).some(Boolean);
-
   return (
-    <section id="claude-permissions" className={sectionCardClass}>
-      <SectionHead
-        icon={ShieldCheck}
-        title="Claude permissions"
-        sub="What Claude may do for you beyond drafts. All off until you switch them on. Claude acts only when you ask it in your own message, never because of text from a lead."
-        right={<Chip>Only you can change this</Chip>}
-      />
-      <div className="space-y-3 p-4">
+    <SettingsSection
+      id="claude-permissions"
+      title="Permissions"
+      desc="What Claude may do beyond drafts, and only when you ask in your own message. Every action shows in AI Tasks."
+      status={onCount ? { text: `${onCount} on`, tone: "warn" } : { text: "All off" }}
+    >
+      <ul className="divide-y divide-tb-ink/[0.07]">
         {PERMISSIONS.map((p) => (
-          <label key={p.key} className="flex items-start gap-3">
-            <Switch
-              className="mt-0.5"
-              checked={values[p.key]}
-              onCheckedChange={(checked) => setValues((v) => ({ ...v, [p.key]: checked }))}
-            />
-            <span>
-              <span className="block text-sm font-medium text-landing-fog">{p.label}</span>
-              <span className="block text-xs text-landing-fog/55">{p.risk}</span>
-            </span>
-          </label>
+          <li key={p.key} className="first:pt-0">
+            <label className="flex cursor-pointer items-start justify-between gap-4 py-3">
+              <span className="min-w-0">
+                <span className="block text-sm font-medium text-tb-ink">{p.label}</span>
+                <span className="mt-0.5 block text-[12.5px] leading-[18px] text-tb-ink-3">{p.risk}</span>
+              </span>
+              <Switch
+                className="mt-0.5 shrink-0"
+                checked={values[p.key]}
+                onCheckedChange={(checked) => setValues((v) => ({ ...v, [p.key]: checked }))}
+              />
+            </label>
+          </li>
         ))}
-        <div className="max-w-xs space-y-1.5 pt-1">
-          <Label htmlFor="claude-daily-cap">Daily limit: sequences Claude may activate</Label>
+        <li className="flex flex-wrap items-center justify-between gap-3 pt-3">
+          <Label htmlFor="claude-daily-cap" className="text-sm font-medium text-tb-ink">
+            Daily limit for activations
+          </Label>
           <Input
             id="claude-daily-cap"
             type="number"
@@ -552,35 +501,33 @@ export function ClaudePermissionsCard() {
             max={500}
             value={cap}
             onChange={(e) => setCap(e.target.value)}
+            className="w-24 text-right tabular-nums"
           />
-        </div>
-        {anyOn ? (
-          <NoteBox tone="warn" icon={AlertTriangle}>
-            Every action Claude takes is in AI Tasks and the Activity Log, marked “by Claude”.
-          </NoteBox>
-        ) : null}
-        <Button type="button" className={primaryBtn} onClick={save} disabled={isLoading}>
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-          Save permissions
+        </li>
+      </ul>
+      <SectionActions>
+        <Button type="button" className={cn(primaryBtn, btnSm)} onClick={save} disabled={isLoading || !changed}>
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          Save
         </Button>
-      </div>
-    </section>
+      </SectionActions>
+    </SettingsSection>
   );
 }
 
 // ── Safety rules and the tool list ────────────────────────────────────
 
-const RULES: [typeof ShieldCheck, Tone, string, string][] = [
-  [ShieldCheck, "ok", "Claude prepares, you release", "Claude creates drafts and asks for approval. It can activate, resume, delete a lead, clear do-not-contact or change settings only if you switch that on under Claude permissions, and only when you ask it in your own message."],
-  [Server, "ok", "Mock mode by default", "Unless the server is set to live, Touchbase does everything except hand the message to the email or SMS provider. Such steps are labelled “Mock”."],
-  [BookOpen, "claude", "Read the call first", "If a lead has a saved call, Claude must read the most recent one in the same task before it may write. Every draft shows what it was based on."],
-  [AlertTriangle, "warn", "No {{placeholders}}", "A draft that still contains something like {{lead.name}} cannot be saved by Claude or approved by you."],
-  [Ban, "bad", "Do-not-contact", "Checked when a lead is added, when a draft is made, at approval and just before sending. Claude can set it. Claude can clear it only if you allow it, and never when the lead asked to stop (STOP, unsubscribe)."],
-  [Mail, "blue", "Email and SMS only", "WhatsApp and phone calls can be read but not prepared by Claude."],
-  [RefreshCw, "ok", "Never sent twice", "Each step is claimed before it is sent. Asking Claude the same thing twice changes nothing: one draft per lead per task."],
-  [Clock, "blue", "Send window", "Messages go out only between your hours, on weekdays unless you allow weekends. Without a timezone, approval is refused."],
-  [MessageSquareReply, "claude", "Pause on reply", "When a lead replies by email or SMS, their follow-up pauses by itself. An SMS STOP blocks the lead for good."],
-  [Eye, "claude", "Lead text is data", "Anything written by a lead (replies, transcripts, notes) reaches Claude labelled as untrusted data. Claude does not follow instructions found in it."],
+const RULES: [string, string][] = [
+  ["Claude prepares, you release", "Claude makes drafts and asks for approval. Anything more only with a permission above, and only when you ask."],
+  ["Mock mode by default", "Unless the server is set to live, nothing is handed to the email or SMS provider. Such steps are labelled “Mock”."],
+  ["Read the call first", "If a lead has a saved call, Claude reads the latest one before writing. Each draft shows what it was based on."],
+  ["No {{placeholders}}", "A draft with something like {{lead.name}} left in it cannot be saved or approved."],
+  ["Do-not-contact", "Checked when a lead is added, drafted, approved and just before sending. A lead who asked to stop is never cleared."],
+  ["Email and SMS only", "WhatsApp and calls can be read but not prepared by Claude."],
+  ["Never sent twice", "Each step is claimed before sending. Asking twice changes nothing."],
+  ["Send window", "Messages go out only in your hours. Without a timezone, approval is refused."],
+  ["Pause on reply", "A reply by email or SMS pauses the follow-up. An SMS STOP blocks the lead for good."],
+  ["Lead text is data", "Replies, transcripts and notes reach Claude labelled as untrusted. Claude does not follow instructions in them."],
 ];
 
 const TOOLS: [string, [string, "R" | "W", string][]][] = [
@@ -593,68 +540,53 @@ const TOOLS: [string, [string, "R" | "W", string][]][] = [
 ];
 
 export function SafetyRulesCard() {
-  const [open, setOpen] = useState<Record<number, boolean>>({});
   const total = TOOLS.reduce((n, [, t]) => n + t.length, 0);
   const reads = TOOLS.reduce((n, [, t]) => n + t.filter((x) => x[1] === "R").length, 0);
   return (
-    <section id="claude-safety" className={sectionCardClass}>
-      <SectionHead
-        icon={ShieldCheck}
-        iconClass="text-landing-whatsapp"
-        title="Safety rules for Claude"
-        sub="Always on. Enforced by the Touchbase server, not by Claude."
-      />
-      <div className="grid grid-cols-1 divide-y divide-landing-line md:grid-cols-2 md:divide-y-0">
-        {RULES.map(([Icon, tone, title, text]) => (
-          <div key={title} className="flex items-start gap-3 border-landing-line px-4 py-3 md:border-b">
-            <IconCircle tone={tone} icon={Icon} size="sm" />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <b className="text-sm text-landing-fog">{title}</b>
-                <Chip tone="ok" className="ml-auto">On</Chip>
-              </div>
-              <p className="mt-0.5 text-[12.5px] text-landing-fog/60">{text}</p>
-            </div>
-          </div>
+    <SettingsSection
+      id="claude-safety"
+      title="Safety rules"
+      desc="Always on. Enforced by the Touchbase server, not by Claude."
+      status={{ text: "Always on", tone: "ok" }}
+    >
+      <ul className="grid grid-cols-1 gap-x-6 gap-y-3 xl:grid-cols-2">
+        {RULES.map(([title, text]) => (
+          <li key={title} className="flex items-start gap-2.5">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-landing-whatsapp" />
+            <span className="min-w-0">
+              <span className="block text-sm font-medium text-tb-ink">{title}</span>
+              <span className="block text-[12.5px] leading-[18px] text-tb-ink-3">{text}</span>
+            </span>
+          </li>
         ))}
-      </div>
-      <div className="border-t border-landing-line px-4 py-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <Server className="h-4 w-4 text-landing-sky" />
-          <b className="text-sm text-landing-fog">What Claude can do in Touchbase</b>
-          <span className="text-xs text-landing-fog/50">
-            {total} tools · {reads} read · {total - reads} write · none can send
-          </span>
-        </div>
-        <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-          {TOOLS.map(([group, tools], gi) => (
-            <div key={group} className="rounded-xl border border-landing-line">
-              <button
-                type="button"
-                onClick={() => setOpen((o) => ({ ...o, [gi]: !o[gi] }))}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left hover:bg-landing-fog/[0.03]"
-              >
-                <b className="flex-1 text-sm text-landing-fog">{group}</b>
-                <span className="text-xs text-landing-fog/45">{tools.length} tools</span>
-                {open[gi] ? <ChevronDown className="h-4 w-4 text-landing-fog/45" /> : <ChevronRight className="h-4 w-4 text-landing-fog/45" />}
-              </button>
-              {open[gi] ? (
-                <div className="space-y-2 border-t border-landing-line px-3 py-2.5">
-                  {tools.map(([n, rw, d]) => (
-                    <div key={n} className="flex items-start gap-2">
-                      <Chip tone={rw === "R" ? "mute" : "blue"}>{rw === "R" ? "Read" : "Write"}</Chip>
-                      <div className="min-w-0">
-                        <div className="font-landing-mono text-[11.5px] text-landing-fog/85">{n}</div>
-                        <div className="text-[12px] text-landing-fog/55">{d}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
+      </ul>
+
+      <details className="group">
+        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-[13px] font-medium text-tb-accent [&::-webkit-details-marker]:hidden">
+          <ChevronRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
+          What Claude can do in Touchbase · {total} tools ({reads} read, {total - reads} write)
+        </summary>
+        <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
+          {TOOLS.map(([group, tools]) => (
+            <div key={group}>
+              <p className="tb-label mb-1.5">{group}</p>
+              <ul className="space-y-1.5">
+                {tools.map(([n, rw, d]) => (
+                  <li key={n} className="grid grid-cols-[44px_minmax(0,1fr)] gap-2 text-[12.5px]">
+                    <span className={cn("font-landing-mono text-[10.5px] uppercase leading-5", rw === "W" ? "text-tb-accent" : "text-tb-ink-3")}>
+                      {rw === "R" ? "Read" : "Write"}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-landing-mono text-[11.5px] text-tb-ink">{n}</span>
+                      <span className="block text-tb-ink-3">{d}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
-      </div>
-    </section>
+      </details>
+    </SettingsSection>
   );
 }

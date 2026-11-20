@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Bot, BarChart3, Mail, MessageSquare, PhoneCall } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,7 +15,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -34,8 +33,16 @@ import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast
 import { AI_PROVIDER, type SettingsItem, type UpdateSettingsRequestBody } from "@/types/settings";
 import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { ClaudeAccessCard, ClaudePermissionsCard, SafetyRulesCard, SendWindowCard } from "@/components/harness/SettingsCards";
+import {
+  SecretInput,
+  SettingsGroup,
+  SettingsNav,
+  SettingsSection,
+  type SectionStatus,
+  type SettingsNavGroup,
+} from "@/components/settings/SettingsLayout";
+import { btnPrimary, btnQuiet } from "@/lib/ds";
 
-const sectionCardClass = "overflow-hidden rounded-2xl border border-landing-line bg-landing-steel-2";
 const generalSettingsKeys = [
   "aiProvider",
   "aiApiKey",
@@ -243,534 +250,455 @@ export default function SettingsPage() {
     }
   };
 
-  if (isLoading) {
-    return <div className="rounded-xl border border-dashed border-landing-line p-8 font-landing-sans text-sm text-landing-fog/60">Loading settings...</div>;
-  }
 
-  if (isError) {
+  // Links such as /dashboard/settings#claude-access scroll to their section.
+  const location = useLocation();
+  useEffect(() => {
+    const id = location.hash.slice(1);
+    if (!id || isLoading) return;
+    const t = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 250);
+    return () => window.clearTimeout(t);
+  }, [location.hash, isLoading]);
+
+  if (isLoading) {
     return (
-      <div className="rounded-xl border border-landing-voice/40 bg-landing-voice/10 p-8 font-landing-sans text-sm text-landing-voice">
-        Failed to fetch settings.
+      <div className="tb-card flex items-center gap-2 p-6 font-landing-sans text-sm text-tb-ink-3">
+        <Loader2 className="h-4 w-4 animate-spin text-tb-accent" />
+        Loading settings…
       </div>
     );
   }
 
+  if (isError) {
+    return (
+      <div className="tb-card p-6 font-landing-sans text-sm text-landing-voice">
+        Could not load your settings. Try again in a moment.
+      </div>
+    );
+  }
+
+  // Current state of each section, from what is saved.
+  const saved = data?.data;
+  const PROVIDER_NAME: Record<string, string> = { openai: "OpenAI", gemini: "Gemini", claude: "Claude" };
+  const on = (text: string): SectionStatus => ({ text, tone: "ok" });
+  const off = (text = "Not set"): SectionStatus => ({ text });
+  const status = {
+    ai: initialAiProvider ? on(`${PROVIDER_NAME[initialAiProvider] ?? initialAiProvider}${saved?.aiModel ? ` · ${saved.aiModel}` : ""}`) : off(),
+    email: saved?.smtpHost && saved?.smtpUsername ? on("Connected") : off(),
+    sms: initialSmsProvider ? on(initialSmsProvider === "twilio" ? "Twilio" : "TextMagic") : off("Off"),
+    calls: saved?.retellApiKey ? on("Connected") : off(),
+    transcripts: saved?.fathomApiKey ? on(saved?.autoDraftEnabled ? "Connected · Auto draft on" : "Connected") : off(),
+  };
+
+  const nav: SettingsNavGroup[] = [
+    {
+      label: "Messaging & AI",
+      items: [
+        { id: "ai-model", title: "AI model" },
+        { id: "email", title: "Email" },
+        { id: "sms", title: "SMS" },
+        { id: "ai-calls", title: "AI calls" },
+        { id: "transcripts", title: "Call transcripts" },
+      ],
+    },
+    {
+      label: "Claude",
+      items: [
+        { id: "claude-access", title: "Connect Claude" },
+        { id: "claude-permissions", title: "Permissions" },
+        { id: "send-window", title: "Send window" },
+        { id: "claude-safety", title: "Safety rules" },
+      ],
+    },
+  ];
+
+  const isDirty = form.formState.isDirty;
+
   return (
-    <div className="space-y-5 font-landing-sans text-landing-fog/80">
-      <h2 className="font-landing-display text-[clamp(26px,3vw,34px)] font-bold tracking-[-0.02em] text-landing-fog">Settings</h2>
+    <div className="mx-auto max-w-[1180px] space-y-6 font-landing-sans">
+      <header>
+        <h1 className="tb-title">Settings</h1>
+        <p className="tb-meta mt-1">
+          Last saved {saved?.updatedAt ? new Date(saved.updatedAt).toLocaleString() : "never"}
+        </p>
+      </header>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
-          <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
-              <div className="flex items-start gap-2">
-                <Bot className="mt-0.5 h-4 w-4 text-landing-sky" />
-                <div>
-                  <h3 className="font-landing-display font-bold text-landing-fog">AI Configuration</h3>
-                  <p className="text-xs text-landing-fog/55">Configure your AI assistant settings and models.</p>
-                </div>
-              </div>
-              <Link
-                to="/docs/ai-credentials"
-                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
-              >
-                Credential help and official docs
-              </Link>
-              {/* <Button type="button" variant="outline" size="sm" onClick={() => handleTestConnection("AI")}>
-                Test Connection
-              </Button> */}
-            </div>
-            <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="aiProvider"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>AI Provider</FormLabel>
-                    <Select
-                      key={aiProvider || "none"}
-                      value={aiProvider || "none"}
-                      onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select provider" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        <SelectItem value={AI_PROVIDER.OPENAI}>OpenAI</SelectItem>
-                        <SelectItem value={AI_PROVIDER.GEMINI}>Gemini</SelectItem>
-                        <SelectItem value={AI_PROVIDER.CLAUDE}>Claude</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[180px_minmax(0,1fr)]">
+        <SettingsNav groups={nav} />
 
-              <FormField
-                control={form.control}
-                name="aiModel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>AI Model</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. gpt-4o-mini / gemini-2.0-flash" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="aiApiKey"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>AI API Key</FormLabel>
-                    <FormControl>
-                      <Input placeholder="sk-proj-..." {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </section>
-
-          <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
-              <div className="flex items-start gap-2">
-                <BarChart3 className="mt-0.5 h-4 w-4 text-landing-violet" />
-                <div>
-                  <h3 className="font-landing-display font-bold text-landing-fog">Fathom Call Transcripts</h3>
-                  <p className="text-xs text-landing-fog/55">
-                    Connect your Fathom analytics account to import call transcripts.
-                  </p>
-                </div>
-              </div>
-              <Link
-                to="/docs/fathom-transcripts"
-                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
-              >
-                Fathom help and official docs
-              </Link>
-            </div>
-            <div className="space-y-5 p-4">
-              <FormField
-                control={form.control}
-                name="fathomApiKey"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fathom API Key</FormLabel>
-                    <FormControl>
-                      <Input placeholder="fathom_api_..." {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="autoDraftEnabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col items-start gap-3 rounded-lg border border-landing-line bg-landing-steel px-4 py-3">
-                    <div className="space-y-1">
-                      <FormLabel className="text-sm font-medium text-landing-fog">
-                        Auto draft
-                      </FormLabel>
-                      <FormDescription className="text-xs text-landing-fog/55">
-                        Automatically draft follow-up sequences from new Fathom call transcripts.
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        className="data-[state=checked]:bg-landing-whatsapp data-[state=unchecked]:bg-landing-fog/15"
-                        checked={Boolean(field.value)}
-                        onCheckedChange={field.onChange}
-                        aria-label="Toggle auto draft"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </section>
-
-          <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
-              <div className="flex items-start gap-2">
-                <PhoneCall className="mt-0.5 h-4 w-4 text-landing-voice" />
-                <div>
-                  <h3 className="font-landing-display font-bold text-landing-fog">AI Calling (Retell)</h3>
-                  <p className="text-xs text-landing-fog/55">
-                    Connect Retell to run outbound AI voice calls from your sequences.
-                  </p>
-                </div>
-              </div>
-              <Link
-                to="/docs/retell-ai-calling"
-                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
-              >
-                Retell help and setup
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="retellApiKey"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Retell API Key</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="key_..."
-                        {...field}
-                        value={field.value ?? ""}
-                        autoComplete="off"
-                      />
-                    </FormControl>
-                    <p className="text-xs text-landing-fog/55">
-                      From Retell dashboard. Used to authenticate Retell API requests.
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="retellAgentId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Retell Agent ID</FormLabel>
-                    <FormControl>
-                      <Input placeholder="agent_..." {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <p className="text-xs text-landing-fog/55">The voice agent that handles your calls.</p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="retellCallerNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Retell Caller Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+1234567890" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <p className="text-xs text-landing-fog/55">
-                      E.164 phone number shown or used as the outbound caller ID (per your Retell setup).
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </section>
-
-          <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
-              <div className="flex items-start gap-2">
-                <Mail className="mt-0.5 h-4 w-4 text-landing-email" />
-                <div>
-                  <h3 className="font-landing-display font-bold text-landing-fog">Email (SMTP) Settings</h3>
-                  <p className="text-xs text-landing-fog/55">Configure SMTP settings for outgoing email follow-ups.</p>
-                </div>
-              </div>
-              <Link
-                to="/docs/email-smtp"
-                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
-              >
-                SMTP help and setup
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="smtpHost"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SMTP Host</FormLabel>
-                    <FormControl>
-                      <Input placeholder="smtp.office365.com" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="smtpPort"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SMTP Port</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={65535}
-                        placeholder="587"
-                        value={typeof field.value === "number" ? field.value : ""}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          field.onChange(value === "" ? undefined : Number(value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="smtpUsername"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SMTP Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="team@company.com" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="smtpPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SMTP Password</FormLabel>
-                    <FormControl>
-                      <Input placeholder="password" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="smtpFromName"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>SMTP From Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="name" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </section>
-
-          <section className={sectionCardClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-landing-line bg-landing-fog/[0.03] px-4 py-3">
-              <div className="flex items-start gap-2">
-                <MessageSquare className="mt-0.5 h-4 w-4 text-landing-sms" />
-                <div>
-                  <h3 className="font-landing-display font-bold text-landing-fog">SMS Settings</h3>
-                  <p className="text-xs text-landing-fog/55">
-                    Choose an SMS provider or disable SMS for text follow-ups.
-                  </p>
-                </div>
-              </div>
-              <Link
-                to="/docs/sms-settings"
-                className="shrink-0 text-sm font-medium text-landing-sky underline-offset-2 hover:underline"
-              >
-                SMS help and setup
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="smsProvider"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>SMS Provider</FormLabel>
-                    <Select
-                      key={smsProvider || "none"}
-                      value={smsProvider || "none"}
-                      onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select provider" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="textmagic">TextMagic</SelectItem>
-                        <SelectItem value="twilio">Twilio</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {smsProvider === "" ? (
-                <div className="rounded-lg border border-dashed border-landing-line bg-landing-steel px-4 py-3 text-sm text-landing-fog/55 md:col-span-2">
-                  SMS is currently disabled. Select a provider above to configure text follow-ups.
-                </div>
-              ) : null}
-
-              {smsProvider === "textmagic" ? (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="textmagicUsername"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>TextMagic Username</FormLabel>
-                        <FormControl>
-                          <Input placeholder="username" {...field} value={field.value ?? ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="textmagicApiKey"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>TextMagic API Key</FormLabel>
-                        <FormControl>
-                          <Input placeholder="tm_api_..." {...field} value={field.value ?? ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              ) : null}
-
-              {smsProvider === "twilio" ? (
-                <>
-                  <div className="rounded-lg border border-dashed border-landing-whatsapp/40 bg-landing-whatsapp/10 px-4 py-3 text-xs text-landing-whatsapp md:col-span-2">
-                    Use one Twilio account for both channels. Account SID and Auth Token are required for
-                    sending SMS and WhatsApp messages.
+        <div className="min-w-0 space-y-8">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSave)}>
+              <SettingsGroup label="Messaging & AI">
+                <SettingsSection id="ai-model" title="AI model" desc="Writes your follow-up drafts." status={status.ai} help={{ to: "/docs/ai-credentials" }}>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="aiProvider"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Provider</FormLabel>
+                          <Select
+                            key={aiProvider || "none"}
+                            value={aiProvider || "none"}
+                            onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select provider" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="none">None</SelectItem>
+                              <SelectItem value={AI_PROVIDER.OPENAI}>OpenAI</SelectItem>
+                              <SelectItem value={AI_PROVIDER.GEMINI}>Gemini</SelectItem>
+                              <SelectItem value={AI_PROVIDER.CLAUDE}>Claude</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="aiModel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Model</FormLabel>
+                          <FormControl>
+                            <Input placeholder="gpt-4o-mini" {...field} value={field.value ?? ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="aiApiKey"
+                      render={({ field }) => (
+                        <FormItem className="sm:col-span-2">
+                          <FormLabel>API key</FormLabel>
+                          <FormControl>
+                            <SecretInput placeholder="sk-proj-…" {...field} value={field.value ?? ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
+                </SettingsSection>
+
+                <SettingsSection id="email" title="Email" desc="Sends your email follow-ups (SMTP)." status={status.email} help={{ to: "/docs/email-smtp" }}>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_110px]">
+                    <FormField
+                      control={form.control}
+                      name="smtpHost"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Host</FormLabel>
+                          <FormControl>
+                            <Input placeholder="smtp.office365.com" {...field} value={field.value ?? ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="smtpPort"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Port</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={65535}
+                              placeholder="587"
+                              value={typeof field.value === "number" ? field.value : ""}
+                              onChange={(event) => {
+                                const value = event.target.value;
+                                field.onChange(value === "" ? undefined : Number(value));
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="smtpUsername"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input placeholder="team@company.com" {...field} value={field.value ?? ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="smtpPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <SecretInput placeholder="••••••••" {...field} value={field.value ?? ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="smtpFromName"
+                      render={({ field }) => (
+                        <FormItem className="sm:col-span-2">
+                          <FormLabel>From name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Sam from Brightline" {...field} value={field.value ?? ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </SettingsSection>
+
+                <SettingsSection id="sms" title="SMS" desc="Sends your text follow-ups." status={status.sms} help={{ to: "/docs/sms-settings" }}>
                   <FormField
                     control={form.control}
-                    name="twilioAccountSid"
+                    name="smsProvider"
+                    render={({ field }) => (
+                      <FormItem className="sm:max-w-xs">
+                        <FormLabel>Provider</FormLabel>
+                        <Select
+                          key={smsProvider || "none"}
+                          value={smsProvider || "none"}
+                          onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select provider" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">Off</SelectItem>
+                            <SelectItem value="textmagic">TextMagic</SelectItem>
+                            <SelectItem value="twilio">Twilio</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {smsProvider === "textmagic" ? (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="textmagicUsername"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Username</FormLabel>
+                            <FormControl>
+                              <Input placeholder="username" {...field} value={field.value ?? ""} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="textmagicApiKey"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>API key</FormLabel>
+                            <FormControl>
+                              <SecretInput placeholder="tm_api_…" {...field} value={field.value ?? ""} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ) : null}
+
+                  {smsProvider === "twilio" ? (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <p className="tb-meta sm:col-span-2">One Twilio account sends both SMS and WhatsApp.</p>
+                      <FormField
+                        control={form.control}
+                        name="twilioAccountSid"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Account SID</FormLabel>
+                            <FormControl>
+                              <Input placeholder="AC…" className="font-landing-mono text-[13px]" {...field} value={field.value ?? ""} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="twilioAuthToken"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Auth token</FormLabel>
+                            <FormControl>
+                              <SecretInput placeholder="••••••••" {...field} value={field.value ?? ""} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="twilioPhoneNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>SMS number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="+1234567890" {...field} value={field.value ?? ""} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="twilioWhatsappNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>WhatsApp number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="+12345678910" {...field} value={field.value ?? ""} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ) : null}
+                </SettingsSection>
+
+                <SettingsSection id="ai-calls" title="AI calls" desc="Outbound AI voice calls with Retell." status={status.calls} help={{ to: "/docs/retell-ai-calling" }}>
+                  <FormField
+                    control={form.control}
+                    name="retellApiKey"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Twilio Account SID</FormLabel>
+                        <FormLabel>API key</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
+                          <SecretInput placeholder="key_…" {...field} value={field.value ?? ""} />
                         </FormControl>
-                        <p className="text-xs text-landing-fog/55">
-                          Found in Twilio Console. Used to authenticate API requests.
-                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="retellAgentId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Agent ID</FormLabel>
+                          <FormControl>
+                            <Input placeholder="agent_…" className="font-landing-mono text-[13px]" {...field} value={field.value ?? ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="retellCallerNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Caller number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+1234567890" {...field} value={field.value ?? ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </SettingsSection>
 
+                <SettingsSection id="transcripts" title="Call transcripts" desc="Imports your calls from Fathom." status={status.transcripts} help={{ to: "/docs/fathom-transcripts" }}>
                   <FormField
                     control={form.control}
-                    name="twilioAuthToken"
+                    name="fathomApiKey"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Twilio Auth Token</FormLabel>
+                        <FormLabel>Fathom API key</FormLabel>
                         <FormControl>
-                          <Input placeholder="twilio_auth_token" {...field} value={field.value ?? ""} />
+                          <SecretInput placeholder="fathom_api_…" {...field} value={field.value ?? ""} />
                         </FormControl>
-                        <p className="text-xs text-landing-fog/55">
-                          Keep this secret. Required with SID for SMS and WhatsApp send APIs.
-                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
-                    name="twilioPhoneNumber"
+                    name="autoDraftEnabled"
                     render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Twilio SMS Number</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+1234567890" {...field} value={field.value ?? ""} />
-                        </FormControl>
-                        <p className="text-xs text-landing-fog/55">
-                          E.164 format. This number sends regular SMS.
-                        </p>
-                        <FormMessage />
+                      <FormItem>
+                        <label className="flex cursor-pointer items-start justify-between gap-4">
+                          <span>
+                            <span className="block text-sm font-medium text-tb-ink">Auto draft</span>
+                            <span className="block text-[12.5px] text-tb-ink-3">Draft a follow-up from each new call.</span>
+                          </span>
+                          <FormControl>
+                            <Switch
+                              className="mt-0.5 shrink-0"
+                              checked={Boolean(field.value)}
+                              onCheckedChange={field.onChange}
+                              aria-label="Auto draft"
+                            />
+                          </FormControl>
+                        </label>
                       </FormItem>
                     )}
                   />
+                </SettingsSection>
+              </SettingsGroup>
 
-                  <FormField
-                    control={form.control}
-                    name="twilioWhatsappNumber"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Twilio WhatsApp Number</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+12345678910" {...field} value={field.value ?? ""} />
-                        </FormControl>
-                        <p className="text-xs text-landing-fog/55">
-                          WhatsApp-enabled Twilio sender in format: +countrycode-number.
-                        </p>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              ) : null}
-            </div>
-          </section>
+              {/* One save bar for the group above, shown only when something changed. */}
+              <div
+                className={
+                  isDirty
+                    ? "tb-glass sticky bottom-4 z-10 mt-3 flex flex-wrap items-center gap-3 rounded-2xl px-4 py-3"
+                    : "hidden"
+                }
+              >
+                <p className="mr-auto text-sm font-medium text-tb-ink">You have unsaved changes</p>
+                <Button type="button" variant="outline" className={btnQuiet} onClick={() => form.reset(toInitialValues(data?.data))}>
+                  Discard
+                </Button>
+                <Button type="submit" disabled={isSaving} className={btnPrimary}>
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Save changes
+                </Button>
+              </div>
+            </form>
+          </Form>
 
-          <div className="flex flex-col gap-3 border-t border-landing-line px-1 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-landing-fog/55">
-              Last updated:{" "}
-              {data?.data.updatedAt
-                ? new Date(data.data.updatedAt).toLocaleString()
-                : "Not available"}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button type="button" variant="outline" onClick={() => form.reset(toInitialValues(data?.data))}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSaving} className="bg-landing-sky font-semibold text-landing-steel hover:bg-landing-sky-deep">
-                {isSaving ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          </div>
-        </form>
-      </Form>
-
-      {/* AI harness: these save on their own, separately from the form above. */}
-      <div className="space-y-4 pt-4">
-        <div>
-          <p className="font-landing-mono text-[11px] uppercase tracking-[0.18em] text-landing-sky">AI Harness</p>
-          <h3 className="mt-1 font-landing-display text-xl font-bold text-landing-fog">Claude</h3>
-          <p className="text-sm text-landing-fog/55">
-            Connect Claude, choose when its follow-ups may go out, decide what else it may do, and see the rules that keep it safe.
-          </p>
+          {/* These save on their own, separately from the form above. */}
+          <SettingsGroup label="Claude" note="Only you can change these">
+            <ClaudeAccessCard />
+            <ClaudePermissionsCard />
+            <SendWindowCard />
+            <SafetyRulesCard />
+          </SettingsGroup>
         </div>
-        <ClaudeAccessCard />
-        <SendWindowCard />
-        <ClaudePermissionsCard />
-        <SafetyRulesCard />
       </div>
     </div>
   );
