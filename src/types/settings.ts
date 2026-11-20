@@ -35,6 +35,13 @@ export interface SettingsItem {
   sendWindowEnd?: string | null;
   sendOnWeekends?: boolean;
   sendTimezone?: string | null;
+  /** What Claude may do in this workspace. All off by default; only you can change them. */
+  claudeCanActivate?: boolean;
+  claudeCanResume?: boolean;
+  claudeCanEditSettings?: boolean;
+  claudeCanDeleteLeads?: boolean;
+  claudeCanClearDoNotContact?: boolean;
+  claudeDailyActivationCap?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -71,6 +78,12 @@ export interface UpdateSettingsRequestBody {
   sendWindowEnd?: string;
   sendOnWeekends?: boolean;
   sendTimezone?: string | null;
+  claudeCanActivate?: boolean;
+  claudeCanResume?: boolean;
+  claudeCanEditSettings?: boolean;
+  claudeCanDeleteLeads?: boolean;
+  claudeCanClearDoNotContact?: boolean;
+  claudeDailyActivationCap?: number;
 }
 
 export interface UpdateSettingsResponse {

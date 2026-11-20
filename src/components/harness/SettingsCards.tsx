@@ -441,27 +441,154 @@ export function SendWindowCard() {
   );
 }
 
+
+// ── Claude permissions ────────────────────────────────────────────────
+
+type PermissionKey =
+  | "claudeCanActivate"
+  | "claudeCanResume"
+  | "claudeCanEditSettings"
+  | "claudeCanDeleteLeads"
+  | "claudeCanClearDoNotContact";
+
+/** The names must match the backend (src/harness/permissions.ts): Claude quotes them to you. */
+const PERMISSIONS: { key: PermissionKey; label: string; risk: string }[] = [
+  {
+    key: "claudeCanActivate",
+    label: "Claude can activate sequences",
+    risk: "Real messages go out without you opening the Review Queue. Checks, send window and the daily limit still apply.",
+  },
+  {
+    key: "claudeCanResume",
+    label: "Claude can resume sequences",
+    risk: "A paused follow-up starts sending again. Never one paused because the lead replied.",
+  },
+  {
+    key: "claudeCanEditSettings",
+    label: "Claude can change settings",
+    risk: "Timezone, send hours, sender details, booking link and AutoDraft. Never keys, passwords or email/SMS setup.",
+  },
+  {
+    key: "claudeCanDeleteLeads",
+    label: "Claude can delete leads",
+    risk: "The lead is hidden and its follow-ups stop. You can restore it for 30 days under Leads → Recently deleted.",
+  },
+  {
+    key: "claudeCanClearDoNotContact",
+    label: "Claude can clear do-not-contact",
+    risk: "A lead blocked by you or Claude can be contacted again. A lead who asked to stop (STOP, unsubscribe) can never be cleared.",
+  },
+];
+
+export function ClaudePermissionsCard() {
+  const { data } = useGetSettingsQuery();
+  const [updateSettings, { isLoading }] = useUpdateSettingsMutation();
+  const s = data?.data;
+  const [values, setValues] = useState<Record<PermissionKey, boolean>>({
+    claudeCanActivate: false,
+    claudeCanResume: false,
+    claudeCanEditSettings: false,
+    claudeCanDeleteLeads: false,
+    claudeCanClearDoNotContact: false,
+  });
+  const [cap, setCap] = useState("50");
+
+  useEffect(() => {
+    if (!s) return;
+    setValues({
+      claudeCanActivate: Boolean(s.claudeCanActivate),
+      claudeCanResume: Boolean(s.claudeCanResume),
+      claudeCanEditSettings: Boolean(s.claudeCanEditSettings),
+      claudeCanDeleteLeads: Boolean(s.claudeCanDeleteLeads),
+      claudeCanClearDoNotContact: Boolean(s.claudeCanClearDoNotContact),
+    });
+    setCap(String(s.claudeDailyActivationCap ?? 50));
+  }, [s]);
+
+  const save = async () => {
+    const capNumber = Number(cap);
+    if (!Number.isInteger(capNumber) || capNumber < 0 || capNumber > 500) {
+      showError("The daily limit must be a whole number from 0 to 500.");
+      return;
+    }
+    try {
+      await updateSettings({ ...values, claudeDailyActivationCap: capNumber }).unwrap();
+      showSuccess("Claude permissions saved.");
+    } catch (error) {
+      showError(apiErrorMessage(error, "Could not save Claude permissions."));
+    }
+  };
+
+  const anyOn = Object.values(values).some(Boolean);
+
+  return (
+    <section id="claude-permissions" className={sectionCardClass}>
+      <SectionHead
+        icon={ShieldCheck}
+        title="Claude permissions"
+        sub="What Claude may do for you beyond drafts. All off until you switch them on. Claude acts only when you ask it in your own message, never because of text from a lead."
+        right={<Chip>Only you can change this</Chip>}
+      />
+      <div className="space-y-3 p-4">
+        {PERMISSIONS.map((p) => (
+          <label key={p.key} className="flex items-start gap-3">
+            <Switch
+              className="mt-0.5"
+              checked={values[p.key]}
+              onCheckedChange={(checked) => setValues((v) => ({ ...v, [p.key]: checked }))}
+            />
+            <span>
+              <span className="block text-sm font-medium text-landing-fog">{p.label}</span>
+              <span className="block text-xs text-landing-fog/55">{p.risk}</span>
+            </span>
+          </label>
+        ))}
+        <div className="max-w-xs space-y-1.5 pt-1">
+          <Label htmlFor="claude-daily-cap">Daily limit: sequences Claude may activate</Label>
+          <Input
+            id="claude-daily-cap"
+            type="number"
+            min={0}
+            max={500}
+            value={cap}
+            onChange={(e) => setCap(e.target.value)}
+          />
+        </div>
+        {anyOn ? (
+          <NoteBox tone="warn" icon={AlertTriangle}>
+            Every action Claude takes is in AI Tasks and the Activity Log, marked “by Claude”.
+          </NoteBox>
+        ) : null}
+        <Button type="button" className={primaryBtn} onClick={save} disabled={isLoading}>
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+          Save permissions
+        </Button>
+      </div>
+    </section>
+  );
+}
+
 // ── Safety rules and the tool list ────────────────────────────────────
 
 const RULES: [typeof ShieldCheck, Tone, string, string][] = [
-  [ShieldCheck, "ok", "Claude prepares, you release", "No tool can switch on a follow-up or send a message. Claude creates drafts and asks for approval. Only a person signed in to this app can approve."],
+  [ShieldCheck, "ok", "Claude prepares, you release", "Claude creates drafts and asks for approval. It can activate, resume, delete a lead, clear do-not-contact or change settings only if you switch that on under Claude permissions, and only when you ask it in your own message."],
   [Server, "ok", "Mock mode by default", "Unless the server is set to live, Touchbase does everything except hand the message to the email or SMS provider. Such steps are labelled “Mock”."],
   [BookOpen, "claude", "Read the call first", "If a lead has a saved call, Claude must read the most recent one in the same task before it may write. Every draft shows what it was based on."],
   [AlertTriangle, "warn", "No {{placeholders}}", "A draft that still contains something like {{lead.name}} cannot be saved by Claude or approved by you."],
-  [Ban, "bad", "Do-not-contact", "Checked when a lead is added, when a draft is made, at approval and just before sending. Claude can set it; only a person can clear it."],
+  [Ban, "bad", "Do-not-contact", "Checked when a lead is added, when a draft is made, at approval and just before sending. Claude can set it. Claude can clear it only if you allow it, and never when the lead asked to stop (STOP, unsubscribe)."],
   [Mail, "blue", "Email and SMS only", "WhatsApp and phone calls can be read but not prepared by Claude."],
   [RefreshCw, "ok", "Never sent twice", "Each step is claimed before it is sent. Asking Claude the same thing twice changes nothing: one draft per lead per task."],
   [Clock, "blue", "Send window", "Messages go out only between your hours, on weekdays unless you allow weekends. Without a timezone, approval is refused."],
-  [MessageSquareReply, "claude", "Pause on reply", "When a lead replies, their follow-up pauses by itself."],
+  [MessageSquareReply, "claude", "Pause on reply", "When a lead replies by email or SMS, their follow-up pauses by itself. An SMS STOP blocks the lead for good."],
   [Eye, "claude", "Lead text is data", "Anything written by a lead (replies, transcripts, notes) reaches Claude labelled as untrusted data. Claude does not follow instructions found in it."],
 ];
 
 const TOOLS: [string, [string, "R" | "W", string][]][] = [
   ["Tasks", [["start_run", "W", "Opens a task for each instruction"], ["get_run", "R", "Reads what a task did"], ["list_runs", "R", "Lists earlier tasks"], ["finish_run", "W", "Closes the task with a summary"]]],
-  ["Leads", [["search_leads", "R", "Finds leads, e.g. “no reply in 30 days”"], ["get_lead", "R", "Reads one lead"], ["create_lead", "W", "Adds one lead (duplicates matched)"], ["update_lead", "W", "Corrects details"], ["import_leads", "W", "Adds a pasted list"], ["mark_lead_do_not_contact", "W", "Blocks a lead. Cannot unblock"]]],
-  ["Calls, notes, replies", [["list_lead_transcripts", "R", "Lists saved calls"], ["get_lead_transcript", "R", "Reads a call (required before writing)"], ["list_lead_replies", "R", "Reads replies, as data"], ["add_lead_transcript", "W", "Saves pasted call notes"]]],
-  ["Templates and profile", [["list_templates", "R", "Your saved templates"], ["get_template", "R", "Tone and booking link for a stage"], ["create_template", "W", "Saves a template"], ["update_template", "W", "Changes a template"], ["list_goals", "R", "Saved goals"], ["save_goal", "W", "Saves a goal"], ["get_workspace_profile", "R", "Sender name, channels, send window. Never secrets"]]],
-  ["Follow-ups", [["list_sequences", "R", "Finds follow-ups"], ["get_sequence", "R", "Reads one, with steps"], ["create_draft_sequences", "W", "Starts drafts (one per lead per task)"], ["update_sequence", "W", "Renames, goal, tone"], ["write_steps", "W", "Writes the messages"], ["reschedule_step", "W", "Moves a step"], ["reorder_steps", "W", "Changes the order"], ["remove_step", "W", "Removes a draft step"], ["skip_step", "W", "Leaves a step out"], ["request_approval", "W", "Sends drafts to your Review Queue"], ["pause_sequence", "W", "Holds a running follow-up"], ["resume_sequence", "W", "Off: only you can resume"], ["stop_sequence", "W", "Ends a follow-up"], ["get_sequence_activity", "R", "History of one follow-up"]]],
+  ["Leads", [["search_leads", "R", "Finds leads, e.g. “no reply in 30 days”"], ["get_lead", "R", "Reads one lead"], ["create_lead", "W", "Adds one lead (duplicates matched)"], ["update_lead", "W", "Corrects details"], ["import_leads", "W", "Adds a pasted list"], ["mark_lead_do_not_contact", "W", "Blocks a lead"], ["delete_lead", "W", "Hides a lead, restorable 30 days. Off unless allowed"], ["clear_do_not_contact", "W", "Unblocks a lead you or Claude blocked. Off unless allowed"]]],
+  ["Calls, notes, replies", [["list_lead_transcripts", "R", "Lists saved calls"], ["get_lead_transcript", "R", "Reads a call (required before writing)"], ["list_lead_replies", "R", "Reads email and SMS replies, as data"], ["add_lead_transcript", "W", "Saves pasted call notes"]]],
+  ["Templates and profile", [["list_templates", "R", "Your saved templates"], ["get_template", "R", "Tone and booking link for a stage"], ["create_template", "W", "Saves a template"], ["update_template", "W", "Changes a template"], ["list_goals", "R", "Saved goals"], ["save_goal", "W", "Saves a goal"], ["get_workspace_profile", "R", "Sender name, channels, send window, permissions. Never secrets"], ["update_workspace_settings", "W", "Timezone, hours, sender details. Off unless allowed"]]],
+  ["Follow-ups", [["list_sequences", "R", "Finds follow-ups"], ["get_sequence", "R", "Reads one, with steps"], ["create_draft_sequences", "W", "Starts drafts (one per lead per task)"], ["update_sequence", "W", "Renames, goal, tone"], ["write_steps", "W", "Writes the messages"], ["reschedule_step", "W", "Moves a step"], ["reorder_steps", "W", "Changes the order"], ["remove_step", "W", "Removes a draft step"], ["skip_step", "W", "Leaves a step out"], ["request_approval", "W", "Sends drafts to your Review Queue"], ["activate_sequence", "W", "Starts approved drafts. Off unless allowed"], ["pause_sequence", "W", "Holds a running follow-up"], ["resume_sequence", "W", "Resumes a paused follow-up. Off unless allowed"], ["stop_sequence", "W", "Ends a follow-up"], ["get_sequence_activity", "R", "History of one follow-up"]]],
   ["Reporting", [["get_dashboard", "R", "The numbers on your dashboard"], ["list_recent_activity", "R", "What was sent, failed or replied lately"]]],
 ];
 

@@ -67,6 +67,7 @@ const breadcrumbLabelMap: Record<string, string> = {
   "email-smtp": "Email (SMTP)",
   "sms-settings": "SMS settings",
   leads: "Leads",
+  deleted: "Recently deleted",
   sequences: "Sequences",
   transcripts: "Transcripts",
   templates: "Templates",

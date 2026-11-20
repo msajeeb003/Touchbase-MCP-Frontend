@@ -151,8 +151,9 @@ export interface ActivityEvent {
   sequence_id: string | null;
   step_number: number | null;
   channel: string | null;
-  lead_id: string;
-  untrusted: { lead_name: string };
+  /** Null for a settings change. */
+  lead_id: string | null;
+  untrusted: { lead_name: string | null };
   untrusted_details: Record<string, unknown>;
 }
 

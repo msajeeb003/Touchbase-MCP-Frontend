@@ -28,6 +28,7 @@ import {
 import type { FathomMeetingItem, LeadTranscriptItem } from "@/types/transcripts";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
+import LeadReplies from "@/components/leads/LeadReplies";
 
 const formatDateTime = (value: string | null | undefined) => {
   if (!value) return "N/A";
@@ -309,6 +310,8 @@ export default function LeadTranscriptsPage() {
           </div>
         </div>
       </div>
+
+      <LeadReplies leadId={leadId} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full max-w-md grid-cols-2">
