@@ -60,9 +60,14 @@ export default function DoNotContactControl({ lead }: { lead: LeadItem }) {
           >
             Do-not-contact
           </Chip>
-          <button type="button" className="text-[12px] text-landing-sky hover:underline" onClick={() => setMode("clear")}>
-            Clear…
-          </button>
+          {lead.doNotContactSource === "lead_opt_out" ? (
+            // The lead's own opt-out can't be cleared (the server refuses it too).
+            <span className="text-[12px] text-landing-fog/60">The lead opted out</span>
+          ) : (
+            <button type="button" className="text-[12px] text-landing-sky hover:underline" onClick={() => setMode("clear")}>
+              Clear…
+            </button>
+          )}
         </div>
       ) : (
         <Button
