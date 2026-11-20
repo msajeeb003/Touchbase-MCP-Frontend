@@ -4,6 +4,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Always reserve the scrollbar's space, so pages do not shift sideways when it appears. */
+  scrollbar-gutter: stable;
 }
 
 body {

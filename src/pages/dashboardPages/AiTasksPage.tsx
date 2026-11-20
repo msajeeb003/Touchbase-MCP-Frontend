@@ -218,7 +218,7 @@ function RunDetailPane({ runId }: { runId: string }) {
           </Button>
         </div>
 
-        <div className="mt-4 flex gap-1 border-b border-landing-line">
+        <div role="tablist" aria-label="Task details" className="mt-4 flex gap-1 border-b border-landing-line">
           {(
             [
               ["timeline", "What Claude did", History],
@@ -229,6 +229,10 @@ function RunDetailPane({ runId }: { runId: string }) {
             <button
               key={k}
               type="button"
+              role="tab"
+              id={`run-tab-${k}`}
+              aria-selected={tab === k}
+              aria-controls={`run-panel-${k}`}
               onClick={() => setTab(k)}
               className={cn(
                 "-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm transition-colors",
@@ -241,14 +245,22 @@ function RunDetailPane({ runId }: { runId: string }) {
           ))}
         </div>
       </div>
-      <div className="px-5 pb-5">
-        {tab === "timeline" ? (
+      {/*
+        All three panels stay mounted and are only hidden, so switching tabs
+        does not rebuild them (no flash, and the technical log keeps its
+        opened rows). The minimum height keeps the page long enough that a
+        short panel never makes the browser jump the scroll position.
+      */}
+      <div className="min-h-[calc(100svh-8rem)] px-5 pb-5">
+        <div role="tabpanel" id="run-panel-timeline" aria-labelledby="run-tab-timeline" hidden={tab !== "timeline"}>
           <RunTimeline run={run} events={events} />
-        ) : tab === "drafts" ? (
+        </div>
+        <div role="tabpanel" id="run-panel-drafts" aria-labelledby="run-tab-drafts" hidden={tab !== "drafts"}>
           <RunDrafts sequences={sequences} />
-        ) : (
+        </div>
+        <div role="tabpanel" id="run-panel-tech" aria-labelledby="run-tab-tech" hidden={tab !== "tech"}>
           <RunTechLog events={events} />
-        )}
+        </div>
         {detail.events.has_more ? (
           <p className="mt-2 text-xs text-landing-fog/45">Showing the first 200 steps of this task.</p>
         ) : null}
