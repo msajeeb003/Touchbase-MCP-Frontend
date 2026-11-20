@@ -86,7 +86,6 @@ export default {
 				'ink-2': 'rgb(var(--tb-ink-2) / <alpha-value>)',
 				'ink-3': 'rgb(var(--tb-ink-3) / <alpha-value>)',
 				accent: 'rgb(var(--tb-accent) / <alpha-value>)',
-				canvas: 'rgb(var(--tb-canvas) / <alpha-value>)',
 			},
 		},
 		fontFamily: {

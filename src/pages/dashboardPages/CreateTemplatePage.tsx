@@ -30,7 +30,6 @@ import {
   useGeneratePromptTextMutation,
 } from "@/store/features/templates/templatesApi";
 import type { GeneratePromptTextRequestBody } from "@/types/templates";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 const STAGE_PRESETS = ["NoShow", "Interested", "Proposal sent", "Cold lead"];
@@ -77,7 +76,6 @@ function FieldLabel({
 }
 
 export default function CreateTemplatePage() {
-  useSteelTheme();
   const navigate = useNavigate();
   const promptRef = useRef<HTMLTextAreaElement>(null);
 

@@ -10,13 +10,11 @@ import {
   RefreshCw,
   ShieldAlert,
   ShieldCheck,
-  Sparkles,
   UserRound,
   X,
-  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PHASES, currentPhaseIndex, errorText, hm, sequenceLook, toolIcon, toolPhase } from "@/lib/harness/labels";
+import { PHASES, TONE_CLASS, currentPhaseIndex, errorText, hm, runLook, sequenceLook, toolIcon, toolPhase } from "@/lib/harness/labels";
 import type { RunEvent, RunItem, RunSequence } from "@/types/harness";
 import { StatusChip } from "./ui";
 
@@ -28,70 +26,23 @@ import { StatusChip } from "./ui";
 
 // ── Task state ────────────────────────────────────────────────────────
 
-type RunState = "live" | "wait" | "fail" | "mute" | "done";
-
-/** One state per task, used the same way in the list, the chip and the stages. */
-function runState(run: RunItem): RunState {
-  if (run.status === "in_progress") return "live";
-  if ((run.counts?.awaiting_approval ?? 0) > 0) return "wait";
-  if (run.status === "failed") return "fail";
-  if (run.status === "abandoned") return "mute";
-  return "done";
-}
-
-const STATE_LOOK: Record<RunState, { label: string; icon: LucideIcon; chip: string; dot: string }> = {
-  live: {
-    label: "Claude is working",
-    icon: Sparkles,
-    chip: "bg-tb-accent/10 text-tb-accent ring-tb-accent/30",
-    dot: "bg-tb-accent animate-pulse",
-  },
-  wait: {
-    label: "Waiting for you",
-    icon: Clock,
-    chip: "bg-landing-sms/10 text-landing-sms ring-landing-sms/35",
-    dot: "bg-landing-sms",
-  },
-  fail: {
-    label: "Failed",
-    icon: X,
-    chip: "bg-landing-voice/10 text-landing-voice ring-landing-voice/35",
-    dot: "bg-landing-voice",
-  },
-  mute: {
-    label: "Left unfinished",
-    icon: X,
-    chip: "bg-tb-ink/[0.05] text-tb-ink-3 ring-tb-ink/15",
-    dot: "bg-tb-ink-3/60",
-  },
-  done: {
-    label: "Done",
-    icon: Check,
-    chip: "bg-tb-ink/[0.05] text-tb-ink-2 ring-tb-ink/15",
-    dot: "bg-tb-ink-3",
-  },
-};
+/** Status key for a task: waiting drafts count as "awaiting_approval" even after the run finished. */
+const runKey = (run: RunItem) =>
+  run.status === "in_progress" ? "in_progress" : (run.counts?.awaiting_approval ?? 0) > 0 ? "awaiting_approval" : run.status;
 
 export function RunStateChip({ run, className }: { run: RunItem; className?: string }) {
-  const look = STATE_LOOK[runState(run)];
-  const Icon = look.icon;
-  return (
-    <span
-      className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset",
-        look.chip,
-        className,
-      )}
-    >
-      <Icon className="h-3 w-3" />
-      {look.label}
-    </span>
-  );
+  return <StatusChip look={runLook(runKey(run))} className={className} />;
 }
 
 export function RunStateDot({ run }: { run: RunItem }) {
-  const look = STATE_LOOK[runState(run)];
-  return <span className={cn("mt-[7px] h-2 w-2 shrink-0 rounded-full", look.dot)} role="img" aria-label={look.label} />;
+  const look = runLook(runKey(run));
+  return (
+    <span
+      className={cn("mt-[7px] h-2 w-2 shrink-0 rounded-full", TONE_CLASS[look.tone].bar, run.status === "in_progress" && "animate-pulse")}
+      role="img"
+      aria-label={look.label}
+    />
+  );
 }
 
 // ── Stages ────────────────────────────────────────────────────────────
@@ -113,7 +64,7 @@ const STAGE_WORD: Record<StageState, string> = {
  * drafts: "Asked for approval" needs you. Failed: the stage it stopped in.
  */
 export function RunStepper({ run, events }: { run: RunItem; events: RunEvent[] }) {
-  const state = runState(run);
+  const key = runKey(run);
   const last = currentPhaseIndex(events);
 
   return (
@@ -124,9 +75,9 @@ export function RunStepper({ run, events }: { run: RunItem; events: RunEvent[] }
         const ran = here.length > 0 || (phase.key === "done" && run.status !== "in_progress" && !!run.finished_at);
 
         let s: StageState = ran ? "done" : "skip";
-        if (state === "live") s = idx < last ? (ran ? "done" : "skip") : idx === last ? "cur" : "todo";
-        else if (state === "fail" || state === "mute") s = idx < last ? (ran ? "done" : "skip") : idx === last ? "bad" : "todo";
-        else if (state === "wait" && phase.key === "ask") s = "need";
+        if (key === "in_progress") s = idx < last ? (ran ? "done" : "skip") : idx === last ? "cur" : "todo";
+        else if (key === "failed" || key === "abandoned") s = idx < last ? (ran ? "done" : "skip") : idx === last ? "bad" : "todo";
+        else if (key === "awaiting_approval" && phase.key === "ask") s = "need";
 
         const node = {
           done: "border-tb-ink-2 bg-tb-ink-2 text-[rgb(var(--tb-surface-strong))]",

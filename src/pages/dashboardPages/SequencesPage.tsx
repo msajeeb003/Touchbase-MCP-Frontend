@@ -50,7 +50,6 @@ import {
 import type { SequenceCountInfo, SequenceStatus } from "@/types/sequences";
 import { cn } from "@/lib/utils";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 
 const VALID_STATUSES: SequenceStatus[] = ["draft", "active", "paused", "completed", "cancelled"];
 
@@ -132,7 +131,6 @@ const buildProgressMetrics = (counts: SequenceCountInfo) => {
 };
 
 export default function SequencesPage() {
-  useSteelTheme();
   const [stageFilter, setStageFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [deletingSequenceId, setDeletingSequenceId] = useState<string | null>(null);

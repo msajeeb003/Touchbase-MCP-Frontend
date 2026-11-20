@@ -1,4 +1,3 @@
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { BookOpen, ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import {
@@ -27,7 +26,6 @@ function DocLink({ href, children }: { href: string; children: ReactNode }) {
 }
 
 export default function SmsSettingsDocsPage() {
-  useSteelTheme();
   return (
     <div className="mx-auto max-w-3xl space-y-8 font-landing-sans text-landing-fog/80">
       <div>

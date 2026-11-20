@@ -31,8 +31,6 @@ export interface DashboardLineChartDataPoint {
 interface DashboardLineChartProps {
   title: string;
   titleIcon?: LucideIcon;
-  /** Optional; not shown (the title is enough). */
-  description?: string;
   emptyMessage: string;
   data: DashboardLineChartDataPoint[];
   series: DashboardLineChartSeries[];

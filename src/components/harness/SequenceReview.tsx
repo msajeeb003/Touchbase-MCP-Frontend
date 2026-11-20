@@ -50,7 +50,8 @@ import { useUpdateSequenceMutation, useUpdateSequenceStepMutation } from "@/stor
 import { useGetSettingsQuery } from "@/store/features/settings/settingsApi";
 import type { HarnessSequence, RunStep } from "@/types/harness";
 import { showError, showSuccess } from "@/utils/toast";
-import { NoteBox, StatusChip, dangerBtn, outlineBtn, primaryBtn } from "./ui";
+import { NoteBox, StatusChip } from "./ui";
+import { btnDanger, btnPrimary, btnQuiet } from "@/lib/ds";
 
 /** Shows {{placeholders}} highlighted. The text is rendered as text, never as markup. */
 export function Highlighted({ text }: { text: string }) {
@@ -116,15 +117,15 @@ export default function SequenceReview({ seq }: { seq: HarnessSequence }) {
   if (awaiting) {
     actions = (
       <>
-        <Button className={primaryBtn} disabled={saving || placeholder} onClick={() => setConfirm("approve")}>
+        <Button className={btnPrimary} disabled={saving || placeholder} onClick={() => setConfirm("approve")}>
           <Check className="h-4 w-4" />
           Approve
         </Button>
-        <Button variant="outline" className={outlineBtn} onClick={() => setEditing(seq.steps[0])}>
+        <Button variant="outline" className={btnQuiet} onClick={() => setEditing(seq.steps[0])}>
           <PencilLine className="h-4 w-4" />
           Edit
         </Button>
-        <Button variant="outline" className={dangerBtn} disabled={saving} onClick={() => setConfirm("reject")}>
+        <Button variant="outline" className={btnDanger} disabled={saving} onClick={() => setConfirm("reject")}>
           <X className="h-4 w-4" />
           Reject
         </Button>
@@ -133,11 +134,11 @@ export default function SequenceReview({ seq }: { seq: HarnessSequence }) {
   } else if (seq.status === "active") {
     actions = (
       <>
-        <Button variant="outline" className={outlineBtn} disabled={saving} onClick={() => setConfirm("pause")}>
+        <Button variant="outline" className={btnQuiet} disabled={saving} onClick={() => setConfirm("pause")}>
           <PauseCircle className="h-4 w-4" />
           Pause
         </Button>
-        <Button variant="outline" className={dangerBtn} disabled={saving} onClick={() => setConfirm("stop")}>
+        <Button variant="outline" className={btnDanger} disabled={saving} onClick={() => setConfirm("stop")}>
           <StopCircle className="h-4 w-4" />
           Stop for good
         </Button>
@@ -146,11 +147,11 @@ export default function SequenceReview({ seq }: { seq: HarnessSequence }) {
   } else if (seq.status === "paused") {
     actions = (
       <>
-        <Button className={primaryBtn} disabled={saving} onClick={() => setConfirm("resume")}>
+        <Button className={btnPrimary} disabled={saving} onClick={() => setConfirm("resume")}>
           <Play className="h-4 w-4" />
           {seq.paused_reason === "changed_after_approval" ? "Approve again" : "Resume"}
         </Button>
-        <Button variant="outline" className={dangerBtn} disabled={saving} onClick={() => setConfirm("stop")}>
+        <Button variant="outline" className={btnDanger} disabled={saving} onClick={() => setConfirm("stop")}>
           <StopCircle className="h-4 w-4" />
           Stop for good
         </Button>
@@ -350,7 +351,7 @@ export default function SequenceReview({ seq }: { seq: HarnessSequence }) {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className={cn(confirm === "reject" || confirm === "stop" ? "bg-landing-voice text-white hover:bg-landing-voice/90" : primaryBtn)}
+                className={cn(confirm === "reject" || confirm === "stop" ? "bg-landing-voice text-white hover:bg-landing-voice/90" : btnPrimary)}
                 onClick={(e) => {
                   e.preventDefault();
                   confirmText[confirm].run();
@@ -497,7 +498,7 @@ function EditStepDialog({ sequenceId, step, onClose }: { sequenceId: string; ste
           <Button variant="ghost" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button className={primaryBtn} onClick={save} disabled={isLoading || !body.trim()}>
+          <Button className={btnPrimary} onClick={save} disabled={isLoading || !body.trim()}>
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             Save
           </Button>

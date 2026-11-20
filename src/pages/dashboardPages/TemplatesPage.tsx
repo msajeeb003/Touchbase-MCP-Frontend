@@ -19,7 +19,6 @@ import {
   useGetPromptTemplatesQuery,
 } from "@/store/features/templates/templatesApi";
 import ViewTemplateDialog from "@/components/templates/ViewTemplateDialog";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 
 const getStageBadgeClass = (stage: string) => {
@@ -43,7 +42,6 @@ const getSummary = (promptText: string) => {
 };
 
 export default function TemplatesPage() {
-  useSteelTheme();
   const navigate = useNavigate();
   const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null);
   const [deletePromptTemplate] = useDeletePromptTemplateMutation();

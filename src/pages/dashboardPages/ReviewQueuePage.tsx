@@ -14,14 +14,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
-import { apiErrorMessage, hasPlaceholder, sequenceLook, type Tone } from "@/lib/harness/labels";
+import { TONE_CLASS, apiErrorMessage, hasPlaceholder, sequenceLook, type Tone } from "@/lib/harness/labels";
 import { useGetAllRunSequencesQuery } from "@/store/features/harness/harnessApi";
 import { useUpdateSequenceMutation } from "@/store/features/sequences/sequencesApi";
 import type { HarnessSequence } from "@/types/harness";
 import SequenceReview, { useSendWindowText } from "@/components/harness/SequenceReview";
-import { PageHead, Panel, primaryBtn } from "@/components/harness/ui";
+import { ErrorBox, PageHead, Panel } from "@/components/harness/ui";
 import { showError, showSuccess } from "@/utils/toast";
+import { btnPrimary, iconBtn } from "@/lib/ds";
 
 /*
  * Review Queue: a reading desk. Tabs with counts on top, the list of
@@ -49,20 +49,7 @@ const REVIEW_FILTERS: {
   { key: "rejected", label: "Rejected / stopped", tone: "bad", match: (s) => s.status === "cancelled" },
 ];
 
-const TAB_DOT: Record<Tone, string> = {
-  warn: "bg-landing-sms",
-  blue: "bg-tb-accent",
-  ok: "bg-landing-whatsapp",
-  bad: "bg-landing-voice",
-  mute: "bg-tb-ink-3",
-  claude: "bg-landing-violet",
-};
-
-const iconBtn =
-  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-tb-ink-3 transition-colors hover:bg-tb-ink/[0.06] hover:text-tb-ink disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--tb-accent))]";
-
 export default function ReviewQueuePage() {
-  useSteelTheme();
   const { id } = useParams();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -131,7 +118,7 @@ export default function ReviewQueuePage() {
                   on ? "border-tb-accent font-semibold text-tb-ink" : "border-transparent text-tb-ink-3 hover:text-tb-ink",
                 )}
               >
-                <span aria-hidden className={cn("h-1.5 w-1.5 rounded-full", n ? TAB_DOT[x.tone] : "bg-tb-ink/20")} />
+                <span aria-hidden className={cn("h-1.5 w-1.5 rounded-full", n ? TONE_CLASS[x.tone].bar : "bg-tb-ink/20")} />
                 {x.label}
                 <span className={cn("font-landing-mono text-[11.5px] tabular-nums", on ? "text-tb-ink-2" : "text-tb-ink-3")}>{n}</span>
               </button>
@@ -176,13 +163,7 @@ export default function ReviewQueuePage() {
           </Panel>
         </div>
       ) : isError ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-landing-voice/35 bg-landing-voice/[0.07] px-4 py-3.5">
-          <XCircle className="h-[18px] w-[18px] shrink-0 text-landing-voice" />
-          <p className="min-w-0 flex-1 text-sm text-tb-ink">Could not load the Review Queue.</p>
-          <button type="button" className="tb-btn-quiet tb-btn-sm" onClick={() => refetch()}>
-            Try again
-          </button>
-        </div>
+        <ErrorBox text="Could not load the Review Queue." onRetry={() => refetch()} />
       ) : (
         <div className="grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
           <Panel className={cn("lg:sticky lg:top-20 lg:max-h-[calc(100svh-6.5rem)] lg:overflow-y-auto", id && "max-lg:hidden")}>
@@ -370,7 +351,7 @@ function BulkApprove({ ids, items, onDone }: { ids: string[]; items: HarnessSequ
 
   return (
     <>
-      <Button className={primaryBtn} disabled={!ids.length} onClick={() => setOpen(true)}>
+      <Button className={btnPrimary} disabled={!ids.length} onClick={() => setOpen(true)}>
         <Check className="h-4 w-4" />
         Approve selected ({ids.length})
       </Button>
@@ -388,7 +369,7 @@ function BulkApprove({ ids, items, onDone }: { ids: string[]; items: HarnessSequ
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className={primaryBtn}
+              className={btnPrimary}
               disabled={busy}
               onClick={(e) => {
                 e.preventDefault();

@@ -27,8 +27,6 @@ export interface DashboardAreaChartDataPoint {
 
 interface DashboardAreaChartProps {
   title: string;
-  /** Optional; not shown (the title is enough). */
-  description?: string;
   emptyMessage: string;
   data: DashboardAreaChartDataPoint[];
   series: DashboardAreaChartSeries[];

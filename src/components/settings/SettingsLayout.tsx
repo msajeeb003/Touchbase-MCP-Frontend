@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
+import { forwardRef, useState, type ComponentProps, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -12,48 +12,8 @@ import { cn } from "@/lib/utils";
 
 export type SettingsNavGroup = { label: string; items: { id: string; title: string }[] };
 
-/** Section menu that follows the scroll position. Desktop only; phones scroll the page. */
+/** Section menu for desktop: plain links to each section. Phones scroll the page. */
 export function SettingsNav({ groups }: { groups: SettingsNavGroup[] }) {
-  const ids = groups.flatMap((g) => g.items.map((i) => i.id));
-  const [active, setActive] = useState(ids[0]);
-  // After a menu click, keep that item until the reader scrolls by themselves.
-  const locked = useRef(false);
-
-  useEffect(() => {
-    const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
-    if (!els.length) return;
-    // The section nearest the top wins; at the bottom of the page, the last
-    // section that is on screen wins (it can never reach the top).
-    const pick = () => {
-      if (locked.current) return;
-      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
-      const line = Math.max(160, window.innerHeight * 0.3);
-      const passed = els.filter((el) => el.getBoundingClientRect().top <= line);
-      const current = atBottom
-        ? els.filter((el) => el.getBoundingClientRect().top < window.innerHeight).pop()
-        : passed.pop() ?? els[0];
-      if (current) setActive(current.id);
-    };
-    const unlock = () => {
-      locked.current = false;
-    };
-    pick();
-    window.addEventListener("scroll", pick, { passive: true });
-    window.addEventListener("resize", pick);
-    window.addEventListener("wheel", unlock, { passive: true });
-    window.addEventListener("touchmove", unlock, { passive: true });
-    window.addEventListener("keydown", unlock);
-    return () => {
-      window.removeEventListener("scroll", pick);
-      window.removeEventListener("resize", pick);
-      window.removeEventListener("wheel", unlock);
-      window.removeEventListener("touchmove", unlock);
-      window.removeEventListener("keydown", unlock);
-    };
-    // ids are static for the page's lifetime
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <nav aria-label="Settings sections" className="sticky top-20 hidden space-y-5 lg:block">
       {groups.map((g) => (
@@ -64,17 +24,7 @@ export function SettingsNav({ groups }: { groups: SettingsNavGroup[] }) {
               <li key={it.id}>
                 <a
                   href={`#${it.id}`}
-                  onClick={() => {
-                    setActive(it.id);
-                    locked.current = true;
-                  }}
-                  aria-current={active === it.id ? "location" : undefined}
-                  className={cn(
-                    "block rounded-lg px-2.5 py-1.5 text-[13.5px] transition-colors",
-                    active === it.id
-                      ? "bg-tb-accent/[0.09] font-semibold text-tb-ink"
-                      : "text-tb-ink-3 hover:bg-tb-ink/[0.04] hover:text-tb-ink",
-                  )}
+                  className="block rounded-lg px-2.5 py-1.5 text-[13.5px] text-tb-ink-3 transition-colors hover:bg-tb-ink/[0.04] hover:text-tb-ink"
                 >
                   {it.title}
                 </a>

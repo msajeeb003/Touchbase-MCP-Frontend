@@ -31,7 +31,6 @@ import {
 } from "@/store/features/settings/settingsApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { AI_PROVIDER, type SettingsItem, type UpdateSettingsRequestBody } from "@/types/settings";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { ClaudeAccessCard, ClaudePermissionsCard, SafetyRulesCard, SendWindowCard } from "@/components/harness/SettingsCards";
 import {
   SecretInput,
@@ -189,7 +188,6 @@ const sanitizeUpdatePayload = (
 };
 
 export default function SettingsPage() {
-  useSteelTheme();
   const { data, isLoading, isError } = useGetSettingsQuery();
   const [updateSettings, { isLoading: isSaving }] = useUpdateSettingsMutation();
 

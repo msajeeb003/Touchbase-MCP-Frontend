@@ -24,7 +24,6 @@ import {
 import type { SequenceStepItem } from "@/types/sequences";
 import { STEP_TYPE } from "@/constants/stepType";
 import { getSendLogStatusClass } from "@/lib/sequences/stepStatusStyles";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 
 const formatDateTime = (value: string | null | undefined) => {
   if (!value) return "Not scheduled";
@@ -187,7 +186,6 @@ function ViewStepCard({
 }
 
 export default function ViewSequenceStepsPage() {
-  useSteelTheme();
   const { id } = useParams<{ id: string }>();
   const [previewStep, setPreviewStep] = useState<PreviewStep | null>(null);
   const {

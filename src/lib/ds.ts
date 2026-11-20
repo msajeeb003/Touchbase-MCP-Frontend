@@ -27,3 +27,7 @@ export const btnDanger = `${btnShape} border border-landing-voice/35 bg-transpar
 
 /** Smaller size, combine with any of the above. */
 export const btnSm = "h-8 rounded-lg px-2.5 text-[13px]";
+
+/** Square icon-only button (Refresh, Copy). Always give it an aria-label. */
+export const iconBtn =
+  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-tb-ink-3 transition-colors hover:bg-tb-ink/[0.06] hover:text-tb-ink disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--tb-accent))]";

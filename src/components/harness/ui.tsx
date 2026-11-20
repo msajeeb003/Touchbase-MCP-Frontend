@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, ShieldCheck, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ChevronRight, ShieldCheck, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { btnDanger, btnPrimary, btnQuiet, glassCard } from "@/lib/ds";
+import { glassCard } from "@/lib/ds";
 import { useGetSettingsQuery } from "@/store/features/settings/settingsApi";
-import { TONE_CLASS, type StatusLook, type Tone } from "@/lib/harness/labels";
+import { CLAUDE_PERMISSIONS, TONE_CLASS, type StatusLook, type Tone } from "@/lib/harness/labels";
 
 /**
  * Small building blocks for the AI harness screens (AI Tasks, Review Queue,
@@ -184,14 +184,6 @@ export function Kpi({
   );
 }
 
-const PERMISSION_LABELS = [
-  ["claudeCanActivate", "activate"],
-  ["claudeCanResume", "resume"],
-  ["claudeCanEditSettings", "change settings"],
-  ["claudeCanDeleteLeads", "delete leads"],
-  ["claudeCanClearDoNotContact", "clear do-not-contact"],
-] as const;
-
 /**
  * What Claude may do in this workspace, in one line. Green while every Claude
  * permission is off (Claude drafts, you approve); amber once any is on.
@@ -200,7 +192,7 @@ const PERMISSION_LABELS = [
 export function SafetyBanner({ mock = false, className }: { mock?: boolean; className?: string }) {
   const { data } = useGetSettingsQuery();
   const settings = (data?.data ?? {}) as Record<string, unknown>;
-  const allowed = PERMISSION_LABELS.filter(([key]) => Boolean(settings[key])).map(([, label]) => label);
+  const allowed = CLAUDE_PERMISSIONS.filter((x) => Boolean(settings[x.key])).map((x) => x.short);
   const open = allowed.length > 0;
   return (
     <Link
@@ -224,6 +216,15 @@ export function SafetyBanner({ mock = false, className }: { mock?: boolean; clas
   );
 }
 
-export const primaryBtn = btnPrimary;
-export const outlineBtn = btnQuiet;
-export const dangerBtn = btnDanger;
+/** A load error with a retry button. */
+export function ErrorBox({ text, onRetry }: { text: string; onRetry: () => void }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-landing-voice/35 bg-landing-voice/[0.07] px-4 py-3.5">
+      <AlertTriangle className="h-[18px] w-[18px] shrink-0 text-landing-voice" />
+      <p className="min-w-0 flex-1 text-sm text-tb-ink">{text}</p>
+      <button type="button" className="tb-btn-quiet tb-btn-sm" onClick={onRetry}>
+        Try again
+      </button>
+    </div>
+  );
+}

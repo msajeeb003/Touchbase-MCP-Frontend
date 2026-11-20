@@ -5,7 +5,6 @@ import {
   useLazyGetFathomMeetingsQuery,
 } from "@/store/features/transcripts/transcriptsApi";
 import ViewTranscriptDialog from "@/components/transcripts/ViewTranscriptDialog";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 
 const formatDateTime = (value: string | null | undefined) => {
   if (!value) return "N/A";
@@ -26,7 +25,6 @@ const getDurationText = (start: string | null | undefined, end: string | null | 
 };
 
 export default function TranscriptsPage() {
-  useSteelTheme();
   const { data, isLoading, isError } = useGetFathomMeetingsQuery();
   const [fetchMoreMeetings, { isFetching: isLoadingMore }] = useLazyGetFathomMeetingsQuery();
 

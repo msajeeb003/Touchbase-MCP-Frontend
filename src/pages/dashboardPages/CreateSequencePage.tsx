@@ -10,7 +10,6 @@ import { useGetSingleLeadQuery } from "@/store/features/leads/leadsApi";
 import { useUpdateSequenceMutation, useGetSingleSequenceQuery } from "@/store/features/sequences/sequencesApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
 import { useParams } from "react-router-dom";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 
 function readSequenceGoal(goal: SequenceItem["goal"] | { id?: string; label?: string } | null) {
   if (!goal) return null;
@@ -20,7 +19,6 @@ function readSequenceGoal(goal: SequenceItem["goal"] | { id?: string; label?: st
 
 export default function CreateSequencePage() {
   const { id } = useParams<{ id: string }>();
-  useSteelTheme();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [situation, setSituation] = useState<string | null>(null);

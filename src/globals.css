@@ -283,12 +283,6 @@ body {
     border: 1px solid rgb(var(--tb-ink) / 0.1);
   }
   .tb-btn-quiet:hover { background-color: rgb(var(--tb-ink) / 0.06); }
-  .tb-btn-danger {
-    @apply tb-btn;
-    color: rgb(var(--landing-voice));
-    border: 1px solid rgb(var(--landing-voice) / 0.35);
-  }
-  .tb-btn-danger:hover { background-color: rgb(var(--landing-voice) / 0.08); }
   .tb-btn-sm { @apply h-8 rounded-lg px-2.5 text-[13px]; }
 
   /* Sidebar navigation */

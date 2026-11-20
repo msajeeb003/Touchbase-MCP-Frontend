@@ -18,8 +18,6 @@ export interface DashboardDonutChartItem {
 interface DashboardDonutChartProps {
   title: string;
   titleIcon?: LucideIcon;
-  /** Optional; not shown (the title is enough). */
-  description?: string;
   emptyMessage: string;
   centerLabel: string;
   valueLabel: string;

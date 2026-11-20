@@ -70,7 +70,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useDeleteLeadMutation, useGetLeadsQuery } from "@/store/features/leads/leadsApi";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import DoNotContactControl from "@/components/harness/DoNotContactControl";
 
 export default function LeadsPage() {
@@ -82,7 +81,6 @@ export default function LeadsPage() {
   const [stage, setStage] = useState<string>("All");
   const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null);
   const [deleteLead] = useDeleteLeadMutation();
-  useSteelTheme();
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {

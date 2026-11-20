@@ -8,7 +8,8 @@ import { apiErrorMessage, dayLabel } from "@/lib/harness/labels";
 import { useClearDoNotContactMutation, useMarkDoNotContactMutation } from "@/store/features/harness/harnessApi";
 import type { LeadItem } from "@/types/leads";
 import { showError, showSuccess } from "@/utils/toast";
-import { Chip, NoteBox, dangerBtn, outlineBtn } from "./ui";
+import { Chip, NoteBox } from "./ui";
+import { btnDanger, btnQuiet } from "@/lib/ds";
 
 const SOURCE: Record<string, string> = {
   mcp: "by Claude",
@@ -114,7 +115,7 @@ export default function DoNotContactControl({ lead }: { lead: LeadItem }) {
               </Button>
               <Button
                 variant="outline"
-                className={mode === "mark" ? dangerBtn : outlineBtn}
+                className={mode === "mark" ? btnDanger : btnQuiet}
                 onClick={submit}
                 disabled={busy || (mode === "clear" && !reason.trim())}
               >

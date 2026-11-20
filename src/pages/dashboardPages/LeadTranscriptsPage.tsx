@@ -27,7 +27,6 @@ import {
 } from "@/store/features/transcripts/transcriptsApi";
 import type { FathomMeetingItem, LeadTranscriptItem } from "@/types/transcripts";
 import { dismissToast, showError, showLoading, showSuccess } from "@/utils/toast";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import LeadReplies from "@/components/leads/LeadReplies";
 
 const formatDateTime = (value: string | null | undefined) => {
@@ -132,7 +131,6 @@ function TranscriptMeetingCard({
 
 export default function LeadTranscriptsPage() {
   const { id: leadId = "" } = useParams();
-  useSteelTheme();
   const [activeTab, setActiveTab] = useState("all");
   const [addingRecordingId, setAddingRecordingId] = useState<number | null>(null);
   const [deletingTranscriptId, setDeletingTranscriptId] = useState<string | null>(null);

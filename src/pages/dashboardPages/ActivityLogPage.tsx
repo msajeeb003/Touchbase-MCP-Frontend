@@ -28,11 +28,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { dayGroup, hm, rel, type Tone } from "@/lib/harness/labels";
 import { useGetActivityQuery, useGetRunsQuery } from "@/store/features/harness/harnessApi";
 import type { ActivityEvent, RunItem } from "@/types/harness";
-import { PageHead, outlineBtn } from "@/components/harness/ui";
+import { ErrorBox, PageHead } from "@/components/harness/ui";
+import { btnQuiet } from "@/lib/ds";
 
 /*
  * Activity Log: a journal. Day headings that stay in view, times in a left
@@ -176,14 +176,7 @@ const ACTOR_ICON: Record<Row["actor"], LucideIcon> = {
   lead: MessageSquareReply,
 };
 
-/* Node colour by tone: only problems and Claude's own tasks get colour; the rest stay neutral. */
-const NODE_TONE: Partial<Record<Tone, string>> = {
-  bad: "bg-landing-voice/[0.10] text-landing-voice",
-  warn: "bg-landing-sms/[0.10] text-landing-sms",
-};
-
 export default function ActivityLogPage() {
-  useSteelTheme();
   const [filter, setFilter] = useState("all");
   const [q, setQ] = useState("");
   const since = useMemo(() => new Date(Date.now() - 30 * 86_400_000).toISOString(), []);
@@ -241,7 +234,7 @@ export default function ActivityLogPage() {
         icon={History}
         sub="Last 30 days"
         actions={
-          <Button variant="outline" className={outlineBtn} onClick={exportCsv} disabled={!shown.length}>
+          <Button variant="outline" className={btnQuiet} onClick={exportCsv} disabled={!shown.length}>
             <Download className="h-4 w-4" />
             Export CSV
           </Button>
@@ -300,13 +293,7 @@ export default function ActivityLogPage() {
           ))}
         </div>
       ) : activity.isError ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-landing-voice/35 bg-landing-voice/[0.07] px-4 py-3.5">
-          <XCircle className="h-[18px] w-[18px] shrink-0 text-landing-voice" />
-          <p className="min-w-0 flex-1 text-sm text-tb-ink">Could not load the activity log.</p>
-          <button type="button" className="tb-btn-quiet tb-btn-sm" onClick={() => activity.refetch()}>
-            Try again
-          </button>
-        </div>
+        <ErrorBox text="Could not load the activity log." onRetry={() => activity.refetch()} />
       ) : !shown.length ? (
         <div className="tb-card px-6 py-12 text-center">
           <p className="text-sm text-tb-ink">Nothing matches.</p>
@@ -339,7 +326,15 @@ export default function ActivityLogPage() {
                   const [Icon, tone] = TYPE_UI[r.type] ?? [History, "mute"];
                   const [who] = ACTOR[r.actor];
                   const WhoIcon = ACTOR_ICON[r.actor];
-                  const node = NODE_TONE[tone] ?? (tone === "claude" && r.type.startsWith("task") ? "bg-landing-violet/[0.10] text-landing-violet" : "bg-tb-ink/[0.05] text-tb-ink-3");
+                  // Only problems and Claude's own tasks get colour; the rest stay neutral.
+                  const node =
+                    tone === "bad"
+                      ? "bg-landing-voice/[0.10] text-landing-voice"
+                      : tone === "warn"
+                        ? "bg-landing-sms/[0.10] text-landing-sms"
+                        : tone === "claude" && r.type.startsWith("task")
+                          ? "bg-landing-violet/[0.10] text-landing-violet"
+                          : "bg-tb-ink/[0.05] text-tb-ink-3";
                   const body = (
                     <>
                       <time

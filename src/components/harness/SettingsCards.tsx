@@ -18,8 +18,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { SectionActions, SettingsSection } from "@/components/settings/SettingsLayout";
-import { apiErrorMessage, dayLabel, rel } from "@/lib/harness/labels";
-import { btnSm } from "@/lib/ds";
+import { CLAUDE_PERMISSIONS, apiErrorMessage, dayLabel, rel, type ClaudePermissionKey } from "@/lib/harness/labels";
+import { btnDanger, btnPrimary, btnQuiet, btnSm } from "@/lib/ds";
 import { cn } from "@/lib/utils";
 import {
   useCreateMcpTokenMutation,
@@ -29,7 +29,6 @@ import {
 import { useGetSettingsQuery, useUpdateSettingsMutation } from "@/store/features/settings/settingsApi";
 import type { McpTokenCreated } from "@/types/harness";
 import { showError, showSuccess } from "@/utils/toast";
-import { dangerBtn, outlineBtn, primaryBtn } from "./ui";
 
 /*
  * The Claude group of the Settings page. Each part is a SettingsSection and
@@ -141,7 +140,7 @@ export function ClaudeAccessCard() {
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button type="button" variant="outline" className={cn(dangerBtn, btnSm)} disabled={revoking}>
+                  <Button type="button" variant="outline" className={cn(btnDanger, btnSm)} disabled={revoking}>
                     <Trash2 className="h-3.5 w-3.5" />
                     Revoke
                   </Button>
@@ -185,7 +184,7 @@ export function ClaudeAccessCard() {
             </SelectContent>
           </Select>
         </div>
-        <Button type="button" variant="outline" className={outlineBtn} onClick={create} disabled={creating}>
+        <Button type="button" variant="outline" className={btnQuiet} onClick={create} disabled={creating}>
           {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           Create token
         </Button>
@@ -225,7 +224,7 @@ export function ClaudeAccessCard() {
             <p className="text-[13px] text-tb-ink-2">To connect Claude Code, run:</p>
             <CodeBlock text={connectCommand(made.token)} />
             <div className="flex justify-end">
-              <Button className={primaryBtn} onClick={() => setMade(null)}>
+              <Button className={btnPrimary} onClick={() => setMade(null)}>
                 <Check className="h-4 w-4" />
                 I have copied it
               </Button>
@@ -380,7 +379,7 @@ export function SendWindowCard() {
         Also send on Saturdays and Sundays
       </label>
       <SectionActions>
-        <Button type="button" className={cn(primaryBtn, btnSm)} onClick={save} disabled={isLoading || !changed}>
+        <Button type="button" className={cn(btnPrimary, btnSm)} onClick={save} disabled={isLoading || !changed}>
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           Save
         </Button>
@@ -391,47 +390,11 @@ export function SendWindowCard() {
 
 // ── Claude permissions ────────────────────────────────────────────────
 
-type PermissionKey =
-  | "claudeCanActivate"
-  | "claudeCanResume"
-  | "claudeCanEditSettings"
-  | "claudeCanDeleteLeads"
-  | "claudeCanClearDoNotContact";
-
-/** The names must match the backend (src/harness/permissions.ts): Claude quotes them to you. */
-const PERMISSIONS: { key: PermissionKey; label: string; risk: string }[] = [
-  {
-    key: "claudeCanActivate",
-    label: "Activate sequences",
-    risk: "Real messages go out without you opening the Review Queue. Checks, send window and the daily limit still apply.",
-  },
-  {
-    key: "claudeCanResume",
-    label: "Resume sequences",
-    risk: "A paused follow-up starts sending again. Never one paused because the lead replied.",
-  },
-  {
-    key: "claudeCanEditSettings",
-    label: "Change settings",
-    risk: "Timezone, send hours, sender details, booking link and AutoDraft. Never keys, passwords or email/SMS setup.",
-  },
-  {
-    key: "claudeCanDeleteLeads",
-    label: "Delete leads",
-    risk: "The lead is hidden and its follow-ups stop. You can restore it for 30 days under Leads → Recently deleted.",
-  },
-  {
-    key: "claudeCanClearDoNotContact",
-    label: "Clear do-not-contact",
-    risk: "A lead blocked by you or Claude can be contacted again. A lead who asked to stop (STOP, unsubscribe) can never be cleared.",
-  },
-];
-
 export function ClaudePermissionsCard() {
   const { data } = useGetSettingsQuery();
   const [updateSettings, { isLoading }] = useUpdateSettingsMutation();
   const s = data?.data;
-  const savedValues = useMemo<Record<PermissionKey, boolean>>(
+  const savedValues = useMemo<Record<ClaudePermissionKey, boolean>>(
     () => ({
       claudeCanActivate: Boolean(s?.claudeCanActivate),
       claudeCanResume: Boolean(s?.claudeCanResume),
@@ -450,8 +413,8 @@ export function ClaudePermissionsCard() {
     setCap(savedCap);
   }, [savedValues, savedCap]);
 
-  const changed = cap !== savedCap || PERMISSIONS.some((p) => values[p.key] !== savedValues[p.key]);
-  const onCount = PERMISSIONS.filter((p) => savedValues[p.key]).length;
+  const changed = cap !== savedCap || CLAUDE_PERMISSIONS.some((p) => values[p.key] !== savedValues[p.key]);
+  const onCount = CLAUDE_PERMISSIONS.filter((p) => savedValues[p.key]).length;
 
   const save = async () => {
     const capNumber = Number(cap);
@@ -475,7 +438,7 @@ export function ClaudePermissionsCard() {
       status={onCount ? { text: `${onCount} on`, tone: "warn" } : { text: "All off" }}
     >
       <ul className="divide-y divide-tb-ink/[0.07]">
-        {PERMISSIONS.map((p) => (
+        {CLAUDE_PERMISSIONS.map((p) => (
           <li key={p.key} className="first:pt-0">
             <label className="flex cursor-pointer items-start justify-between gap-4 py-3">
               <span className="min-w-0">
@@ -506,7 +469,7 @@ export function ClaudePermissionsCard() {
         </li>
       </ul>
       <SectionActions>
-        <Button type="button" className={cn(primaryBtn, btnSm)} onClick={save} disabled={isLoading || !changed}>
+        <Button type="button" className={cn(btnPrimary, btnSm)} onClick={save} disabled={isLoading || !changed}>
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           Save
         </Button>

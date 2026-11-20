@@ -1,4 +1,3 @@
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -35,7 +34,6 @@ const cardClass =
   "block rounded-xl border border-landing-line bg-landing-steel-2 p-4 transition-colors hover:border-landing-sky/40 hover:bg-landing-fog/[0.03]";
 
 export default function DocsIndexPage() {
-  useSteelTheme();
   return (
     <div className="mx-auto max-w-3xl space-y-8 font-landing-sans text-landing-fog/80">
       <div>

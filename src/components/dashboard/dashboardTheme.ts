@@ -69,8 +69,6 @@ export const dashCardTitle =
 
 export const dashCardIcon = "h-4 w-4 text-tb-accent";
 
-export const dashCardDesc = "text-[12.5px] text-tb-ink-3";
-
 export const dashEmpty =
   "tb-well px-6 py-8 text-center text-sm text-tb-ink-3";
 

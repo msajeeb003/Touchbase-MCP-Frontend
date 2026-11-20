@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Loader2, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { apiErrorMessage, dayLabel, rel } from "@/lib/harness/labels";
 import { useGetDeletedLeadsQuery, useRestoreLeadMutation } from "@/store/features/leads/leadsApi";
-import { Chip, Empty, NoteBox, PageHead, Panel, PanelHead, outlineBtn } from "@/components/harness/ui";
+import { Chip, Empty, NoteBox, PageHead, Panel, PanelHead } from "@/components/harness/ui";
 import { showError, showSuccess } from "@/utils/toast";
+import { btnQuiet } from "@/lib/ds";
 
 /**
  * Leads Claude deleted. Each can be restored for 30 days; after that it is
@@ -14,7 +14,6 @@ import { showError, showSuccess } from "@/utils/toast";
  * either way. Restoring does not restart follow-ups that were stopped.
  */
 export default function DeletedLeadsPage() {
-  useSteelTheme();
   const { data, isLoading, isError } = useGetDeletedLeadsQuery();
   const [restore] = useRestoreLeadMutation();
   const [restoring, setRestoring] = useState<string | null>(null);
@@ -39,7 +38,7 @@ export default function DeletedLeadsPage() {
         title="Recently deleted"
         sub="Leads Claude deleted for you. Restore one within 30 days; after that it is removed for good."
         actions={
-          <Button asChild variant="outline" className={outlineBtn}>
+          <Button asChild variant="outline" className={btnQuiet}>
             <Link to="/dashboard/leads">
               <ArrowLeft className="h-4 w-4" /> Back to leads
             </Link>
@@ -79,7 +78,7 @@ export default function DeletedLeadsPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className={outlineBtn}
+                  className={btnQuiet}
                   disabled={restoring === lead.id}
                   onClick={() => onRestore(lead.id, lead.name)}
                 >

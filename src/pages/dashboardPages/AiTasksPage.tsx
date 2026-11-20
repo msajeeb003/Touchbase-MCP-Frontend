@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AlertTriangle, ChevronLeft, Copy, Inbox, RefreshCw, Sparkles, Terminal } from "lucide-react";
+import { ChevronLeft, Copy, Inbox, RefreshCw, Sparkles, Terminal } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSteelTheme } from "@/components/dashboard/dashboardTheme";
 import { clientLabel, rel } from "@/lib/harness/labels";
 import { useGetRunQuery, useGetRunsQuery, useLazyGetRunEventsQuery } from "@/store/features/harness/harnessApi";
 import type { RunEvent, RunItem } from "@/types/harness";
@@ -17,7 +16,8 @@ import {
   RunTechLog,
   RunTimeline,
 } from "@/components/harness/RunParts";
-import { PageHead, Panel, SafetyBanner } from "@/components/harness/ui";
+import { ErrorBox, PageHead, Panel, SafetyBanner } from "@/components/harness/ui";
+import { iconBtn } from "@/lib/ds";
 import { showSuccess } from "@/utils/toast";
 
 /*
@@ -29,11 +29,7 @@ import { showSuccess } from "@/utils/toast";
 
 type Tab = "timeline" | "drafts" | "tech";
 
-const iconBtn =
-  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-tb-ink-3 transition-colors hover:bg-tb-ink/[0.06] hover:text-tb-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--tb-accent))]";
-
 export default function AiTasksPage() {
-  useSteelTheme();
   const { id } = useParams();
   const navigate = useNavigate();
   const { data, isLoading, isError, isFetching, refetch } = useGetRunsQuery({ limit: 50 }, { pollingInterval: 15000 });
@@ -347,18 +343,6 @@ function DetailSkeleton() {
       <div className="h-5 animate-pulse rounded bg-tb-ink/[0.06]" />
       <div className="h-3.5 w-3/4 animate-pulse rounded bg-tb-ink/[0.06]" />
       <div className="h-16 animate-pulse rounded bg-tb-ink/[0.05]" />
-    </div>
-  );
-}
-
-function ErrorBox({ text, onRetry }: { text: string; onRetry: () => void }) {
-  return (
-    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-landing-voice/35 bg-landing-voice/[0.07] px-4 py-3.5">
-      <AlertTriangle className="h-[18px] w-[18px] shrink-0 text-landing-voice" />
-      <p className="min-w-0 flex-1 text-sm text-tb-ink">{text}</p>
-      <button type="button" className="tb-btn-quiet tb-btn-sm" onClick={onRetry}>
-        Try again
-      </button>
     </div>
   );
 }

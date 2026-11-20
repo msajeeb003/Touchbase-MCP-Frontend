@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Check, Copy, Sparkles, Terminal } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { primaryBtn } from "./ui";
+import { btnPrimary } from "@/lib/ds";
 
 const EXAMPLES = [
   "Show me my leads in the Demo done stage who have not replied in the last 7 days.",
@@ -43,7 +43,7 @@ export default function NewInstructionDialog({ trigger }: { trigger?: ReactNode 
     <Dialog>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className={primaryBtn}>
+          <Button className={btnPrimary}>
             <Sparkles className="h-4 w-4" />
             New instruction
           </Button>

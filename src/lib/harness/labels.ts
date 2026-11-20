@@ -79,9 +79,9 @@ export type StatusLook = { label: string; tone: Tone; icon: LucideIcon };
 // ── runs (tasks) ─────────────────────────────────────────────────────
 
 export const RUN_STATUS: Record<string, StatusLook> = {
-  in_progress: { label: "Claude is working", tone: "claude", icon: Sparkles },
+  in_progress: { label: "Claude is working", tone: "blue", icon: Sparkles },
   awaiting_approval: { label: "Waiting for you", tone: "warn", icon: Clock },
-  completed: { label: "Done", tone: "ok", icon: CheckCircle2 },
+  completed: { label: "Done", tone: "mute", icon: CheckCircle2 },
   failed: { label: "Failed", tone: "bad", icon: XCircle },
   abandoned: { label: "Left unfinished", tone: "mute", icon: StopCircle },
 };
@@ -312,3 +312,46 @@ export const apiErrorMessage = (error: unknown, fallback = "Something went wrong
   const e = error as { data?: { message?: string }; error?: string } | undefined;
   return e?.data?.message || e?.error || fallback;
 };
+
+// ── Claude permissions (Settings page and the safety pill) ────────────
+
+export type ClaudePermissionKey =
+  | "claudeCanActivate"
+  | "claudeCanResume"
+  | "claudeCanEditSettings"
+  | "claudeCanDeleteLeads"
+  | "claudeCanClearDoNotContact";
+
+/** The names must match the backend (src/harness/permissions.ts): Claude quotes them to you. */
+export const CLAUDE_PERMISSIONS: { key: ClaudePermissionKey; label: string; short: string; risk: string }[] = [
+  {
+    key: "claudeCanActivate",
+    short: "activate",
+    label: "Activate sequences",
+    risk: "Real messages go out without you opening the Review Queue. Checks, send window and the daily limit still apply.",
+  },
+  {
+    key: "claudeCanResume",
+    short: "resume",
+    label: "Resume sequences",
+    risk: "A paused follow-up starts sending again. Never one paused because the lead replied.",
+  },
+  {
+    key: "claudeCanEditSettings",
+    short: "change settings",
+    label: "Change settings",
+    risk: "Timezone, send hours, sender details, booking link and AutoDraft. Never keys, passwords or email/SMS setup.",
+  },
+  {
+    key: "claudeCanDeleteLeads",
+    short: "delete leads",
+    label: "Delete leads",
+    risk: "The lead is hidden and its follow-ups stop. You can restore it for 30 days under Leads → Recently deleted.",
+  },
+  {
+    key: "claudeCanClearDoNotContact",
+    short: "clear do-not-contact",
+    label: "Clear do-not-contact",
+    risk: "A lead blocked by you or Claude can be contacted again. A lead who asked to stop (STOP, unsubscribe) can never be cleared.",
+  },
+];
