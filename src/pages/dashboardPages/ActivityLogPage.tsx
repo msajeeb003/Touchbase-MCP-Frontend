@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Ban,
   CalendarClock,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   Download,
   History,
@@ -29,7 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { dayGroup, hm, rel, type Tone } from "@/lib/harness/labels";
-import { useGetActivityQuery, useGetRunsQuery } from "@/store/features/harness/harnessApi";
+import { useGetAllActivityQuery, useGetRunsQuery } from "@/store/features/harness/harnessApi";
 import type { ActivityEvent, RunItem } from "@/types/harness";
 import { ErrorBox, PageHead } from "@/components/harness/ui";
 import { btnQuiet } from "@/lib/ds";
@@ -179,12 +180,13 @@ const ACTOR_ICON: Record<Row["actor"], LucideIcon> = {
 export default function ActivityLogPage() {
   const [filter, setFilter] = useState("all");
   const [q, setQ] = useState("");
+  const [params, setParams] = useSearchParams();
   const since = useMemo(() => new Date(Date.now() - 30 * 86_400_000).toISOString(), []);
-  const activity = useGetActivityQuery({ since, page_size: 50 }, { pollingInterval: 30000 });
+  const activity = useGetAllActivityQuery({ since }, { pollingInterval: 30000 });
   const runs = useGetRunsQuery({ limit: 50 });
 
   const rows = useMemo(() => {
-    const events = activity.data?.data.events ?? [];
+    const events = activity.data?.events ?? [];
     const list: Row[] = events.map((e, i) => ({
       key: `a-${i}-${e.at}`,
       at: e.at,
@@ -201,17 +203,42 @@ export default function ActivityLogPage() {
               ? `/dashboard/leads/${e.lead_id}/transcripts`
               : null,
     }));
-    const oldest = events.length ? events[events.length - 1].at : since;
-    list.push(...fromRuns((runs.data?.data.items ?? []).filter((r) => r.started_at >= oldest || events.length < 50)));
+    list.push(...fromRuns((runs.data?.data.items ?? []).filter((r) => r.started_at >= since)));
     return list.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
   }, [activity.data, runs.data, since]);
 
   const f = FILTERS.find((x) => x.key === filter) ?? FILTERS[0];
   const shown = rows.filter(f.match).filter((r) => !q || r.text.toLowerCase().includes(q.toLowerCase()));
-  const groups = shown.reduce<Record<string, Row[]>>((acc, r) => {
-    (acc[dayGroup(r.at)] ??= []).push(r);
-    return acc;
-  }, {});
+  // One day per page: page 1 is the newest day with activity, page 2 the day
+  // before it, and so on. Days without activity are skipped.
+  const days = Object.entries(
+    shown.reduce<Record<string, Row[]>>((acc, r) => {
+      (acc[dayGroup(r.at)] ??= []).push(r);
+      return acc;
+    }, {}),
+  );
+  const pageCount = days.length;
+  const askedPage = Number(params.get("page")) || 1;
+  const page = Math.min(Math.max(1, askedPage), Math.max(1, pageCount));
+  const current = days[page - 1];
+  const goTo = (n: number) => {
+    const next = new URLSearchParams(params);
+    if (n <= 1) next.delete("page");
+    else next.set("page", String(n));
+    setParams(next);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // A new search or filter starts again at the newest day.
+  useEffect(() => {
+    if (params.get("page")) {
+      const next = new URLSearchParams(params);
+      next.delete("page");
+      setParams(next, { replace: true });
+    }
+    // Only when the search or filter changes, not when the page does.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, filter]);
 
   const exportCsv = () => {
     const lines = [["time", "who", "what"], ...shown.map((r) => [r.at, ACTOR[r.actor][0], r.text])];
@@ -225,7 +252,8 @@ export default function ActivityLogPage() {
   };
 
   const loading = activity.isLoading || runs.isLoading;
-  const total = activity.data?.data.total ?? 0;
+  const total = activity.data?.total ?? 0;
+  const loaded = activity.data?.events.length ?? 0;
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-[980px] space-y-5 font-landing-sans">
@@ -276,7 +304,7 @@ export default function ActivityLogPage() {
         </div>
       </div>
 
-      {(activity.data?.data.notes ?? []).map((n) => (
+      {(activity.data?.notes ?? []).map((n) => (
         <p key={n} className="flex items-start gap-2 text-[13px] text-tb-ink-3">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {n}
@@ -311,8 +339,8 @@ export default function ActivityLogPage() {
           ) : null}
         </div>
       ) : (
-        <div className="space-y-6">
-          {Object.entries(groups).map(([day, list]) => (
+        <div className="space-y-4">
+          {current ? [current].map(([day, list]) => (
             <section key={day} aria-label={day}>
               {/* Day heading stays in view while its events scroll */}
               <h2 className="sticky top-14 z-[5] -mx-1 mb-1 flex items-baseline gap-2 bg-[rgb(var(--tb-canvas)/0.85)] px-1 py-2 backdrop-blur-sm">
@@ -387,12 +415,66 @@ export default function ActivityLogPage() {
                 })}
               </ol>
             </section>
-          ))}
+          )) : null}
+          {pageCount > 1 ? <DayPager page={page} pageCount={pageCount} days={days.map(([d]) => d)} onGo={goTo} /> : null}
         </div>
       )}
-      {total > 50 ? (
-        <p className="text-xs text-tb-ink-3">Showing the newest 50 of {total} follow-up events from the last 30 days.</p>
+      {total > loaded ? (
+        <p className="text-xs text-tb-ink-3">Showing the newest {loaded} of {total} follow-up events from the last 30 days.</p>
       ) : null}
     </div>
+  );
+}
+
+/** Page numbers with the newest day as page 1. Long lists show 1 … 4 5 6 … 30. */
+function DayPager({
+  page,
+  pageCount,
+  days,
+  onGo,
+}: {
+  page: number;
+  pageCount: number;
+  days: string[];
+  onGo: (n: number) => void;
+}) {
+  const shown = new Set([1, pageCount, page - 1, page, page + 1].filter((n) => n >= 1 && n <= pageCount));
+  const numbers = [...shown].sort((a, b) => a - b);
+  const btn =
+    "inline-flex h-9 min-w-9 items-center justify-center gap-1 rounded-lg px-2.5 text-[13px] tabular-nums transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--tb-accent))] disabled:pointer-events-none disabled:opacity-40";
+  return (
+    <nav aria-label="Days" className="flex flex-col items-center gap-2 pt-2">
+      <div className="flex flex-wrap items-center justify-center gap-1">
+        <button type="button" className={cn(btn, "text-tb-ink-2 hover:bg-tb-ink/[0.05]")} disabled={page <= 1} onClick={() => onGo(page - 1)}>
+          <ChevronLeft className="h-4 w-4" />
+          Newer
+        </button>
+        {numbers.map((n, i) => (
+          <span key={n} className="flex items-center gap-1">
+            {i > 0 && n - numbers[i - 1] > 1 ? <span className="px-1 text-tb-ink-3">…</span> : null}
+            <button
+              type="button"
+              title={days[n - 1]}
+              aria-label={`Page ${n}: ${days[n - 1]}`}
+              aria-current={n === page ? "page" : undefined}
+              onClick={() => onGo(n)}
+              className={cn(
+                btn,
+                n === page ? "bg-tb-ink font-semibold text-[rgb(var(--tb-surface-strong))]" : "text-tb-ink-2 hover:bg-tb-ink/[0.05]",
+              )}
+            >
+              {n}
+            </button>
+          </span>
+        ))}
+        <button type="button" className={cn(btn, "text-tb-ink-2 hover:bg-tb-ink/[0.05]")} disabled={page >= pageCount} onClick={() => onGo(page + 1)}>
+          Older
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+      <p className="text-[12px] text-tb-ink-3">
+        Day {page} of {pageCount} · {days[page - 1]}
+      </p>
+    </nav>
   );
 }

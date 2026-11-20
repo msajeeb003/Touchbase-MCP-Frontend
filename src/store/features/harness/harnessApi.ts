@@ -125,6 +125,31 @@ export const harnessApi = baseApi.injectEndpoints({
       query: (params) => ({ url: "/activity", method: "GET", params: { ...(params || {}) } }),
       providesTags: ["Activity"],
     }),
+
+    /**
+     * Every activity event since `since`, for the Activity Log's one-day pages.
+     * The backend returns at most 50 per page, so this reads page 1 and then
+     * the rest in parallel. The backend looks at no more than 1000 events.
+     */
+    getAllActivity: builder.query<ActivityPage, { since: string }>({
+      async queryFn({ since }, _api, _extra, baseQuery) {
+        const read = (page: number) =>
+          baseQuery({ url: "/activity", params: { since, page, page_size: 50 } });
+        const first = await read(1);
+        if (first.error) return { error: first.error };
+        const head = (first.data as ApiEnvelope<ActivityPage>).data;
+        const pages = Math.min(head.total_pages, 20);
+        const rest = await Promise.all(Array.from({ length: Math.max(0, pages - 1) }, (_, i) => read(i + 2)));
+        const failed = rest.find((r) => r.error);
+        if (failed?.error) return { error: failed.error };
+        const events = [
+          ...head.events,
+          ...rest.flatMap((r) => (r.data as ApiEnvelope<ActivityPage>).data.events),
+        ];
+        return { data: { ...head, events, page: 1, page_size: events.length, total_pages: 1 } };
+      },
+      providesTags: ["Activity"],
+    }),
   }),
   overrideExisting: false,
 });
@@ -141,4 +166,5 @@ export const {
   useMarkDoNotContactMutation,
   useClearDoNotContactMutation,
   useGetActivityQuery,
+  useGetAllActivityQuery,
 } = harnessApi;
