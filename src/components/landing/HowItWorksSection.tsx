@@ -21,6 +21,7 @@ import {
   Users,
   Wand2,
 } from "lucide-react";
+import { McpMapNode, McpSetupTile, McpSplitConnector, McpStepRail, McpTag } from "@/components/harness/McpMapParts";
 
 export function WhatsIcon({ className }: { className?: string }) {
   return (
@@ -136,9 +137,11 @@ interface HowItWorksSectionProps {
   showSetupAndTracking?: boolean;
   /** Show Settings link on setup block (dashboard). */
   linksEnabled?: boolean;
+  /** Put the Claude + MCP server path on the map (How to configure page). */
+  showMcp?: boolean;
 }
 
-function SetupPrerequisites({ linksEnabled }: { linksEnabled: boolean }) {
+function SetupPrerequisites({ linksEnabled, showMcp }: { linksEnabled: boolean; showMcp: boolean }) {
   return (
     <div className="mb-12 rounded-2xl border border-landing-line bg-landing-steel-2 p-5 md:p-6">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
@@ -163,7 +166,7 @@ function SetupPrerequisites({ linksEnabled }: { linksEnabled: boolean }) {
           </Link>
         ) : null}
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+      <div className={cn("grid grid-cols-2 gap-2 sm:grid-cols-3", showMcp ? "lg:grid-cols-6" : "lg:grid-cols-5")}>
         {SETUP_ITEMS.map(({ label, desc, icon: Icon }) => (
           <div
             key={label}
@@ -176,6 +179,7 @@ function SetupPrerequisites({ linksEnabled }: { linksEnabled: boolean }) {
             <p className="text-[10px] leading-relaxed text-landing-fog/55">{desc}</p>
           </div>
         ))}
+        {showMcp ? <McpSetupTile /> : null}
       </div>
     </div>
   );
@@ -233,6 +237,7 @@ export default function HowItWorksSection({
   showHeader = true,
   showSetupAndTracking = false,
   linksEnabled = false,
+  showMcp = false,
 }: HowItWorksSectionProps) {
   return (
     <div id={id} className={cn("mx-auto max-w-[1040px]", className)}>
@@ -250,7 +255,7 @@ export default function HowItWorksSection({
       ) : null}
 
       {showSetupAndTracking ? (
-        <SetupPrerequisites linksEnabled={linksEnabled} />
+        <SetupPrerequisites linksEnabled={linksEnabled} showMcp={showMcp} />
       ) : null}
 
       <div className="mb-16 hidden lg:block">
@@ -303,9 +308,16 @@ export default function HowItWorksSection({
             </div>
           ))}
         </div>
+        {showMcp ? <McpStepRail /> : null}
       </div>
 
       <div className="mx-auto max-w-3xl">
+        {showMcp ? (
+          <>
+            <McpMapNode />
+            <McpSplitConnector />
+          </>
+        ) : null}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10">
           <div className="flex flex-col overflow-hidden rounded-xl border border-landing-violet/40 bg-landing-steel-2 shadow-sm">
             <div className="border-b border-landing-violet/25 bg-landing-violet/10 px-4 py-2.5">
@@ -424,6 +436,7 @@ export default function HowItWorksSection({
               <p className="text-xs leading-relaxed text-landing-fog/55">
                 One click — AI uses lead info, transcript, and template to create steps and content.
               </p>
+              {showMcp ? <McpTag>Or ask Claude: it writes email and SMS drafts for many leads at once.</McpTag> : null}
             </div>
           </div>
         </div>
@@ -476,6 +489,7 @@ export default function HowItWorksSection({
               <p className="mt-auto text-xs leading-relaxed text-landing-fog/55">
                 Edit steps manually, or regenerate all content with AI before going live.
               </p>
+              {showMcp ? <McpTag>Claude's drafts wait here, in the Review Queue.</McpTag> : null}
             </div>
           </div>
 
@@ -513,6 +527,7 @@ export default function HowItWorksSection({
               <p className="text-xs leading-relaxed text-landing-fog/55">
                 Activate to start automated follow-up across all configured channels.
               </p>
+              {showMcp ? <McpTag>You approve Claude's drafts, one or many at once.</McpTag> : null}
             </div>
           </div>
         </div>

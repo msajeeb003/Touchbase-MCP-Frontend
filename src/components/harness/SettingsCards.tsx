@@ -36,7 +36,7 @@ import { showError, showSuccess } from "@/utils/toast";
  */
 
 /** Where Claude connects: the backend's origin plus /mcp. */
-const mcpUrl = () => {
+export const mcpUrl = () => {
   try {
     return `${new URL(import.meta.env.VITE_BASE_URL as string).origin}/mcp`;
   } catch {
@@ -44,7 +44,7 @@ const mcpUrl = () => {
   }
 };
 
-async function copyText(text: string) {
+export async function copyText(text: string) {
   try {
     await navigator.clipboard.writeText(text);
   } catch {
@@ -61,7 +61,7 @@ async function copyText(text: string) {
   }
 }
 
-function CodeBlock({ text }: { text: string }) {
+export function CodeBlock({ text }: { text: string }) {
   const [done, setDone] = useState(false);
   return (
     <div className="relative">
